@@ -2,6 +2,8 @@ import os
 
 # widget utils
 WIDGET_SIDE_BUFFER = 40
+ZERO_MARGIN_PADDING = "padding:0px; margin:0px;"
+FULL_HEIGHT_WIDTH = "width:100%; height:100%"
 
 # colors
 COLOR_HIGHLIGHT = (210, 210, 210, 1)
