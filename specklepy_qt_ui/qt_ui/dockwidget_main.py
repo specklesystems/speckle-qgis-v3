@@ -5,6 +5,9 @@ import inspect
 import os
 import threading
 from plugin_utils.helpers import string_diff
+from specklepy_qt_ui.qt_ui_v3.widget_no_document import NoDocumentWidget
+from specklepy_qt_ui.qt_ui_v3.widget_no_model_cards import NoModelCardsWidget
+from specklepy_qt_ui.qt_ui_v3.widget_project_search import ProjectSearchWidget
 
 try:
     from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
@@ -105,6 +108,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     dataStorage: DataStorage = None
     mappingSendDialog = None
     custom_crs_modal = None
+
+    contextStack: dict = None
+    widget_no_document: NoDocumentWidget = None
+    widget_no_model_cards: NoModelCardsWidget = None
+    widget_project_search: ProjectSearchWidget = None
 
     signal_1 = pyqtSignal(object)
     signal_2 = pyqtSignal(object)
@@ -224,7 +232,59 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         # self.addDataStorage(plugin)
         self.addLabel(plugin)
         self.addProps(plugin)
+        self.add_start_widget(plugin)
         # self.createMappingDialog()
+
+    def add_start_widget(self, plugin):
+
+        # TODOv3: detect opened document
+        document_open = True
+
+        if not document_open:
+            no_document_widget = NoDocumentWidget(parent=self)
+            no_document_widget.contextStack = self.contextStack
+            self.layout().addWidget(no_document_widget)
+            self.widget_no_document = no_document_widget
+        else:
+            no_model_cards_widget = NoModelCardsWidget(parent=self)
+            no_model_cards_widget.contextStack = self.contextStack
+            self.layout().addWidget(no_model_cards_widget)
+            self.widget_no_model_cards = no_model_cards_widget
+
+    def kill_background_widgets(self):
+        if self.widget_no_document:
+            self.widget_no_document.setParent(None)
+            self.widget_no_document = None
+
+        if self.widget_no_model_cards:
+            self.widget_no_model_cards.setParent(None)
+            self.widget_no_model_cards = None
+
+        if self.widget_project_search:
+            self.widget_project_search.setParent(None)
+            self.widget_project_search = None
+
+    def open_select_projects_widget(self):
+        self.kill_background_widgets()
+
+        project_search_widget = ProjectSearchWidget(parent=self)
+        self.layout().addWidget(project_search_widget)
+        self.widget_project_search = project_search_widget
+
+    def resizeEvent(self, event):
+        QtWidgets.QDockWidget.resizeEvent(self, event)
+
+        # handle resize of child elements
+        if self.widget_no_document:
+            self.widget_no_document.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
+        if self.widget_no_model_cards:
+            self.widget_no_model_cards.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
 
     def addProps(self, plugin):
         # add widgets that will only show on event trigger
@@ -274,6 +334,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         self.mappingSendDialog.close()
 
     def showMappingDialog(self):
+        return
         # updata DataStorage
         self.mappingSendDialog.runSetup()
         self.mappingSendDialog.show()
@@ -335,20 +396,8 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         except Exception as e:
             logToUser(e)
 
-    def resizeEvent(self, event):
-        try:
-            QtWidgets.QDockWidget.resizeEvent(self, event)
-            if self.msgLog.size().height() != 0:  # visible
-                self.msgLog.setGeometry(
-                    0,
-                    0,
-                    self.msgLog.parentWidget.frameSize().width(),
-                    self.msgLog.parentWidget.frameSize().height(),
-                )  # .resize(self.frameSize().width(), self.frameSize().height())
-        except Exception as e:
-            return
-
     def clearDropdown(self):
+        return
         try:
             self.streamBranchDropdown.clear()
             self.commitDropdown.clear()
@@ -357,6 +406,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             return
 
     def reloadDialogUI(self, plugin):
+        return
         try:
             self.clearDropdown()
             self.populateUI(plugin)

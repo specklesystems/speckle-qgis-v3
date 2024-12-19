@@ -1,5 +1,8 @@
 import os
 
+# widget utils
+WIDGET_SIDE_BUFFER = 40
+
 # colors
 COLOR_HIGHLIGHT = (210, 210, 210, 1)
 SPECKLE_COLOR = (59, 130, 246, 1)
@@ -13,6 +16,7 @@ ERROR_COLOR_LIGHT = (255, 210, 210, 1)
 
 COLOR = f"color: rgba{str(SPECKLE_COLOR)};"
 BACKGR_COLOR_TRANSPARENT = f"background-color: rgba(0,0,0,0);"
+BACKGR_COLOR_SEMI_TRANSPARENT = "background-color: rgba(250,250,250,80);"
 BACKGR_COLOR_HIGHLIGHT = f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
 BACKGR_COLOR = f"background-color: rgba{str(SPECKLE_COLOR)};"
 BACKGR_COLOR_LIGHT = f"background-color: rgba{str(SPECKLE_COLOR_LIGHT)};"
@@ -87,4 +91,3 @@ ICON_PIN_ACTIVE = os.path.join(
 ICON_PIN_DISABLED = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "assets", "pin-outline.png"
 )
-
