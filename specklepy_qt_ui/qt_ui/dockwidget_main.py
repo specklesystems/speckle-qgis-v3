@@ -271,7 +271,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.widget_project_search = None
 
     def open_select_projects_widget(self):
-        self.kill_all_widgets()
+        # self.kill_all_widgets()
 
         project_search_widget = ProjectSearchWidget(parent=self)
         self.layout().addWidget(project_search_widget)

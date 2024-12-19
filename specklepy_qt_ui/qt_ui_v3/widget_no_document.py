@@ -5,9 +5,9 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QHBoxLayout, QLab
 
 from specklepy_qt_ui.qt_ui.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
-    BACKGR_COLOR_SEMI_TRANSPARENT,
-    BACKGR_COLOR,
-    BACKGR_COLOR_LIGHT,
+    BACKGR_COLOR_WHITE,
+    BACKGR_COLOR_LIGHT_GREY,
+    BACKGR_COLOR_LIGHT_GREY2,
     BACKGR_COLOR_GREY,
     BACKGR_COLOR_TRANSPARENT,
     BACKGR_COLOR_HIGHLIGHT,
@@ -28,13 +28,14 @@ class NoDocumentWidget(QWidget):
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
 
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, 60, 10, 20)
+        self.layout.setContentsMargins(0, 60, 0, 0)
         self.layout.setAlignment(Qt.AlignVCenter)
 
+        self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        self.setStyleSheet(f"{BACKGR_COLOR_LIGHT_GREY2}")
+
         # align with the parent widget size
-        self.setGeometry(
-            0,
-            0,
+        self.resize(
             parent.frameSize().width(),
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
@@ -42,7 +43,7 @@ class NoDocumentWidget(QWidget):
         self.message_card = QWidget()
         self.message_card.setStyleSheet(
             "QWidget {"
-            + f"border-radius: 10px;padding: 20px;margin:{WIDGET_SIDE_BUFFER};height: 40px;{BACKGR_COLOR_GREY}"
+            + f"border-radius: 10px;padding: 20px;margin:{WIDGET_SIDE_BUFFER};height: 40px;{BACKGR_COLOR_WHITE}"
             + "}"
         )
         self.fill_message_card()

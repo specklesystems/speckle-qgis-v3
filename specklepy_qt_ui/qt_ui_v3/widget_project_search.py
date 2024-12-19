@@ -18,7 +18,7 @@ from specklepy_qt_ui.qt_ui.utils.global_resources import (
     ZERO_MARGIN_PADDING,
     FULL_HEIGHT_WIDTH,
     SPECKLE_COLOR,
-    BACKGR_COLOR_SEMI_TRANSPARENT,
+    BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
     BACKGR_COLOR_GREY,
@@ -44,9 +44,7 @@ class ProjectSearchWidget(QWidget):
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
 
         # align with the parent widget size
-        self.setGeometry(
-            0,
-            0,
+        self.resize(
             parent.frameSize().width(),
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
@@ -61,7 +59,12 @@ class ProjectSearchWidget(QWidget):
 
         content = QWidget()
         content.layout = QVBoxLayout(self)
-        content.layout.setContentsMargins(0, 60, 10, 20)
+        content.layout.setContentsMargins(
+            WIDGET_SIDE_BUFFER,
+            WIDGET_SIDE_BUFFER,
+            WIDGET_SIDE_BUFFER,
+            WIDGET_SIDE_BUFFER,
+        )
         content.layout.setAlignment(Qt.AlignCenter)
         content.layout.addWidget(project_selection_widget)
 
@@ -88,8 +91,8 @@ class ProjectSearchWidget(QWidget):
         scroll_container.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         scroll_container.setStyleSheet(
             "QWidget {"
-            f"margin:{WIDGET_SIDE_BUFFER};"
-            + "border-radius:5px; background-color:rgba(250,250,250,255);"
+            f"{ZERO_MARGIN_PADDING}"
+            + f"border-radius:5px; {BACKGR_COLOR_LIGHT_GREY}"
             + "}"
         )
         scroll_container_layout = QVBoxLayout(scroll_container)
@@ -104,7 +107,7 @@ class ProjectSearchWidget(QWidget):
         # for some reason, "margin-left" doesn't make any effect here
         label.setStyleSheet(
             "QLabel {"
-            + f"padding:0px; padding-left:{int(WIDGET_SIDE_BUFFER/2)}; padding-top:{int(WIDGET_SIDE_BUFFER/4)}; margin-bottom:{int(WIDGET_SIDE_BUFFER/4)}; text-align:left;"
+            + f"{ZERO_MARGIN_PADDING}padding-left:{int(WIDGET_SIDE_BUFFER*0.75)}; padding-top:{int(WIDGET_SIDE_BUFFER/4)}; margin-bottom:{int(WIDGET_SIDE_BUFFER/4)}; text-align:left;"
             + "}"
         )
         return label
@@ -112,11 +115,7 @@ class ProjectSearchWidget(QWidget):
     def create_scroll_area(self):
 
         scroll_area = QtWidgets.QScrollArea()
-        scroll_area.setStyleSheet(
-            "QScrollArea {"
-            + f"margin:{WIDGET_SIDE_BUFFER}; margin-top:0px; padding:0px; padding-left:{int(WIDGET_SIDE_BUFFER/4)}; "
-            + "}"
-        )
+        scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")
         scroll_area.setAlignment(Qt.AlignHCenter)
 
         # create a widget inside scroll area
@@ -148,8 +147,8 @@ class ProjectSearchWidget(QWidget):
         project_card = QWidget()
         project_card.setStyleSheet(
             "QWidget {"
-            + f"border-radius: 5px;padding: 20px;margin:0px;margin-bottom: 3px;background-color:rgba(240,240,240,255);"
-            + "height: 50px;"
+            + f"border-radius: 5px;{ZERO_MARGIN_PADDING}margin-bottom: 3px;"
+            + "height: 50px;background-color:rgba(240,240,240,255);"
             + "} QWidget:hover { "
             + f"background-color:rgba(225,225,225,255);"
             + "}"
@@ -196,7 +195,10 @@ class ProjectSearchWidget(QWidget):
             pass
 
     def installEventFilter(self):
-        # don't pass click events to parent widgets
+        """Overwriting native behavior of passing click (and other) events
+        to parent widgets. This is needed, so that only click on background
+        itself would close the widget.
+        """
         return
 
     def mouseReleaseEvent(self, event):
