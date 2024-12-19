@@ -20,7 +20,7 @@ from specklepy_qt_ui.qt_ui.utils.global_resources import (
 
 class NoDocumentWidget(QWidget):
     context_stack = None
-    message_card: QPushButton
+    message_card: QWidget
     send_data = pyqtSignal(object)
 
     def __init__(self, parent=None):

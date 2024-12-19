@@ -251,7 +251,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.layout().addWidget(no_model_cards_widget)
             self.widget_no_model_cards = no_model_cards_widget
 
-    def kill_background_widgets(self):
+    def kill_all_widgets(self):
         if self.widget_no_document:
             self.widget_no_document.setParent(None)
             self.widget_no_document = None
@@ -264,8 +264,13 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.widget_project_search.setParent(None)
             self.widget_project_search = None
 
+    def kill_process_widgets(self):
+        if self.widget_project_search:
+            self.widget_project_search.setParent(None)
+            self.widget_project_search = None
+
     def open_select_projects_widget(self):
-        self.kill_background_widgets()
+        self.kill_all_widgets()
 
         project_search_widget = ProjectSearchWidget(parent=self)
         self.layout().addWidget(project_search_widget)
@@ -282,6 +287,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             )
         if self.widget_no_model_cards:
             self.widget_no_model_cards.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
+        if self.widget_project_search:
+            self.widget_project_search.resize(
                 self.frameSize().width(),
                 self.frameSize().height(),
             )
