@@ -25,7 +25,7 @@ class NoDocumentWidget(QWidget):
 
     def __init__(self, parent=None):
         super(NoDocumentWidget, self).__init__(parent)
-        self.parentWidget = parent
+        self.parentWidget: "SpeckleQGISv3Dialog" = parent
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 60, 10, 20)

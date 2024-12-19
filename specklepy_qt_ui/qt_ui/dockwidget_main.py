@@ -5,6 +5,7 @@ import inspect
 import os
 import threading
 from plugin_utils.helpers import string_diff
+from specklepy_qt_ui.qt_ui_v3.background import BackgroundWidget
 from specklepy_qt_ui.qt_ui_v3.widget_no_document import NoDocumentWidget
 from specklepy_qt_ui.qt_ui_v3.widget_no_model_cards import NoModelCardsWidget
 from specklepy_qt_ui.qt_ui_v3.widget_project_search import ProjectSearchWidget

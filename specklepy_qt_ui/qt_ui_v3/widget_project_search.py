@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QGroupBox,
     QHBoxLayout,
+    QStackedLayout,
     QLabel,
 )
 
@@ -28,25 +29,19 @@ from specklepy_qt_ui.qt_ui.utils.global_resources import (
     BACKGR_ERROR_COLOR,
     BACKGR_ERROR_COLOR_LIGHT,
 )
+from specklepy_qt_ui.qt_ui_v3.background import BackgroundWidget
 
 
 class ProjectSearchWidget(QWidget):
     context_stack = None
+    background: BackgroundWidget = None
     project_selection_widget: QWidget
     cards_list_widget: QWidget  # needed here to resize child elements
     send_data = pyqtSignal(object)
 
     def __init__(self, parent=None):
         super(ProjectSearchWidget, self).__init__(parent)
-        self.parentWidget = parent
-
-        # enable colored background
-        self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        self.setStyleSheet("background-color: rgba(120,120,120,150);")
-
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, 60, 10, 20)
-        self.layout.setAlignment(Qt.AlignCenter)
+        self.parentWidget: "SpeckleQGISv3Dialog" = parent
 
         # align with the parent widget size
         self.setGeometry(
@@ -56,8 +51,21 @@ class ProjectSearchWidget(QWidget):
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
 
+        self.background = BackgroundWidget(parent=self)
+        self.background.show()
+
+        self.layout = QStackedLayout()
+        self.layout.addWidget(self.background)
+
         project_selection_widget = self.create_project_selection_widget()
-        self.layout.addWidget(project_selection_widget)
+
+        content = QWidget()
+        content.layout = QVBoxLayout(self)
+        content.layout.setContentsMargins(0, 60, 10, 20)
+        content.layout.setAlignment(Qt.AlignCenter)
+        content.layout.addWidget(project_selection_widget)
+
+        self.layout.addWidget(content)
 
     def create_project_selection_widget(self) -> QWidget:
 
@@ -175,6 +183,10 @@ class ProjectSearchWidget(QWidget):
     def resizeEvent(self, event):
         QtWidgets.QWidget.resizeEvent(self, event)
         try:
+            self.background.resize(
+                self.parentWidget.frameSize().width(),
+                self.cards_list_widget.height(),
+            )
             self.cards_list_widget.resize(
                 self.parentWidget.frameSize().width() - 4 * WIDGET_SIDE_BUFFER,
                 self.cards_list_widget.height(),
@@ -182,3 +194,25 @@ class ProjectSearchWidget(QWidget):
         except RuntimeError as e:
             # e.g. Widget was deleted
             pass
+
+    def installEventFilter(self):
+        # don't pass click events to parent widgets
+        return
+
+    def mouseReleaseEvent(self, event):
+        # print("Mouse Release Event")
+        return
+        self.destroy()
+
+    def destroy(self):
+        return
+        # remove all buttons
+        for i in reversed(range(self.layout.count())):
+            self.layout.itemAt(i).widget().setParent(None)
+
+        # delete reference from the parent widget
+        for i in reversed(range(self.parentWidget.layout().count())):
+            current_widget = self.parentWidget.layout().itemAt(i).widget()
+            if current_widget is type(self):
+                current_widget.setParent(None)
+        self.parentWidget.widget_project_search = None

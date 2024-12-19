@@ -23,6 +23,7 @@ BACKGR_COLOR_HIGHLIGHT = f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
 BACKGR_COLOR = f"background-color: rgba{str(SPECKLE_COLOR)};"
 BACKGR_COLOR_LIGHT = f"background-color: rgba{str(SPECKLE_COLOR_LIGHT)};"
 BACKGR_COLOR_GREY = f"background-color: rgba(220,220,220,1);"
+BACKGR_COLOR_DARK_GREY_SEMI = f"background-color: rgba(120,120,120,150);"
 
 BACKGR_ERROR_COLOR = f"background-color: rgba{str(ERROR_COLOR)};"
 BACKGR_ERROR_COLOR_LIGHT = f"background-color: rgba{str(ERROR_COLOR_LIGHT)};"
