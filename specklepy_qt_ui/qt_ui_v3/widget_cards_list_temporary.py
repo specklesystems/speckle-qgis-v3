@@ -13,18 +13,7 @@ from PyQt5.QtWidgets import (
 from specklepy_qt_ui.qt_ui.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
-    FULL_HEIGHT_WIDTH,
-    SPECKLE_COLOR,
-    BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR_WHITE,
-    BACKGR_COLOR_LIGHT,
-    BACKGR_COLOR_GREY,
-    BACKGR_COLOR_TRANSPARENT,
-    BACKGR_COLOR_HIGHLIGHT,
-    NEW_GREY,
-    NEW_GREY_HIGHLIGHT,
-    BACKGR_ERROR_COLOR,
-    BACKGR_ERROR_COLOR_LIGHT,
 )
 from specklepy_qt_ui.qt_ui_v3.background import BackgroundWidget
 from specklepy_qt_ui.qt_ui_v3.widget_card_from_list import CardInListWidget
@@ -137,9 +126,11 @@ class CardsListTemporaryWidget(QWidget):
         )
         _ = QVBoxLayout(self.cards_list_widget)
 
-        for i in range(len(cards_content_list)):
-            project_card = CardInListWidget(cards_content_list[i])
-            self.cards_list_widget.layout().addWidget(project_card)
+        # in case the input argument was missing or None, don't create any cards
+        if isinstance(cards_content_list, list):
+            for content in cards_content_list:
+                project_card = CardInListWidget(content)
+                self.cards_list_widget.layout().addWidget(project_card)
 
         return self.cards_list_widget
 

@@ -9,7 +9,7 @@ from specklepy_qt_ui.qt_ui_v3.widget_cards_list_temporary import (
 )
 
 
-class ProjectSearchWidget(CardsListTemporaryWidget):
+class ModelSearchWidget(CardsListTemporaryWidget):
     context_stack = None
     background: BackgroundWidget = None
     project_selection_widget: QWidget
@@ -22,6 +22,6 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         label_text: str = "Label",
         cards_content_list: List[Tuple] = None,
     ):
-        super(ProjectSearchWidget, self).__init__(
+        super(ModelSearchWidget, self).__init__(
             parent=parent, label_text=label_text, cards_content_list=cards_content_list
         )
