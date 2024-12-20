@@ -5,7 +5,6 @@ import inspect
 import os
 import threading
 from plugin_utils.helpers import string_diff
-from specklepy_qt_ui.qt_ui_v3.background import BackgroundWidget
 from specklepy_qt_ui.qt_ui_v3.widget_no_document import NoDocumentWidget
 from specklepy_qt_ui.qt_ui_v3.widget_no_model_cards import NoModelCardsWidget
 from specklepy_qt_ui.qt_ui_v3.widget_project_search import ProjectSearchWidget
@@ -273,7 +272,14 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     def open_select_projects_widget(self):
         # self.kill_all_widgets()
 
-        project_search_widget = ProjectSearchWidget(parent=self)
+        project_search_widget = ProjectSearchWidget(
+            parent=self,
+            label_text="1/3 Select project",
+            cards_content_list=[
+                (lambda: print(1), "Project 1", "line 1", "line 2"),
+                (lambda: print(2), "Project 1", "line 1", "line 2"),
+            ],
+        )
         self.layout().addWidget(project_search_widget)
         self.widget_project_search = project_search_widget
 

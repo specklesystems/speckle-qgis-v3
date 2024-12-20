@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap, QCursor
@@ -30,191 +30,24 @@ from specklepy_qt_ui.qt_ui.utils.global_resources import (
     BACKGR_ERROR_COLOR_LIGHT,
 )
 from specklepy_qt_ui.qt_ui_v3.background import BackgroundWidget
+from specklepy_qt_ui.qt_ui_v3.widget_cards_list_temporary import (
+    CardsListTemporaryWidget,
+)
 
 
-class ProjectSearchWidget(QWidget):
+class ProjectSearchWidget(CardsListTemporaryWidget):
     context_stack = None
     background: BackgroundWidget = None
     project_selection_widget: QWidget
     cards_list_widget: QWidget  # needed here to resize child elements
     send_data = pyqtSignal(object)
 
-    def __init__(self, parent=None):
-        super(ProjectSearchWidget, self).__init__(parent)
-        self.parentWidget: "SpeckleQGISv3Dialog" = parent
-
-        # align with the parent widget size
-        self.resize(
-            parent.frameSize().width(),
-            parent.frameSize().height(),
-        )  # top left corner x, y, width, height
-
-        self.background = BackgroundWidget(parent=self)
-        self.background.show()
-
-        self.layout = QStackedLayout()
-        self.layout.addWidget(self.background)
-
-        project_selection_widget = self.create_project_selection_widget()
-
-        content = QWidget()
-        content.layout = QVBoxLayout(self)
-        content.layout.setContentsMargins(
-            WIDGET_SIDE_BUFFER,
-            WIDGET_SIDE_BUFFER,
-            WIDGET_SIDE_BUFFER,
-            WIDGET_SIDE_BUFFER,
+    def __init__(
+        self,
+        parent=None,
+        label_text: str = "Label",
+        cards_content_list: List[Tuple] = None,
+    ):
+        super(ProjectSearchWidget, self).__init__(
+            parent=parent, label_text=label_text, cards_content_list=cards_content_list
         )
-        content.layout.setAlignment(Qt.AlignCenter)
-        content.layout.addWidget(project_selection_widget)
-
-        self.layout.addWidget(content)
-
-    def create_project_selection_widget(self) -> QWidget:
-
-        # create a container
-        scroll_container = self.create_container()
-
-        # create scroll area with this widget
-        label = self.create_widget_label()
-        scroll_area = self.create_scroll_area()
-
-        # add label and scroll area to the container
-        scroll_container.layout().addWidget(label)
-        scroll_container.layout().addWidget(scroll_area)
-
-        return scroll_container
-
-    def create_container(self):
-
-        scroll_container = QWidget()
-        scroll_container.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        scroll_container.setStyleSheet(
-            "QWidget {"
-            f"{ZERO_MARGIN_PADDING}"
-            + f"border-radius:5px; {BACKGR_COLOR_LIGHT_GREY}"
-            + "}"
-        )
-        scroll_container_layout = QVBoxLayout(scroll_container)
-        scroll_container_layout.setAlignment(Qt.AlignHCenter)
-
-        return scroll_container
-
-    def create_widget_label(self):
-
-        label = QLabel("1/3 Select Project:")
-
-        # for some reason, "margin-left" doesn't make any effect here
-        label.setStyleSheet(
-            "QLabel {"
-            + f"{ZERO_MARGIN_PADDING}padding-left:{int(WIDGET_SIDE_BUFFER*0.75)}; padding-top:{int(WIDGET_SIDE_BUFFER/4)}; margin-bottom:{int(WIDGET_SIDE_BUFFER/4)}; text-align:left;"
-            + "}"
-        )
-        return label
-
-    def create_scroll_area(self):
-
-        scroll_area = QtWidgets.QScrollArea()
-        scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")
-        scroll_area.setAlignment(Qt.AlignHCenter)
-
-        # create a widget inside scroll area
-        cards_list_widget = self.create_area_with_cards()
-        scroll_area.setWidget(cards_list_widget)
-
-        return scroll_area
-
-    def create_area_with_cards(self) -> QWidget:
-
-        self.cards_list_widget = QWidget()
-        self.cards_list_widget.setStyleSheet(
-            "QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}"
-        )
-        _ = QVBoxLayout(self.cards_list_widget)
-
-        for i in range(10):
-            project_card = self.create_project_card()
-            # project_card.clicked.connect(
-            #    lambda: self.parentWidget.open_select_projects_widget()
-            # )
-            self.cards_list_widget.layout().addWidget(project_card)
-
-        return self.cards_list_widget
-
-    def create_project_card(self):
-
-        # add project card
-        project_card = QWidget()
-        project_card.setStyleSheet(
-            "QWidget {"
-            + f"border-radius: 5px;{ZERO_MARGIN_PADDING}margin-bottom: 3px;"
-            + "height: 50px;background-color:rgba(240,240,240,255);"
-            + "} QWidget:hover { "
-            + f"background-color:rgba(225,225,225,255);"
-            + "}"
-        )
-        project_card.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-
-        layout = QVBoxLayout(project_card)
-
-        # add text #1 (in a shape of QPushButton for easier styling)
-        button_1 = QPushButton("Project X")
-        button_1.setStyleSheet(
-            "QPushButton {"
-            + f"color:black;border-radius: 7px;{ZERO_MARGIN_PADDING} height: 20px;text-align: left;{BACKGR_COLOR_TRANSPARENT}"
-            + "} QPushButton:hover { "
-            + f"color:rgba{SPECKLE_COLOR};"
-            + " }"
-        )
-        layout.addWidget(button_1)
-
-        # add text #2 (in a shape of QPushButton for easier styling)
-        button_role = QPushButton("My role")
-        button_role.setStyleSheet(
-            "QPushButton {"
-            + f"color:grey;border-radius: 7px;{ZERO_MARGIN_PADDING}height: 20px;text-align: left;{BACKGR_COLOR_TRANSPARENT}"
-            + " }"
-        )
-        layout.addWidget(button_role)
-
-        return project_card
-
-    def resizeEvent(self, event):
-        QtWidgets.QWidget.resizeEvent(self, event)
-        try:
-            self.background.resize(
-                self.parentWidget.frameSize().width(),
-                self.cards_list_widget.height(),
-            )
-            self.cards_list_widget.resize(
-                self.parentWidget.frameSize().width() - 4 * WIDGET_SIDE_BUFFER,
-                self.cards_list_widget.height(),
-            )
-        except RuntimeError as e:
-            # e.g. Widget was deleted
-            pass
-
-    def installEventFilter(self):
-        """Overwriting native behavior of passing click (and other) events
-        to parent widgets. This is needed, so that only click on background
-        itself would close the widget.
-        """
-        return
-
-    def mouseReleaseEvent(self, event):
-        # print("Mouse Release Event")
-        return
-        self.destroy()
-
-    def destroy(self):
-        return
-        # remove all buttons
-        for i in reversed(range(self.layout.count())):
-            self.layout.itemAt(i).widget().setParent(None)
-
-        # delete reference from the parent widget
-        for i in reversed(range(self.parentWidget.layout().count())):
-            current_widget = self.parentWidget.layout().itemAt(i).widget()
-            if current_widget is type(self):
-                current_widget.setParent(None)
-        self.parentWidget.widget_project_search = None
