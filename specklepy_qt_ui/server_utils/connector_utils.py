@@ -26,8 +26,11 @@ def get_project_search_widget_content() -> List[List]:
 
     for project in projects_first:
 
+        # make sure to pass the actual project, not a reference to a variable
         project_content = [
-            lambda: get_model_search_widget_content(speckle_client, project),
+            lambda project=project: get_model_search_widget_content(
+                speckle_client, project
+            ),
             project.name,
             project.role.split(":")[-1],
             f"updated {time_ago(project.updatedAt)}",
@@ -49,8 +52,11 @@ def get_model_search_widget_content(
 
     for model in models:
 
+        # make sure to pass the actual model, not a reference to a variable
         model_content = [
-            lambda: get_version_search_widget_content(speckle_client, model),
+            lambda model=model: get_version_search_widget_content(
+                speckle_client, model
+            ),
             model.name,
             f"updated {time_ago(model.updatedAt)}",
         ]
