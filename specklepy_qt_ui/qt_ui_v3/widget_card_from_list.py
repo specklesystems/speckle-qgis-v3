@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
@@ -23,7 +23,7 @@ class CardInListWidget(QWidget):
     callback = None
     send_data = pyqtSignal(object)
 
-    def __init__(self, card_content=Tuple):
+    def __init__(self, card_content: List):
         super(CardInListWidget, self).__init__(None)
 
         self.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
@@ -31,7 +31,7 @@ class CardInListWidget(QWidget):
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         self.setStyleSheet(
             "QWidget {"
-            + "border-radius:5px; margin-bottom:3px; height:50px;"
+            + "border-radius:5px; margin-bottom:3px; min-height:50px;"
             + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_LIGHT_GREY2}"
             + "} QWidget:hover { "
             + f"{BACKGR_COLOR_GREY}"
@@ -58,7 +58,7 @@ class CardInListWidget(QWidget):
         main_text.clicked.connect(self.callback)
         main_text.setStyleSheet(
             "QPushButton {color:black;border-radius: 7px;"
-            + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_TRANSPARENT} height: 15px;text-align: left;"
+            + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_TRANSPARENT} min-height: 15px;text-align: left;"
             + "} QPushButton:hover { "
             + f"color:rgba{SPECKLE_COLOR};"
             + " }"
@@ -74,7 +74,7 @@ class CardInListWidget(QWidget):
         text_line.clicked.connect(self.callback)
         text_line.setStyleSheet(
             "QPushButton {color:grey;border-radius: 7px;"
-            + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_TRANSPARENT} height: 10px;text-align: left;"
+            + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_TRANSPARENT} min-height: 10px;text-align: left;"
             + " }"
         )
         return text_line

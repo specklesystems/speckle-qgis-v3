@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap, QCursor
@@ -28,9 +28,10 @@ class CardsListTemporaryWidget(QWidget):
 
     def __init__(
         self,
+        *,
         parent=None,
         label_text: str = "Label",
-        cards_content_list: List[Tuple] = None,
+        cards_content_list: List[List] = None,
     ):
         super(CardsListTemporaryWidget, self).__init__(parent)
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
@@ -65,7 +66,7 @@ class CardsListTemporaryWidget(QWidget):
         self.layout.addWidget(content)
 
     def create_project_selection_widget(
-        self, label_text: str, cards_content_list: List[Tuple]
+        self, label_text: str, cards_content_list: List[List]
     ) -> QWidget:
 
         # create a container
@@ -106,7 +107,7 @@ class CardsListTemporaryWidget(QWidget):
         )
         return label
 
-    def create_scroll_area(self, cards_content_list: List[Tuple]):
+    def create_scroll_area(self, cards_content_list: List[List]):
 
         scroll_area = QtWidgets.QScrollArea()
         scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")
@@ -118,7 +119,7 @@ class CardsListTemporaryWidget(QWidget):
 
         return scroll_area
 
-    def create_area_with_cards(self, cards_content_list: List[Tuple]) -> QWidget:
+    def create_area_with_cards(self, cards_content_list: List[List]) -> QWidget:
 
         self.cards_list_widget = QWidget()
         self.cards_list_widget.setStyleSheet(

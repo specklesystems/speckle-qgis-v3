@@ -5,9 +5,13 @@ import inspect
 import os
 import threading
 from plugin_utils.helpers import string_diff
+from specklepy_qt_ui.qt_ui_v3.widget_model_search import ModelSearchWidget
 from specklepy_qt_ui.qt_ui_v3.widget_no_document import NoDocumentWidget
 from specklepy_qt_ui.qt_ui_v3.widget_no_model_cards import NoModelCardsWidget
 from specklepy_qt_ui.qt_ui_v3.widget_project_search import ProjectSearchWidget
+from specklepy_qt_ui.server_utils.connector_utils import (
+    get_project_search_widget_content,
+)
 
 try:
     from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
@@ -270,15 +274,27 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.widget_project_search = None
 
     def open_select_projects_widget(self):
-        # self.kill_all_widgets()
+
+        # get content for project cards
+        content_list = get_project_search_widget_content()
+
+        # add a function for generating model card widget
+        for i in range(len(content_list)):
+            project_content = content_list[i]
+
+            def new_callback():
+                return ModelSearchWidget(
+                    parent=self,
+                    label_text="2/3 Select model",
+                    cards_content_list=project_content[0],
+                )
+
+            project_content[0] = new_callback
 
         project_search_widget = ProjectSearchWidget(
             parent=self,
             label_text="1/3 Select project",
-            cards_content_list=[
-                (lambda: print(1), "Project 1", "line 1", "line 2"),
-                (lambda: print(2), "Project 1", "line 1", "line 2"),
-            ],
+            cards_content_list=content_list,
         )
         self.layout().addWidget(project_search_widget)
         self.widget_project_search = project_search_widget

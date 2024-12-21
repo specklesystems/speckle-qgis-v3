@@ -18,9 +18,10 @@ class ModelSearchWidget(CardsListTemporaryWidget):
 
     def __init__(
         self,
+        *,
         parent=None,
         label_text: str = "Label",
-        cards_content_list: List[Tuple] = None,
+        cards_content_list: List[List] = None,
     ):
         super(ModelSearchWidget, self).__init__(
             parent=parent, label_text=label_text, cards_content_list=cards_content_list
