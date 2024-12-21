@@ -309,7 +309,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         # add a function for generating model card widget
         for i in range(len(projects_contents_list)):
             project_content = projects_contents_list[i]
-
+            print(project_content[1])
             projects_contents_list[i] = [
                 lambda: self.overwrite_model_search_callback(project_content[0])
             ] + project_content[1:]

@@ -1,7 +1,8 @@
 from typing import List, Tuple
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
-from specklepy.core.api.models.current import Project
+from specklepy.core.api.models.current import Model, Project, ProjectWithModels
+from specklepy.core.api.resources.current.project_resource import ProjectResource
 from specklepy_qt_ui.server_utils.utils import (
     get_accounts,
     get_authenticate_client_for_account,
@@ -26,7 +27,7 @@ def get_project_search_widget_content() -> List[List]:
     for project in projects_first:
 
         project_content = [
-            lambda: get_model_search_widget_content(project),
+            lambda: get_model_search_widget_content(speckle_client, project),
             project.name,
             project.role.split(":")[-1],
             f"updated {time_ago(project.updatedAt)}",
@@ -36,8 +37,30 @@ def get_project_search_widget_content() -> List[List]:
     return content_list
 
 
-def get_model_search_widget_content(project: Project) -> List[List]:
+def get_model_search_widget_content(
+    speckle_client: SpeckleClient, project: Project
+) -> List[List]:
 
-    content_list: List[List] = [[lambda: print(1), "Label", "Label", "Label"]]
+    content_list: List[List] = []
+    models_resource_collection: ProjectWithModels = (
+        speckle_client.project.get_with_models(project.id)
+    )
+    models: List[Model] = models_resource_collection.models.items
+
+    for model in models:
+
+        model_content = [
+            lambda: get_version_search_widget_content(speckle_client, model),
+            model.name,
+            f"updated {time_ago(model.updatedAt)}",
+        ]
+        content_list.append(model_content)
 
     return content_list
+
+
+def get_version_search_widget_content(
+    speckle_client: SpeckleClient, project: ProjectResource
+) -> List[List]:
+
+    return []
