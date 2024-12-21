@@ -39,5 +39,5 @@ def get_project_search_widget_content() -> List[List]:
 def get_model_search_widget_content(project: Project) -> List[List]:
 
     content_list: List[List] = [[lambda: print(1), "Label", "Label", "Label"]]
-    print(content_list)
+
     return content_list

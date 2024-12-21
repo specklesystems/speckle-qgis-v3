@@ -117,6 +117,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     widget_no_document: NoDocumentWidget = None
     widget_no_model_cards: NoModelCardsWidget = None
     widget_project_search: ProjectSearchWidget = None
+    widget_model_search: ModelSearchWidget = None
 
     signal_1 = pyqtSignal(object)
     signal_2 = pyqtSignal(object)
@@ -270,34 +271,57 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
 
     def kill_process_widgets(self):
         if self.widget_project_search:
-            self.widget_project_search.setParent(None)
-            self.widget_project_search = None
+            self.kill_widget_project_search()
+        if self.widget_model_search:
+            self.kill_widget_model_search()
+
+    def kill_widget_project_search(self):
+        self.widget_project_search.setParent(None)
+        self.widget_project_search = None
+
+    def kill_widget_model_search(self):
+        self.widget_model_search.setParent(None)
+        self.widget_model_search = None
+
+    def kill_current_widget(self, widget):
+        if self.widget_project_search == widget:
+            self.kill_widget_project_search()
+        elif self.widget_model_search == widget:
+            self.kill_widget_model_search()
+
+    def overwrite_model_search_callback(self, card_function):
+        # current function returns a content list for models
+        self.widget_model_search = ModelSearchWidget(
+            parent=self,
+            label_text="2/3 Select model",
+            cards_content_list=card_function(),
+        )
+
+        # add widgets to the layout
+        self.layout().addWidget(self.widget_model_search)
+        return self.widget_model_search
 
     def open_select_projects_widget(self):
 
         # get content for project cards
-        content_list = get_project_search_widget_content()
+        projects_contents_list = get_project_search_widget_content()
 
         # add a function for generating model card widget
-        for i in range(len(content_list)):
-            project_content = content_list[i]
+        for i in range(len(projects_contents_list)):
+            project_content = projects_contents_list[i]
 
-            def new_callback():
-                return ModelSearchWidget(
-                    parent=self,
-                    label_text="2/3 Select model",
-                    cards_content_list=project_content[0],
-                )
+            projects_contents_list[i] = [
+                lambda: self.overwrite_model_search_callback(project_content[0])
+            ] + project_content[1:]
 
-            project_content[0] = new_callback
-
-        project_search_widget = ProjectSearchWidget(
+        self.widget_project_search = ProjectSearchWidget(
             parent=self,
             label_text="1/3 Select project",
-            cards_content_list=content_list,
+            cards_content_list=projects_contents_list,
         )
-        self.layout().addWidget(project_search_widget)
-        self.widget_project_search = project_search_widget
+
+        # add widgets to the layout
+        self.layout().addWidget(self.widget_project_search)
 
     def resizeEvent(self, event):
         QtWidgets.QDockWidget.resizeEvent(self, event)

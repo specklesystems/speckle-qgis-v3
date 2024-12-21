@@ -26,3 +26,8 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         super(ModelSearchWidget, self).__init__(
             parent=parent, label_text=label_text, cards_content_list=cards_content_list
         )
+
+    def add_background(self):
+        # overwrite function to make background transparent
+        self.background = BackgroundWidget(parent=self, transparent=True)
+        self.background.show()

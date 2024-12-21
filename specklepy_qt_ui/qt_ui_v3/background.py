@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget
 
 from specklepy_qt_ui.qt_ui.utils.global_resources import (
     BACKGR_COLOR_DARK_GREY_SEMI,
+    BACKGR_COLOR_TRANSPARENT,
 )
 
 
@@ -12,17 +13,22 @@ class BackgroundWidget(QWidget):
     message_card: QWidget
     send_data = pyqtSignal(object)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, transparent=False):
         super(BackgroundWidget, self).__init__(parent)
         self.parentWidget = parent
 
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        self.setStyleSheet(f"{BACKGR_COLOR_DARK_GREY_SEMI}")
-        self.setGeometry(0, 0, 0, 0)
+
+        if not transparent:  # first widget
+            self.setStyleSheet(f"{BACKGR_COLOR_DARK_GREY_SEMI}")
+        else:  # more overlaying widgets
+            self.setStyleSheet(f"{BACKGR_COLOR_TRANSPARENT}")
+
+        # self.setGeometry(0, 0, 0, 0)
 
     def mouseReleaseEvent(self, event):
         self.setGeometry(0, 0, 0, 0)
-        self.parentWidget.parentWidget.kill_process_widgets()
+        self.parentWidget.parentWidget.kill_current_widget(self.parentWidget)
 
     def show(self):
         self.setGeometry(

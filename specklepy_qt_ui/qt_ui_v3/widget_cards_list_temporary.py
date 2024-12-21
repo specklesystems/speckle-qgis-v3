@@ -42,8 +42,7 @@ class CardsListTemporaryWidget(QWidget):
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
 
-        self.background = BackgroundWidget(parent=self)
-        self.background.show()
+        self.add_background()
 
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
@@ -64,6 +63,10 @@ class CardsListTemporaryWidget(QWidget):
         content.layout.addWidget(project_selection_widget)
 
         self.layout.addWidget(content)
+
+    def add_background(self):
+        self.background = BackgroundWidget(parent=self, transparent=False)
+        self.background.show()
 
     def create_project_selection_widget(
         self, label_text: str, cards_content_list: List[List]
@@ -144,10 +147,7 @@ class CardsListTemporaryWidget(QWidget):
             )
             self.cards_list_widget.resize(
                 self.parentWidget.frameSize().width() - 3 * WIDGET_SIDE_BUFFER,
-                min(
-                    self.cards_list_widget.height(),
-                    self.parentWidget.frameSize().height() - 4 * WIDGET_SIDE_BUFFER,
-                ),
+                self.cards_list_widget.height(),
             )
         except RuntimeError as e:
             # e.g. Widget was deleted
