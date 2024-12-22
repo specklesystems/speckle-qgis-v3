@@ -5,7 +5,14 @@ from specklepy.core.api.credentials import (
     Account,
     get_local_accounts,
 )
-from specklepy.core.api.models.current import Project, ResourceCollection
+from specklepy.core.api.models.current import (
+    Project,
+    ProjectWithModels,
+    ResourceCollection,
+)
+
+QUERY_LIMIT = 25
+QUERY_BATCH_SIZE = 10
 
 
 def get_accounts() -> List[Account]:
@@ -35,12 +42,16 @@ def get_authenticate_client_for_account(account: Account) -> SpeckleClient:
     return speckle_client
 
 
-def get_first_projects_from_client(speckle_client: SpeckleClient):
+def get_first_projects_from_client(
+    speckle_client: SpeckleClient,
+) -> ResourceCollection[Project]:
 
     results = []
     if speckle_client is not None:
         # possible GraphQLException
-        results: ResourceCollection[Project] = speckle_client.active_user.get_projects()
+        results: ResourceCollection[Project] = speckle_client.active_user.get_projects(
+            limit=QUERY_LIMIT
+        )
 
         if not isinstance(results, ResourceCollection):
             # TODO: handle
@@ -50,7 +61,29 @@ def get_first_projects_from_client(speckle_client: SpeckleClient):
         # TODO add a warning
         pass
 
-    return results.items
+    return results
+
+
+def get_first_models_from_client(
+    speckle_client: SpeckleClient, project: Project
+) -> ResourceCollection[Project]:
+
+    results = []
+    if speckle_client is not None:
+        # possible GraphQLException
+        results: ProjectWithModels = speckle_client.project.get_with_models(
+            project_id=project.id, models_limit=QUERY_LIMIT
+        ).models
+
+        if not isinstance(results, ResourceCollection):
+            # TODO: handle
+            pass
+
+    else:
+        # TODO add a warning
+        pass
+
+    return results
 
 
 def time_ago(timestamp: datetime) -> str:

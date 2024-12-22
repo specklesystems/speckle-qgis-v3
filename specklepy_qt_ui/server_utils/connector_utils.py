@@ -6,6 +6,7 @@ from specklepy.core.api.resources.current.project_resource import ProjectResourc
 from specklepy_qt_ui.server_utils.utils import (
     get_accounts,
     get_authenticate_client_for_account,
+    get_first_models_from_client,
     get_first_projects_from_client,
     time_ago,
 )
@@ -22,7 +23,7 @@ def get_project_search_widget_content() -> List[List]:
         return
 
     speckle_client: SpeckleClient = get_authenticate_client_for_account(accounts[0])
-    projects_first: List[Project] = get_first_projects_from_client(speckle_client)
+    projects_first: List[Project] = get_first_projects_from_client(speckle_client).items
 
     for project in projects_first:
 
@@ -45,12 +46,11 @@ def get_model_search_widget_content(
 ) -> List[List]:
 
     content_list: List[List] = []
-    models_resource_collection: ProjectWithModels = (
-        speckle_client.project.get_with_models(project.id)
-    )
-    models: List[Model] = models_resource_collection.models.items
+    models_first: List[Model] = get_first_models_from_client(
+        speckle_client, project
+    ).items
 
-    for model in models:
+    for model in models_first:
 
         # make sure to pass the actual model, not a reference to a variable
         model_content = [
