@@ -231,15 +231,12 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         l = self.verticalLayout
 
     def runSetup(self, plugin):
-        # self.addDataStorage(plugin)
         self.addLabel(plugin)
-        self.addProps(plugin)
         self.add_start_widget(plugin)
-        # self.createMappingDialog()
 
     def add_start_widget(self, plugin):
 
-        # TODOv3: detect opened document
+        # document in QGIS is opened by default, we don't need as actually saved file to start working with data
         document_open = True
 
         if not document_open:
@@ -341,19 +338,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
                 self.frameSize().width(),
                 self.frameSize().height(),
             )
-
-    def addProps(self, plugin):
-        # add widgets that will only show on event trigger
-
-        self.setMapping.setFlat(True)
-        self.setMapping.setStyleSheet(
-            "QPushButton {text-align: right;} QPushButton:hover { " + f"{COLOR}" + " }"
-        )
-
-        self.crsSettings.setFlat(True)
-        self.crsSettings.setStyleSheet(
-            "QPushButton {text-align: right;} QPushButton:hover { " + f"{COLOR}" + " }"
-        )
 
     def addDataStorage(self, plugin):
         self.dataStorage = plugin.dataStorage
@@ -458,18 +442,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.clearDropdown()
             self.populateUI(plugin)
             self.enableElements(plugin)
-        except Exception as e:
-            logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self)
-            return
-
-    def run(self, plugin):
-        try:
-            # Setup events on first load only!
-            self.setupOnFirstLoad(plugin)
-            # Connect streams section events
-            self.completeStreamSection(plugin)
-            # Populate the UI dropdowns
-            self.populateUI(plugin)
         except Exception as e:
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self)
             return

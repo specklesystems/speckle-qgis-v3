@@ -319,7 +319,6 @@ class SpeckleQGISv3:
                 self.dockwidget = SpeckleQGISv3Dialog()
                 self.dockwidget.runSetup(self)
 
-            self.dockwidget.run(self)
             # show the dockwidget
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
             self.verify_dependencies()
@@ -347,6 +346,7 @@ class SpeckleQGISv3:
         # if self.theads_total==0: self.theads_total = threading.active_count()
 
         all_threads = threading.enumerate()
+        return
 
         for t in all_threads:
             if t.name.startswith("speckle"):
@@ -366,17 +366,11 @@ class SpeckleQGISv3:
         # set the project instance
         self.project = QgsProject.instance()
         self.dataStorage.project = self.project
-        self.dockwidget.reportBtn.setEnabled(True)
 
         # https://www.opengis.ch/2016/09/07/using-threads-in-qgis-python-plugins/
 
         # send
         if self.btnAction == 0:
-            # Reset Survey point
-            # self.dockwidget.populateSurveyPoint(self)
-            # Get and clear message
-            message = str(self.dockwidget.messageInput.text())
-            self.dockwidget.messageInput.setText("")
 
             try:
                 streamWrapper = self.active_stream[0]
