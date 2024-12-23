@@ -38,6 +38,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         self.parent.widget_model_search = ModelSearchWidget(
             parent=self.parent,
             cards_content_list=card_function(),
+            ui_search_content=self.ui_search_content,
         )
 
         # add widgets to the layout
@@ -60,6 +61,8 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
         if len(new_project_cards) == 0:
             self.load_more_btn.setText("No more projects found")
+            self.style_load_btn(active=False)
+            self.load_more_btn.setEnabled(False)
             return
 
         self.modify_card_callback(new_project_cards)

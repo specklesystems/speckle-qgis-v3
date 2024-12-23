@@ -49,7 +49,8 @@ class CardInListWidget(QWidget):
         layout.addWidget(self.add_main_text(card_content[1]))
 
         for content in card_content[2:]:
-            layout.addWidget(self.add_text_line(content))
+            if isinstance(content, str):
+                layout.addWidget(self.add_text_line(content))
 
     def add_main_text(self, content: str):
 

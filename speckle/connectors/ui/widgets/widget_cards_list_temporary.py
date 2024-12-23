@@ -16,7 +16,7 @@ from speckle.connectors.ui.widgets.widget_card_from_list import CardInListWidget
 
 
 class CardsListTemporaryWidget(QWidget):
-    context_stack = None
+
     background: BackgroundWidget = None
     cards_list_widget: QWidget = None  # needed here to resize child elements
     load_more_btn: QPushButton = None
@@ -126,14 +126,27 @@ class CardsListTemporaryWidget(QWidget):
 
         load_more_btn = QPushButton("Load more")
         load_more_btn.clicked.connect(lambda: self.load_more())
-        load_more_btn.setStyleSheet(
-            "QWidget {"
-            + f"color:black;border-width:1px;border-color:rgba(100,100,100,1);border-radius: 5px;margin-top:0px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR_WHITE}"
-            + "} QWidget:hover { "
-            + f"{BACKGR_COLOR_LIGHT_GREY2};"
-            + " }"
-        )
         self.load_more_btn = load_more_btn
+        self.style_load_btn()
+
+    def style_load_btn(self, active: bool = True):
+
+        if active:
+            self.load_more_btn.setStyleSheet(
+                "QWidget {"
+                + f"color:black;border-width:1px;border-color:rgba(100,100,100,1);border-radius: 5px;margin-top:0px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR_WHITE}"
+                + "} QWidget:hover { "
+                + f"{BACKGR_COLOR_LIGHT_GREY2};"
+                + " }"
+            )
+        else:
+            self.load_more_btn.setStyleSheet(
+                "QWidget {"
+                + f"color:grey;border-width:1px;border-color:rgba(100,100,100,1);border-radius: 5px;margin-top:0px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR_WHITE}"
+                + "} QWidget:hover { "
+                + f"{BACKGR_COLOR_LIGHT_GREY2};"
+                + " }"
+            )
 
     def create_area_with_cards(self, cards_content_list: List[List]) -> QWidget:
 

@@ -4,7 +4,6 @@ from specklepy.core.api.credentials import Account
 from specklepy.core.api.models.current import (
     Model,
     Project,
-    ProjectWithModels,
     ResourceCollection,
 )
 from specklepy.core.api.resources.current.project_resource import ProjectResource
@@ -55,7 +54,7 @@ class UiSearchContent(QObject):
 
             # make sure to pass the actual project, not a reference to a variable
             project_content = [
-                lambda project=project: self.get_model_search_widget_content(project),
+                lambda project=project: self.get_new_models_content(project),
                 project.name,
                 project.role.split(":")[-1],
                 f"updated {time_ago(project.updatedAt)}",
@@ -63,7 +62,7 @@ class UiSearchContent(QObject):
             content_list.append(project_content)
         return content_list
 
-    def get_model_search_widget_content(
+    def get_new_models_content(
         self,
         project: Project,
     ) -> List[List]:
@@ -84,6 +83,7 @@ class UiSearchContent(QObject):
                 ),  # if a receive workflow: get_version_search_widget_content(...)
                 model.name,
                 f"updated {time_ago(model.updatedAt)}",
+                project,
             ]
             content_list.append(model_content)
 
