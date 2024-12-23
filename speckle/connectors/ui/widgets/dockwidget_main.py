@@ -10,7 +10,6 @@ from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
 from speckle.connectors.ui.widgets.widget_no_model_cards import NoModelCardsWidget
 from speckle.connectors.ui.widgets.widget_project_search import ProjectSearchWidget
-from speckle.connectors.ui.utils.connector_utils import UiSearchContent
 
 from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
 from speckle.connectors.ui.widgets.utils.logger import logToUser
@@ -243,37 +242,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         elif self.widget_model_search == widget:
             self.kill_widget_model_search()
 
-    def overwrite_model_search_callback(self, card_function):
-        # current function returns a content list for models
-        self.widget_model_search = ModelSearchWidget(
-            parent=self,
-            label_text="2/3 Select model",
-            cards_content_list=card_function(),
-        )
-
-        # add widgets to the layout
-        self.layout().addWidget(self.widget_model_search)
-        return self.widget_model_search
-
     def open_select_projects_widget(self):
 
-        # get content for project cards
-        projects_contents_list = UiSearchContent().get_project_search_widget_content()
-
-        # add a function for generating model card widget
-        for i, content in enumerate(projects_contents_list):
-            callback = content[0]
-
-            def make_callback(v):
-                return lambda: self.overwrite_model_search_callback(v)
-
-            projects_contents_list[i][0] = make_callback(callback)
-
-        self.widget_project_search = ProjectSearchWidget(
-            parent=self,
-            label_text="1/3 Select project",
-            cards_content_list=projects_contents_list,
-        )
+        self.widget_project_search = ProjectSearchWidget(parent=self)
 
         # add widgets to the layout
         self.layout().addWidget(self.widget_project_search)

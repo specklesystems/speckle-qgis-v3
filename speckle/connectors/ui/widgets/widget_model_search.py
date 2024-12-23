@@ -20,7 +20,7 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         self,
         *,
         parent=None,
-        label_text: str = "Label",
+        label_text: str = "2/3 Select model",
         cards_content_list: List[List] = None,
     ):
         super(ModelSearchWidget, self).__init__(
