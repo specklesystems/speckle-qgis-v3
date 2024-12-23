@@ -6,15 +6,8 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QHBoxLayout, QLab
 from speckle.connectors.UI.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     BACKGR_COLOR_WHITE,
-    BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR_LIGHT_GREY2,
-    BACKGR_COLOR_GREY,
-    BACKGR_COLOR_TRANSPARENT,
-    BACKGR_COLOR_HIGHLIGHT,
-    NEW_GREY,
-    NEW_GREY_HIGHLIGHT,
-    BACKGR_ERROR_COLOR,
-    BACKGR_ERROR_COLOR_LIGHT,
+    LABEL_HEIGHT,
 )
 
 
@@ -28,7 +21,7 @@ class NoDocumentWidget(QWidget):
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
 
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, 60, 0, 0)
+        self.layout.setContentsMargins(0, {LABEL_HEIGHT}, 0, 0)
         self.layout.setAlignment(Qt.AlignVCenter)
 
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)

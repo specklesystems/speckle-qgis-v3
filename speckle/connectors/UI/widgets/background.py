@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget
 from speckle.connectors.UI.widgets.utils.global_resources import (
     BACKGR_COLOR_DARK_GREY_SEMI,
     BACKGR_COLOR_TRANSPARENT,
+    LABEL_HEIGHT,
 )
 
 
@@ -20,11 +21,11 @@ class BackgroundWidget(QWidget):
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
 
         if not transparent:  # first widget
-            self.setStyleSheet(f"{BACKGR_COLOR_DARK_GREY_SEMI}")
+            self.setStyleSheet(
+                f"margin-top:{LABEL_HEIGHT};{BACKGR_COLOR_DARK_GREY_SEMI}"
+            )
         else:  # more overlaying widgets
-            self.setStyleSheet(f"{BACKGR_COLOR_TRANSPARENT}")
-
-        # self.setGeometry(0, 0, 0, 0)
+            self.setStyleSheet(f"margin-top:{LABEL_HEIGHT};{BACKGR_COLOR_TRANSPARENT}")
 
     def mouseReleaseEvent(self, event):
         self.setGeometry(0, 0, 0, 0)

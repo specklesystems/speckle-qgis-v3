@@ -1,20 +1,14 @@
 from PyQt5 import QtCore
-from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLabel
 
 from speckle.connectors.UI.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
-    BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
     BACKGR_COLOR_LIGHT_GREY2,
     BACKGR_COLOR_WHITE,
-    BACKGR_COLOR_HIGHLIGHT,
-    NEW_GREY,
-    NEW_GREY_HIGHLIGHT,
-    BACKGR_ERROR_COLOR,
-    BACKGR_ERROR_COLOR_LIGHT,
+    LABEL_HEIGHT,
 )
 
 
@@ -28,11 +22,11 @@ class NoModelCardsWidget(QWidget):
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
 
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, 60, 0, 0)
+        self.layout.setContentsMargins(0, LABEL_HEIGHT, 0, 0)
         self.layout.setAlignment(Qt.AlignVCenter)
 
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        self.setStyleSheet(f"{BACKGR_COLOR_LIGHT_GREY2}")
+        self.setStyleSheet(f"margin-top:60px;{BACKGR_COLOR_LIGHT_GREY2}")
 
         # align with the parent widget size
         self.resize(

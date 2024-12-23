@@ -115,7 +115,6 @@ class SpeckleQGISv3:
     current_layers: List[Tuple[Union["QgsVectorLayer", "QgsRasterLayer"], str, str]] = (
         []
     )
-    # current_layer_group: Any
     receive_layer_tree: Dict
 
     active_stream: Optional[Tuple[StreamWrapper, Stream]]
@@ -123,15 +122,10 @@ class SpeckleQGISv3:
     active_commit: Optional[Commit] = None
 
     project: "QgsProject"
-
-    # lat: float
-    # lon: float
-
     accounts: List[Account]
 
     theads_total: int
     dataStorage: DataStorage
-    # signal_groupCreate = pyqtSignal(object)
 
     def __init__(self, iface):
         """Constructor.
@@ -141,31 +135,6 @@ class SpeckleQGISv3:
             application at run time.
         :type iface: QgsInterface
         """
-        # Save reference to the QGIS interface
-
-        # self.lock = threading.Lock()
-        self.dockwidget = None
-        self.version = "3.0.0"
-        self.gis_version = Qgis.QGIS_VERSION.encode(
-            "iso-8859-1", errors="ignore"
-        ).decode("utf-8")
-        self.iface = iface
-        self.project = QgsProject.instance()
-        self.current_streams = []
-        self.active_stream = None
-        self.active_branch = None
-        self.active_commit = None
-        self.receive_layer_tree = None
-        # self.default_account = None
-        # self.accounts = []
-        # self.active_account = None
-
-        self.theads_total = 0
-
-        self.btnAction = 0
-
-        # self.lat = 0.0
-        # self.lon = 0.0
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
@@ -186,6 +155,23 @@ class SpeckleQGISv3:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.pluginIsActive = False
+
+        # self.lock = threading.Lock()
+        self.dockwidget = None
+        self.version = "3.0.0"
+        self.gis_version = Qgis.QGIS_VERSION.encode(
+            "iso-8859-1", errors="ignore"
+        ).decode("utf-8")
+        self.iface = iface
+        self.project = QgsProject.instance()
+        self.current_streams = []
+        self.active_stream = None
+        self.active_branch = None
+        self.active_commit = None
+        self.receive_layer_tree = None
+        self.theads_total = 0
+
+        self.btnAction = 0
 
     # noinspection PyMethodMayBeStatic
 
@@ -279,7 +265,7 @@ class SpeckleQGISv3:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ":/plugins/speckle_qgis_v3/icon.png"
+        icon_path = ":/plugins/speckle-qgis-v3/icon.png"
         self.add_action(
             icon_path,
             text=self.tr("SpeckleQGISv3"),
@@ -308,13 +294,103 @@ class SpeckleQGISv3:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
-        try:
-            for action in self.actions:
-                self.iface.removePluginWebMenu(self.tr("&SpeckleQGISv3"), action)
-                self.iface.removeToolBarIcon(action)
-        except Exception as e:
-            logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
-            return
+        for action in self.actions:
+            self.iface.removePluginWebMenu(self.tr("&SpeckleQGISv3"), action)
+            self.iface.removeToolBarIcon(action)
+
+    def run(self):
+        """Run method that performs all the real work"""
+        from speckle.connectors.UI.widgets.dockwidget_main import SpeckleQGISv3Dialog
+        from speckle.utils.project_vars import (
+            get_project_streams,
+            get_survey_point,
+            get_rotation,
+            get_crs_offsets,
+            get_elevationLayer,
+            get_project_saved_layers,
+            get_transformations,
+        )
+
+        # Create the dialog with elements (after translation) and keep reference
+        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
+        self.project = QgsProject.instance()
+        self.dataStorage = DataStorage()
+        self.dataStorage.plugin_version = self.version
+        self.dataStorage.project = self.project
+
+        get_transformations(self.dataStorage)
+
+        self.is_setup = self.dataStorage.check_for_accounts()
+
+        if self.pluginIsActive:
+            self.reloadUI()
+        else:
+            print("Plugin inactive, launch")
+            self.pluginIsActive = True
+            if self.dockwidget is None:
+                self.dockwidget = SpeckleQGISv3Dialog()
+
+                root = self.dataStorage.project.layerTreeRoot()
+                self.dataStorage.all_layers = getAllLayers(root)
+                self.dockwidget.addDataStorage(self)
+                self.dockwidget.runSetup(self)
+                # self.dockwidget.createMappingDialog(self)
+
+                self.project.fileNameChanged.connect(self.reloadUI)
+                self.project.homePathChanged.connect(self.reloadUI)
+
+                self.dockwidget.runButton.clicked.connect(self.onRunButtonClicked)
+
+                self.dockwidget.crsSettings.clicked.connect(self.customCRSDialogCreate)
+
+                self.dockwidget.signal_1.connect(addVectorMainThread)
+                self.dockwidget.signal_2.connect(addBimMainThread)
+                self.dockwidget.signal_3.connect(addCadMainThread)
+                self.dockwidget.signal_4.connect(addRasterMainThread)
+                self.dockwidget.signal_5.connect(addNonGeometryMainThread)
+                self.dockwidget.signal_6.connect(addExcelMainThread)
+                self.dockwidget.signal_cancel_operation.connect(
+                    self.dockwidget.cancelOperations
+                )
+
+                # self.signal_groupCreate.connect(tryCreateGroup)
+
+            else:
+                root = self.dataStorage.project.layerTreeRoot()
+                self.dataStorage.all_layers = getAllLayers(root)
+                self.dockwidget.addDataStorage(self)
+
+            get_project_streams(self)
+            get_rotation(self.dataStorage)
+            get_survey_point(self.dataStorage)
+            get_crs_offsets(self.dataStorage)
+            get_project_saved_layers(self)
+            self.dockwidget.populateSavedLayerDropdown(self)
+            get_elevationLayer(self.dataStorage)
+
+            self.dockwidget.run(self)
+            self.dockwidget.saveLayerSelection.clicked.connect(
+                lambda: self.populateSelectedLayerDropdown()
+            )
+
+            # show the dockwidget
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
+            self.dockwidget.enableElements(self)
+
+        import urllib3
+        import requests
+
+        # if the standard QGIS libraries are used
+        if (urllib3.__version__ == "1.25.11" and requests.__version__ == "2.24.0") or (
+            urllib3.__version__.startswith("1.24.")
+            and requests.__version__.startswith("2.23.")
+        ):
+            logToUser(
+                "Dependencies versioning error.\nClick here for details.",
+                url="dependencies_error",
+                level=2,
+                plugin=self.dockwidget,
+            )
 
     def onRunButtonClicked(self):
         # print("onRUN")
@@ -1080,100 +1156,6 @@ class SpeckleQGISv3:
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
             return
 
-    def run(self):
-        """Run method that performs all the real work"""
-        from speckle.connectors.UI.widgets.dockwidget_main import SpeckleQGISv3Dialog
-        from speckle.utils.project_vars import (
-            get_project_streams,
-            get_survey_point,
-            get_rotation,
-            get_crs_offsets,
-            get_elevationLayer,
-            get_project_saved_layers,
-            get_transformations,
-        )
-
-        # Create the dialog with elements (after translation) and keep reference
-        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        self.project = QgsProject.instance()
-        self.dataStorage = DataStorage()
-        self.dataStorage.plugin_version = self.version
-        self.dataStorage.project = self.project
-
-        get_transformations(self.dataStorage)
-
-        self.is_setup = self.dataStorage.check_for_accounts()
-
-        if self.pluginIsActive:
-            self.reloadUI()
-        else:
-            print("Plugin inactive, launch")
-            self.pluginIsActive = True
-            if self.dockwidget is None:
-                self.dockwidget = SpeckleQGISv3Dialog()
-
-                root = self.dataStorage.project.layerTreeRoot()
-                self.dataStorage.all_layers = getAllLayers(root)
-                self.dockwidget.addDataStorage(self)
-                self.dockwidget.runSetup(self)
-                # self.dockwidget.createMappingDialog(self)
-
-                self.project.fileNameChanged.connect(self.reloadUI)
-                self.project.homePathChanged.connect(self.reloadUI)
-
-                self.dockwidget.runButton.clicked.connect(self.onRunButtonClicked)
-
-                self.dockwidget.crsSettings.clicked.connect(self.customCRSDialogCreate)
-
-                self.dockwidget.signal_1.connect(addVectorMainThread)
-                self.dockwidget.signal_2.connect(addBimMainThread)
-                self.dockwidget.signal_3.connect(addCadMainThread)
-                self.dockwidget.signal_4.connect(addRasterMainThread)
-                self.dockwidget.signal_5.connect(addNonGeometryMainThread)
-                self.dockwidget.signal_6.connect(addExcelMainThread)
-                self.dockwidget.signal_cancel_operation.connect(
-                    self.dockwidget.cancelOperations
-                )
-
-                # self.signal_groupCreate.connect(tryCreateGroup)
-
-            else:
-                root = self.dataStorage.project.layerTreeRoot()
-                self.dataStorage.all_layers = getAllLayers(root)
-                self.dockwidget.addDataStorage(self)
-
-            get_project_streams(self)
-            get_rotation(self.dataStorage)
-            get_survey_point(self.dataStorage)
-            get_crs_offsets(self.dataStorage)
-            get_project_saved_layers(self)
-            self.dockwidget.populateSavedLayerDropdown(self)
-            get_elevationLayer(self.dataStorage)
-
-            self.dockwidget.run(self)
-            self.dockwidget.saveLayerSelection.clicked.connect(
-                lambda: self.populateSelectedLayerDropdown()
-            )
-
-            # show the dockwidget
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
-            self.dockwidget.enableElements(self)
-
-        import urllib3
-        import requests
-
-        # if the standard QGIS libraries are used
-        if (urllib3.__version__ == "1.25.11" and requests.__version__ == "2.24.0") or (
-            urllib3.__version__.startswith("1.24.")
-            and requests.__version__.startswith("2.23.")
-        ):
-            logToUser(
-                "Dependencies versioning error.\nClick here for details.",
-                url="dependencies_error",
-                level=2,
-                plugin=self.dockwidget,
-            )
-
     def populateSelectedLayerDropdown(self):
         # print("populateSelectedLayerDropdown")
         from speckle.utils.project_vars import set_project_layer_selection
@@ -1198,17 +1180,6 @@ class SpeckleQGISv3:
         except Exception as e:
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
             return
-
-    r"""
-    def set_survey_point(self): 
-        try:
-            from speckle.utils.project_vars import set_survey_point, setProjectReferenceSystem
-            set_survey_point(self.dataStorage, self.dockwidget)
-            setProjectReferenceSystem(self.dataStorage, self.dockwidget)
-        except Exception as e:
-            logToUser(e, level = 2, func = inspect.stack()[0][3], plugin=self.dockwidget)
-            return
-    """
 
     def onStreamCreateClicked(self):
         try:

@@ -14,6 +14,7 @@ from speckle.connectors.UI.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
+    LABEL_HEIGHT,
 )
 from speckle.connectors.UI.widgets.background import BackgroundWidget
 from speckle.connectors.UI.widgets.widget_card_from_list import CardInListWidget
@@ -55,7 +56,7 @@ class CardsListTemporaryWidget(QWidget):
         content.layout = QVBoxLayout(self)
         content.layout.setContentsMargins(
             WIDGET_SIDE_BUFFER,
-            WIDGET_SIDE_BUFFER,
+            WIDGET_SIDE_BUFFER + LABEL_HEIGHT,
             WIDGET_SIDE_BUFFER,
             WIDGET_SIDE_BUFFER,
         )

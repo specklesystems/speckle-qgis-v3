@@ -21,7 +21,7 @@ try:
     from speckle.connectors.UI.widgets.utils.global_resources import (
         COLOR_HIGHLIGHT,
         SPECKLE_COLOR,
-        SPECKLE_COLOR_LIGHT,
+        LABEL_HEIGHT,
         ICON_OPEN_WEB,
         ICON_REPORT,
         ICON_LOGO,
@@ -644,20 +644,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         except Exception as e:
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self)
             return
-        try:
-            self.streams_remove_button.clicked.connect(
-                lambda: self.onStreamRemoveButtonClicked(plugin)
-            )
-            self.streamList.currentIndexChanged.connect(
-                lambda: self.onActiveStreamChanged(plugin)
-            )
-            self.streamBranchDropdown.currentIndexChanged.connect(
-                lambda: self.populateActiveCommitDropdown(plugin)
-            )
-            return
-        except Exception as e:
-            logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self)
-            return
 
     def completeStreamSection(self, plugin):
         return
@@ -666,9 +652,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         try:
             self.populateLayerSendModeDropdown()
             self.populateProjectStreams(plugin)
-
-            # self.runBtnStatusChanged(plugin)
-            # self.runButton.setEnabled(False)
 
         except Exception as e:
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self)
@@ -1097,30 +1080,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             # print(str(e) + "::" + str(inspect.stack()[0][3]))
             return
 
-    def onStreamRemoveButtonClicked(self, plugin):
-        return
-        try:
-            from speckle.utils.project_vars import set_project_streams
-
-            if not self:
-                return
-            index = self.streamList.currentIndex()
-            if len(plugin.current_streams) > 0:
-                plugin.current_streams.pop(index)
-            plugin.active_stream = None
-            self.streamBranchDropdown.clear()
-            self.commitDropdown.clear()
-
-            set_project_streams(plugin)
-            self.populateProjectStreams(plugin)
-        except Exception as e:
-            logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self)
-            return
-
     def cancelOperations(self):
         return
         for t in threading.enumerate():
             if "speckle_" in t.name:
                 t.kill()
                 t.join()
-
