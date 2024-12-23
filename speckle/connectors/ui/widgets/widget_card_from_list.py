@@ -19,12 +19,14 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
 
 
 class CardInListWidget(QWidget):
-    context_stack = None
+    card_content = None
     callback = None
     send_data = pyqtSignal(object)
 
     def __init__(self, card_content: List):
         super(CardInListWidget, self).__init__(None)
+
+        self.card_content = card_content
 
         self.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
 

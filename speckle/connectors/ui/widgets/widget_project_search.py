@@ -31,7 +31,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             cards_content_list=projects_list,
         )
 
-        self.load_more_btn.clicked.connect(lambda: self.add_projects())
+        self.load_more = lambda: self.add_projects()
 
     def overwrite_model_search_callback(self, card_function):
         # current function returns a content list for models
@@ -55,6 +55,15 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             projects_contents_list[i][0] = make_callback(callback)
 
     def add_projects(self):
+
         new_project_cards = self.ui_search_content.get_new_projects_content()
+
+        if len(new_project_cards) == 0:
+            self.load_more_btn.setText("No more projects found")
+            return
+
         self.modify_card_callback(new_project_cards)
         self.add_more_cards(new_project_cards)
+
+        # adjust size of new widget:
+        self.resizeEvent()

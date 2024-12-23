@@ -12,8 +12,8 @@ from speckle.connectors.ui.widgets.widget_cards_list_temporary import (
 class ModelSearchWidget(CardsListTemporaryWidget):
     context_stack = None
     background: BackgroundWidget = None
-    project_selection_widget: QWidget
-    cards_list_widget: QWidget  # needed here to resize child elements
+    project_selection_widget: QWidget = None
+    cards_list_widget: QWidget = None  # needed here to resize child elements
     send_data = pyqtSignal(object)
 
     def __init__(

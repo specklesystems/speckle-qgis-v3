@@ -18,8 +18,9 @@ from speckle.connectors.ui.widgets.widget_card_from_list import CardInListWidget
 class CardsListTemporaryWidget(QWidget):
     context_stack = None
     background: BackgroundWidget = None
-    cards_list_widget: QWidget  # needed here to resize child elements
-    load_more_btn: QPushButton
+    cards_list_widget: QWidget = None  # needed here to resize child elements
+    load_more_btn: QPushButton = None
+    scroll_area: QtWidgets.QScrollArea = None
 
     def __init__(
         self,
@@ -107,15 +108,15 @@ class CardsListTemporaryWidget(QWidget):
 
     def create_scroll_area(self, cards_content_list: List[List]):
 
-        scroll_area = QtWidgets.QScrollArea()
-        scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")
-        scroll_area.setAlignment(Qt.AlignHCenter)
+        self.scroll_area = QtWidgets.QScrollArea()
+        self.scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")
+        self.scroll_area.setAlignment(Qt.AlignHCenter)
 
         # create a widget inside scroll area
         cards_list_widget = self.create_area_with_cards(cards_content_list)
-        scroll_area.setWidget(cards_list_widget)
+        self.scroll_area.setWidget(cards_list_widget)
 
-        return scroll_area
+        return self.scroll_area
 
     def load_more(self):
         """Overwride in the inheriting widgets."""
@@ -155,6 +156,21 @@ class CardsListTemporaryWidget(QWidget):
 
     def add_more_cards(self, new_cards_content_list: list):
 
+        self.cards_list_widget.setParent(None)
+        existing_content = []
+        for i in range(self.cards_list_widget.layout().count()):
+            widget = self.cards_list_widget.layout().itemAt(i).widget()
+            if not isinstance(widget, CardInListWidget):
+                continue
+
+            existing_content.append(widget.card_content)
+
+        existing_content.extend(new_cards_content_list)
+        assigned_cards_list_widget = self.create_area_with_cards(existing_content)
+
+        self.scroll_area.setWidget(assigned_cards_list_widget)
+
+        return
         # remove load button from layout
         self.load_more_btn.setParent(None)
 
@@ -162,10 +178,10 @@ class CardsListTemporaryWidget(QWidget):
             project_card = CardInListWidget(content)
             self.cards_list_widget.layout().addWidget(project_card)
 
-        # return button
+        # return load button
         self.cards_list_widget.layout().addWidget(self.load_more_btn)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event=None):
         QtWidgets.QWidget.resizeEvent(self, event)
         try:
             self.background.resize(
