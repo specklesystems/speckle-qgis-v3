@@ -41,7 +41,9 @@ except ModuleNotFoundError:
     pass
 
 
-from speckle.connectors.host_apps.qgis.connectors.bindings import BasicConnectorBinding
+from speckle.connectors.host_apps.qgis.connectors.bindings import (
+    QgisBasicConnectorBinding,
+)
 from speckle.connectors.host_apps.qgis.connectors.host_app import QgisDocumentStore
 from specklepy.core.api import operations
 from specklepy.logging.exceptions import (
@@ -98,7 +100,7 @@ SPECKLE_COLOR_LIGHT = (69, 140, 255)
 class SpeckleQGISv3:
     """Speckle Connector Plugin for QGIS"""
 
-    basic_binding: BasicConnectorBinding
+    basic_binding: QgisBasicConnectorBinding
     dockwidget: Optional["QDockWidget"]
     version: str
     gis_version: str
@@ -299,7 +301,7 @@ class SpeckleQGISv3:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         document_store = QgisDocumentStore()
         bridge = None
-        self.basic_binding = BasicConnectorBinding(document_store, bridge)
+        self.basic_binding = QgisBasicConnectorBinding(document_store, bridge)
 
         if self.pluginIsActive:
             self.reloadUI()
@@ -307,7 +309,9 @@ class SpeckleQGISv3:
             print("Plugin inactive, launch")
             self.pluginIsActive = True
             if self.dockwidget is None:
-                self.dockwidget = SpeckleQGISv3Dialog(parent=None)
+                self.dockwidget = SpeckleQGISv3Dialog(
+                    parent=None, basic_binding=self.basic_binding
+                )
                 self.dockwidget.runSetup(self)
 
             # show the dockwidget
@@ -810,6 +814,7 @@ class SpeckleQGISv3:
     def onReceive(self):
         """Handles action when the Receive button is pressed"""
         # print("Receive")
+        return
 
         try:
             if not self.dockwidget:
@@ -1063,6 +1068,7 @@ class SpeckleQGISv3:
         # print("populateSelectedLayerDropdown")
         from speckle.utils.project_vars import set_project_layer_selection
 
+        return
         layers = getSelectedLayers(self)
         current_layers = []
         for layer in layers:
@@ -1070,29 +1076,6 @@ class SpeckleQGISv3:
         self.dataStorage.current_layers = current_layers
         self.dockwidget.populateSelectedLayerDropdown(self)
         set_project_layer_selection(self)
-
-    def onStreamAddButtonClicked(self):
-        try:
-            self.add_stream_modal = AddStreamModalDialog(None)
-            self.add_stream_modal.dataStorage = self.dataStorage
-            self.add_stream_modal.connect()
-            # self.add_stream_modal.onAccountSelected(0)
-            self.add_stream_modal.handleStreamAdd.connect(self.handleStreamAdd)
-            # self.add_stream_modal.getAllStreams()
-            self.add_stream_modal.show()
-        except Exception as e:
-            logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
-            return
-
-    def onStreamCreateClicked(self):
-        try:
-            self.create_stream_modal = CreateStreamModalDialog(None)
-            self.create_stream_modal.handleStreamCreate.connect(self.handleStreamCreate)
-            # self.create_stream_modal.handleCancelStreamCreate.connect(lambda: self.dockwidget.populateProjectStreams(self))
-            self.create_stream_modal.show()
-        except Exception as e:
-            logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
-            return
 
     def handleStreamCreate(self, account, str_name, description, is_public):
         try:
@@ -1138,17 +1121,7 @@ class SpeckleQGISv3:
                 return
             else:
                 sw = StreamWrapper(account.serverInfo.url + "/streams/" + str_id)
-                self.handleStreamAdd((sw, None, None))
             return
-        except Exception as e:
-            logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
-            return
-
-    def onBranchCreateClicked(self):
-        try:
-            self.create_stream_modal = CreateBranchModalDialog(None)
-            self.create_stream_modal.handleBranchCreate.connect(self.handleBranchCreate)
-            self.create_stream_modal.show()
         except Exception as e:
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
             return
@@ -1208,60 +1181,6 @@ class SpeckleQGISv3:
             )  # will be ignored if branch name is not in the list
 
             return
-        except Exception as e:
-            logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
-            return
-
-    def handleStreamAdd(self, objectPacked: Tuple):
-        try:
-            # print("___handleStreamAdd")
-            from speckle.utils.project_vars import set_project_streams
-
-            sw, branch, commit = objectPacked
-            # print(sw)
-            # print(branch)
-            # print(commit)
-            streamExists = 0
-            index = 0
-
-            self.dataStorage.check_for_accounts()
-            stream = sw.get_client().stream.get(
-                id=sw.stream_id, branch_limit=100, commit_limit=100
-            )
-            # stream = tryGetStream(sw, self.dataStorage, False, self.dockwidget)
-            # print(stream)
-
-            if stream is not None and branch in stream.branches.items:
-                self.active_branch = branch
-                self.active_commit = commit
-            else:
-                self.active_branch = None
-                self.active_commit = None
-
-            # try: print(f"ACTIVE BRANCH NAME: {self.active_branch.name}")
-            # except: print("ACTIVE BRANCH IS NONE")
-            for st in self.current_streams:
-                # if isinstance(st[1], SpeckleException) or isinstance(stream, SpeckleException): pass
-                if isinstance(stream, Stream) and st[0].stream_id == stream.id:
-                    streamExists = 1
-                    break
-                index += 1
-        except SpeckleException as e:
-            logToUser(e.message, level=1, plugin=self.dockwidget)
-            stream = None
-
-        try:
-            if streamExists == 0:
-                self.current_streams.insert(0, (sw, stream))
-            else:
-                del self.current_streams[index]
-                self.current_streams.insert(0, (sw, stream))
-            try:
-                self.add_stream_modal.handleStreamAdd.disconnect(self.handleStreamAdd)
-            except:
-                pass
-            # set_project_streams(self)
-            self.dockwidget.populateProjectStreams(self)
         except Exception as e:
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
             return

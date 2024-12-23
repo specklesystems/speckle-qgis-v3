@@ -15,7 +15,7 @@ from speckle.connectors.ui.models import (
 )
 
 
-class BasicConnectorBinding(IBasicConnectorBinding):
+class QgisBasicConnectorBinding(IBasicConnectorBinding):
     store: DocumentModelStore
     speckle_application: Any  # TODO
 

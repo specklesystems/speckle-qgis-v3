@@ -13,70 +13,38 @@ from speckle.connectors.ui.utils.connector_utils import (
     get_project_search_widget_content,
 )
 
-try:
-    from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
-    from specklepy_qt_ui.qt_ui.LogWidget import LogWidget
-    from speckle.connectors.ui.widgets.utils.logger import logToUser
-    from speckle.connectors.ui.widgets.utils.utils import constructCommitURL
-    from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from speckle.connectors.ui.widgets.utils.global_resources import (
-        COLOR_HIGHLIGHT,
-        SPECKLE_COLOR,
-        SPECKLE_COLOR_LIGHT,
-        ICON_OPEN_WEB,
-        ICON_REPORT,
-        ICON_LOGO,
-        ICON_SEARCH,
-        ICON_DELETE,
-        ICON_DELETE_BLUE,
-        ICON_SEND,
-        ICON_RECEIVE,
-        ICON_SEND_BLACK,
-        ICON_RECEIVE_BLACK,
-        ICON_SEND_BLUE,
-        ICON_RECEIVE_BLUE,
-        COLOR,
-        BACKGR_COLOR,
-        BACKGR_COLOR_LIGHT,
-        ICON_XXL,
-        ICON_RASTER,
-        ICON_POLYGON,
-        ICON_LINE,
-        ICON_POINT,
-        ICON_GENERIC,
-    )
-except ModuleNotFoundError:
-    from speckle.specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
-    from speckle.specklepy_qt_ui.qt_ui.LogWidget import LogWidget
-    from speckle.specklepy_qt_ui.qt_ui.utils.logger import logToUser
-    from speckle.specklepy_qt_ui.qt_ui.utils.utils import constructCommitURL
-    from speckle.specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from speckle.specklepy_qt_ui.qt_ui.utils.global_resources import (
-        COLOR_HIGHLIGHT,
-        SPECKLE_COLOR,
-        SPECKLE_COLOR_LIGHT,
-        ICON_OPEN_WEB,
-        ICON_REPORT,
-        ICON_LOGO,
-        ICON_SEARCH,
-        ICON_DELETE,
-        ICON_DELETE_BLUE,
-        ICON_SEND,
-        ICON_RECEIVE,
-        ICON_SEND_BLACK,
-        ICON_RECEIVE_BLACK,
-        ICON_SEND_BLUE,
-        ICON_RECEIVE_BLUE,
-        COLOR,
-        BACKGR_COLOR,
-        BACKGR_COLOR_LIGHT,
-        ICON_XXL,
-        ICON_RASTER,
-        ICON_POLYGON,
-        ICON_LINE,
-        ICON_POINT,
-        ICON_GENERIC,
-    )
+from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
+from specklepy_qt_ui.qt_ui.LogWidget import LogWidget
+from speckle.connectors.ui.widgets.utils.logger import logToUser
+from speckle.connectors.ui.widgets.utils.utils import constructCommitURL
+from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
+from speckle.connectors.ui.widgets.utils.global_resources import (
+    COLOR_HIGHLIGHT,
+    SPECKLE_COLOR,
+    SPECKLE_COLOR_LIGHT,
+    ICON_OPEN_WEB,
+    ICON_REPORT,
+    ICON_LOGO,
+    ICON_SEARCH,
+    ICON_DELETE,
+    ICON_DELETE_BLUE,
+    ICON_SEND,
+    ICON_RECEIVE,
+    ICON_SEND_BLACK,
+    ICON_RECEIVE_BLACK,
+    ICON_SEND_BLUE,
+    ICON_RECEIVE_BLUE,
+    COLOR,
+    BACKGR_COLOR,
+    BACKGR_COLOR_LIGHT,
+    ICON_XXL,
+    ICON_RASTER,
+    ICON_POLYGON,
+    ICON_LINE,
+    ICON_POINT,
+    ICON_GENERIC,
+)
+
 
 from specklepy.logging.exceptions import SpeckleException, GraphQLException
 from specklepy.logging import metrics
@@ -504,7 +472,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.setMapping.clicked.connect(self.showMappingDialog)
             self.reportBtn.clicked.connect(self.msgLog.showReport)
 
-            self.streams_add_button.clicked.connect(plugin.onStreamAddButtonClicked)
             self.commit_web_view.clicked.connect(
                 lambda: plugin.openUrl(
                     constructCommitURL(
@@ -928,7 +895,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
                 len(plugin.current_streams) > 0 and index == len(plugin.current_streams)
             ):
                 self.populateProjectStreams(plugin)
-                plugin.onStreamCreateClicked()
                 return
             if len(plugin.current_streams) == 0:
                 return

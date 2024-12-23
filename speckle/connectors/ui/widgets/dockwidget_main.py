@@ -5,6 +5,7 @@ import inspect
 import os
 import threading
 from plugin_utils.helpers import string_diff
+from speckle.connectors.ui.bindings import IBasicConnectorBinding
 from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
 from speckle.connectors.ui.widgets.widget_no_model_cards import NoModelCardsWidget
@@ -13,68 +14,37 @@ from speckle.connectors.ui.utils.connector_utils import (
     get_project_search_widget_content,
 )
 
-try:
-    from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
-    from speckle.connectors.ui.widgets.utils.logger import logToUser
-    from speckle.connectors.ui.widgets.utils.utils import constructCommitURL
-    from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from speckle.connectors.ui.widgets.utils.global_resources import (
-        COLOR_HIGHLIGHT,
-        SPECKLE_COLOR,
-        LABEL_HEIGHT,
-        ICON_OPEN_WEB,
-        ICON_REPORT,
-        ICON_LOGO,
-        ICON_SEARCH,
-        ICON_DELETE,
-        ICON_DELETE_BLUE,
-        ICON_SEND,
-        ICON_RECEIVE,
-        ICON_SEND_BLACK,
-        ICON_RECEIVE_BLACK,
-        ICON_SEND_BLUE,
-        ICON_RECEIVE_BLUE,
-        COLOR,
-        BACKGR_COLOR,
-        BACKGR_COLOR_LIGHT,
-        ICON_XXL,
-        ICON_RASTER,
-        ICON_POLYGON,
-        ICON_LINE,
-        ICON_POINT,
-        ICON_GENERIC,
-    )
-except ModuleNotFoundError:
-    from speckle.specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
-    from speckle.specklepy_qt_ui.qt_ui.utils.logger import logToUser
-    from speckle.specklepy_qt_ui.qt_ui.utils.utils import constructCommitURL
-    from speckle.specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from speckle.specklepy_qt_ui.qt_ui.utils.global_resources import (
-        COLOR_HIGHLIGHT,
-        SPECKLE_COLOR,
-        SPECKLE_COLOR_LIGHT,
-        ICON_OPEN_WEB,
-        ICON_REPORT,
-        ICON_LOGO,
-        ICON_SEARCH,
-        ICON_DELETE,
-        ICON_DELETE_BLUE,
-        ICON_SEND,
-        ICON_RECEIVE,
-        ICON_SEND_BLACK,
-        ICON_RECEIVE_BLACK,
-        ICON_SEND_BLUE,
-        ICON_RECEIVE_BLUE,
-        COLOR,
-        BACKGR_COLOR,
-        BACKGR_COLOR_LIGHT,
-        ICON_XXL,
-        ICON_RASTER,
-        ICON_POLYGON,
-        ICON_LINE,
-        ICON_POINT,
-        ICON_GENERIC,
-    )
+from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
+from speckle.connectors.ui.widgets.utils.logger import logToUser
+from speckle.connectors.ui.widgets.utils.utils import constructCommitURL
+from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
+from speckle.connectors.ui.widgets.utils.global_resources import (
+    COLOR_HIGHLIGHT,
+    SPECKLE_COLOR,
+    LABEL_HEIGHT,
+    ICON_OPEN_WEB,
+    ICON_REPORT,
+    ICON_LOGO,
+    ICON_SEARCH,
+    ICON_DELETE,
+    ICON_DELETE_BLUE,
+    ICON_SEND,
+    ICON_RECEIVE,
+    ICON_SEND_BLACK,
+    ICON_RECEIVE_BLACK,
+    ICON_SEND_BLUE,
+    ICON_RECEIVE_BLUE,
+    COLOR,
+    BACKGR_COLOR,
+    BACKGR_COLOR_LIGHT,
+    ICON_XXL,
+    ICON_RASTER,
+    ICON_POLYGON,
+    ICON_LINE,
+    ICON_POINT,
+    ICON_GENERIC,
+)
+
 
 from specklepy.logging.exceptions import SpeckleException, GraphQLException
 from specklepy.logging import metrics
@@ -84,7 +54,6 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap, QCursor
 from PyQt5.QtWidgets import QCheckBox, QListWidgetItem, QHBoxLayout, QWidget
 from PyQt5 import QtCore
-from PyQt5.QtCore import pyqtSignal
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -94,7 +63,8 @@ FORM_CLASS, _ = uic.loadUiType(
 
 
 class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
-    closingPlugin = pyqtSignal()
+    basic_binding: IBasicConnectorBinding
+
     streamList: QtWidgets.QComboBox
     sendModeButton: QtWidgets.QPushButton
     receiveModeButton: QtWidgets.QPushButton
@@ -116,16 +86,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     widget_project_search: ProjectSearchWidget = None
     widget_model_search: ModelSearchWidget = None
 
-    signal_1 = pyqtSignal(object)
-    signal_2 = pyqtSignal(object)
-    signal_3 = pyqtSignal(object)
-    signal_4 = pyqtSignal(object)
-    signal_5 = pyqtSignal(object)
-    signal_6 = pyqtSignal(object)
-    signal_remove_btn_url = pyqtSignal(str)
-    signal_cancel_operation = pyqtSignal()
-
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
         super(SpeckleQGISv3Dialog, self).__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.
@@ -134,6 +95,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.basic_binding = basic_binding
         self.runAllSetup()
 
     def runAllSetup(self):
@@ -458,7 +420,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         try:
             self.setMapping.clicked.connect(self.showMappingDialog)
 
-            self.streams_add_button.clicked.connect(plugin.onStreamAddButtonClicked)
             self.commit_web_view.clicked.connect(
                 lambda: plugin.openUrl(
                     constructCommitURL(
@@ -865,7 +826,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
                 len(plugin.current_streams) > 0 and index == len(plugin.current_streams)
             ):
                 self.populateProjectStreams(plugin)
-                plugin.onStreamCreateClicked()
                 return
             if len(plugin.current_streams) == 0:
                 return
@@ -977,7 +937,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
                 return
             if branchName == "Create New Branch":
                 self.streamBranchDropdown.setCurrentText("main")
-                plugin.onBranchCreateClicked()
                 return
             branch = None
 

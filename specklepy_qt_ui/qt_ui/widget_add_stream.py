@@ -3,16 +3,13 @@ import os
 from typing import List, Union
 import urllib.parse
 
-try:
-    from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from speckle.connectors.ui.widgets.utils.logger import logToUser
-    from speckle.connectors.ui.widgets.utils.utils import constructCommitURLfromServerCommit
-    from speckle.connectors.ui.widgets.utils.logger import displayUserMsg
-except ModuleNotFoundError: 
-    from speckle.specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from speckle.specklepy_qt_ui.qt_ui.utils.logger import logToUser
-    from speckle.specklepy_qt_ui.qt_ui.utils.utils import constructCommitURLfromServerCommit
-    from speckle.specklepy_qt_ui.qt_ui.utils.logger import displayUserMsg
+from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
+from speckle.connectors.ui.widgets.utils.logger import logToUser
+from speckle.connectors.ui.widgets.utils.utils import (
+    constructCommitURLfromServerCommit,
+)
+from speckle.connectors.ui.widgets.utils.logger import displayUserMsg
+
 
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtCore import pyqtSignal
@@ -45,7 +42,6 @@ class AddStreamModalDialog(QtWidgets.QWidget, FORM_CLASS):
     dataStorage: DataStorage = None
 
     # Events
-    handleStreamAdd = pyqtSignal(object)
 
     def __init__(self, parent=None, speckle_client: SpeckleClient = None):
         super(AddStreamModalDialog, self).__init__(
@@ -265,10 +261,6 @@ class AddStreamModalDialog(QtWidgets.QWidget, FORM_CLASS):
                     except Exception as e:
                         logToUser(e, level=2, func=inspect.stack()[0][3])
 
-                    # acc = sw.get_account() #get_local_accounts()[self.accounts_dropdown.currentIndex()]
-                    self.handleStreamAdd.emit(
-                        (sw, self.branch_result, self.commit_result)
-                    )  # StreamWrapper(f"{acc.serverInfo.url}/streams/{stream.id}?u={acc.userInfo.id}"))
                     self.close()
                 except Exception as e:
                     logToUser(
