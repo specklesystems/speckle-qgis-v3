@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-from specklepy_qt_ui.qt_ui_v3.utils.exceptions_utils import ModelNotFound
+from speckle.connectors.UI.utils.exceptions_utils import ModelNotFound
 
 
 @dataclass
@@ -70,8 +70,12 @@ class DocumentInfo:
 
 
 class DocumentModelStore:
-    models: List[ModelCard] = None
-    is_document_init: bool = None
+    models: List[ModelCard]
+    is_document_init: bool
+
+    def __init__(self, saved_model_cards: str):
+        self.models = []
+        self.is_document_init = False
 
     def document_changed(self):
         """Placeholder for connector to define."""

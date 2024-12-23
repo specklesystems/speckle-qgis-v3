@@ -1,5 +1,5 @@
 try:
-    from specklepy_qt_ui.qt_ui.utils.utils import splitTextIntoLines
+    from speckle.connectors.UI.widgets.utils.utils import splitTextIntoLines
 except ModuleNotFoundError:
     from speckle.specklepy_qt_ui.qt_ui.utils.utils import splitTextIntoLines
 

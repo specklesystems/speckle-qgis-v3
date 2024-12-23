@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, Union, Any
 import webbrowser
 
 try:
-    from specklepy_qt_ui.qt_ui.utils.logger import logToUser
+    from speckle.connectors.UI.widgets.utils.logger import logToUser
 except ModuleNotFoundError:
     from speckle.specklepy_qt_ui.qt_ui.utils.logger import logToUser
 

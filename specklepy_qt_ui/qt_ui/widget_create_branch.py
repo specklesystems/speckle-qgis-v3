@@ -3,7 +3,7 @@ import os
 from typing import List, Tuple, Union
 
 try:
-    from specklepy_qt_ui.qt_ui.utils.logger import logToUser
+    from speckle.connectors.UI.widgets.utils.logger import logToUser
 except ModuleNotFoundError: 
     from speckle.specklepy_qt_ui.qt_ui.utils.logger import logToUser
 

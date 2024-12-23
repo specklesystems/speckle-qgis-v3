@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QHBoxLayout, QLabel
 
-from specklepy_qt_ui.qt_ui.utils.global_resources import (
+from speckle.connectors.UI.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     BACKGR_COLOR_WHITE,
     BACKGR_COLOR_LIGHT_GREY,

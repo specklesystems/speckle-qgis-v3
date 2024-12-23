@@ -4,8 +4,8 @@ from typing import List, Tuple, Union
 
 try:
     from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from specklepy_qt_ui.qt_ui.utils.global_resources import COLOR
-    from specklepy_qt_ui.qt_ui.utils.utils import SYMBOL
+    from speckle.connectors.UI.widgets.utils.global_resources import COLOR
+    from speckle.connectors.UI.widgets.utils.utils import SYMBOL
 except ModuleNotFoundError:
     from speckle.specklepy_qt_ui.qt_ui.DataStorage import DataStorage
     from speckle.specklepy_qt_ui.qt_ui.utils.global_resources import COLOR
