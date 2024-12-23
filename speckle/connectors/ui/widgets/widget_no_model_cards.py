@@ -56,6 +56,11 @@ class NoModelCardsWidget(QWidget):
         boxLayout.addWidget(label)
 
         # add publish / load buttons
+        button_publish = self.create_search_button()
+        boxLayout.addWidget(button_publish)
+
+    def create_search_button(self) -> QPushButton:
+
         button_publish = QPushButton("Publish")
         button_publish.clicked.connect(
             lambda: self.parentWidget.open_select_projects_widget()
@@ -67,4 +72,4 @@ class NoModelCardsWidget(QWidget):
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"
         )
-        boxLayout.addWidget(button_publish)
+        return button_publish

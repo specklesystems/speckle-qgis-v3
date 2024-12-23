@@ -18,9 +18,10 @@ from speckle.connectors.ui.utils.utils import (
     time_ago,
 )
 from PyQt5.QtCore import QObject, pyqtSignal
+from specklepy.logging.exceptions import SpeckleException
 
 
-class UiSearchContent(QObject):
+class UiSearchUtils(QObject):
 
     cursor_projects: Any = None
     cursor_models: Any = None
@@ -29,18 +30,19 @@ class UiSearchContent(QObject):
 
     def __init__(self):
         super().__init__()
-
-    def get_project_search_widget_content(self) -> List[List]:
-
         accounts: List[Account] = get_accounts()
         if len(accounts) == 0:  # TODO handle no local accounts
-            return
+            raise SpeckleException(
+                "Add accounts via Speckle Desktop Manager in order to start"
+            )
 
         self.speckle_client: SpeckleClient = get_authenticate_client_for_account(
             accounts[0]
         )
-        content_list = self.get_new_projects_content()
 
+    def get_project_search_widget_content(self) -> List[List]:
+
+        content_list = self.get_new_projects_content()
         return content_list
 
     def get_new_projects_content(self):
@@ -56,7 +58,9 @@ class UiSearchContent(QObject):
 
             # make sure to pass the actual project, not a reference to a variable
             project_content = [
-                lambda project=project: self.get_new_models_content(project),
+                lambda project=project: self.get_new_models_content(
+                    project
+                ),  # will return list if called
                 project.name,
                 project.role.split(":")[-1],
                 f"updated {time_ago(project.updatedAt)}",
@@ -78,11 +82,9 @@ class UiSearchContent(QObject):
 
         for model in models_first:
 
-            # make sure to pass the actual model, not a reference to a variable
+            # if a receive workflow: get_version_search_widget_content(...)
             model_content = [
-                lambda model=model: self.add_send_model_card(
-                    model
-                ),  # if a receive workflow: get_version_search_widget_content(...)
+                lambda: self.add_send_model_card(project, model),
                 model.name,
                 f"updated {time_ago(model.updatedAt)}",
                 project,
@@ -91,18 +93,20 @@ class UiSearchContent(QObject):
 
         return content_list
 
-    def add_send_model_card(self, *args):
+    def add_send_model_card(self, project: Project, model: Model):
 
         # leave "search widgets" area and send signal to the main dockwidget
         # dockwidget will kill the search widgets and display a modelCards widget
+        server_url = self.speckle_client.account.serverInfo.url
+
         self.add_send_card_signal.emit(
             SenderModelCard(
-                model_card_id=None,
-                model_id=None,
-                project_id=None,
+                model_card_id=f"Send_{server_url}_{project.id}_{model.id}",
+                model_id=model.id,
+                project_id=project.id,
                 workspace_id=None,
-                account_id=None,
-                server_url=None,
+                account_id=self.speckle_client.account.id,
+                server_url=server_url,
                 settings=None,
             )
         )

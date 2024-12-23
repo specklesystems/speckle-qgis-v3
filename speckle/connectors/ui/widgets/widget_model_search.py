@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 
 
-from speckle.connectors.ui.utils.connector_utils import UiSearchContent
+from speckle.connectors.ui.utils.search_widget_utils import UiSearchUtils
 from speckle.connectors.ui.widgets.background import BackgroundWidget
 from speckle.connectors.ui.widgets.widget_cards_list_temporary import (
     CardsListTemporaryWidget,
@@ -13,7 +13,7 @@ from specklepy.core.api.models.current import Project
 
 class ModelSearchWidget(CardsListTemporaryWidget):
 
-    ui_search_content: UiSearchContent = None
+    ui_search_content: UiSearchUtils = None
     project: Project = None
 
     def __init__(
@@ -22,7 +22,7 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         parent=None,
         label_text: str = "2/3 Select model",
         cards_content_list: List[List] = None,
-        ui_search_content=None
+        ui_search_content: UiSearchUtils = None
     ):
         self.parent = parent
         self.ui_search_content = ui_search_content
@@ -33,9 +33,9 @@ class ModelSearchWidget(CardsListTemporaryWidget):
 
         # extract project from the first card
         for item in cards_content_list:
-            print(item)
             if isinstance(item[-1], Project):
                 self.project = cards_content_list[0][-1]
+                break
 
         self.load_more = lambda: self.add_models()
 
@@ -45,7 +45,6 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         self.background.show()
 
     def add_models(self):
-
         new_models_cards = self.ui_search_content.get_new_models_content(self.project)
 
         if len(new_models_cards) == 0:

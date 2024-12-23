@@ -6,6 +6,7 @@ import os
 import threading
 from plugin_utils.helpers import string_diff
 from speckle.connectors.ui.bindings import IBasicConnectorBinding
+from speckle.connectors.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
 from speckle.connectors.ui.widgets.widget_no_model_cards import NoModelCardsWidget
@@ -82,6 +83,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     widget_no_model_cards: NoModelCardsWidget = None
     widget_project_search: ProjectSearchWidget = None
     widget_model_search: ModelSearchWidget = None
+    widget_model_cards: ModelCardsWidget = None
 
     def __init__(self, parent=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
@@ -242,17 +244,19 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         elif self.widget_model_search == widget:
             self.kill_widget_model_search()
 
-    def open_model_cards_widget(self, model_card):
+    def create_model_cards_widget(self, first_model_card):
         self.kill_process_widgets()
-        print("new card")
-        print(model_card)
-        pass
+        self.widget_model_cards = ModelCardsWidget(
+            parent=self, cards_list=[first_model_card]
+        )
+        # add widgets to the layout
+        self.layout().addWidget(self.widget_model_cards)
 
     def open_select_projects_widget(self):
 
         self.widget_project_search = ProjectSearchWidget(parent=self)
         self.widget_project_search.ui_search_content.add_send_card_signal.connect(
-            self.open_model_cards_widget
+            self.create_model_cards_widget
         )
 
         # add widgets to the layout

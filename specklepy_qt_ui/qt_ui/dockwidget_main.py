@@ -9,7 +9,7 @@ from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
 from speckle.connectors.ui.widgets.widget_no_model_cards import NoModelCardsWidget
 from speckle.connectors.ui.widgets.widget_project_search import ProjectSearchWidget
-from speckle.connectors.ui.utils.connector_utils import (
+from speckle.connectors.ui.utils.search_widget_utils import (
     get_project_search_widget_content,
 )
 

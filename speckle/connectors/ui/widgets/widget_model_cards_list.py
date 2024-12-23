@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QStackedLayout, QLabel, QPushButton
 
+from speckle.connectors.ui.models import ModelCard
 from speckle.connectors.ui.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
@@ -12,10 +13,12 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT_GREY2,
 )
 from speckle.connectors.ui.widgets.background import BackgroundWidget
+from speckle.connectors.ui.utils.search_widget_utils import UiSearchUtils
 from speckle.connectors.ui.widgets.widget_card_from_list import CardInListWidget
+from speckle.connectors.ui.widgets.widget_model_card import ModelCardWidget
 
 
-class CardsListTemporaryWidget(QWidget):
+class ModelCardsWidget(QWidget):
 
     background: BackgroundWidget = None
     cards_list_widget: QWidget = None  # needed here to resize child elements
@@ -26,10 +29,9 @@ class CardsListTemporaryWidget(QWidget):
         self,
         *,
         parent=None,
-        label_text: str = "Label",
-        cards_content_list: List[List] = None,
+        cards_list: List[ModelCard] = None,
     ):
-        super(CardsListTemporaryWidget, self).__init__(parent)
+        super(ModelCardsWidget, self).__init__(parent)
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
 
         # align with the parent widget size
@@ -43,9 +45,7 @@ class CardsListTemporaryWidget(QWidget):
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
 
-        cards_selection_widget = self.create_cards_selection_widget(
-            label_text, cards_content_list
-        )
+        cards_selection_widget = self.create_cards_selection_widget(cards_list)
 
         content = QWidget()
         content.layout = QVBoxLayout(self)
@@ -61,22 +61,22 @@ class CardsListTemporaryWidget(QWidget):
         self.layout.addWidget(content)
 
     def add_background(self):
-        self.background = BackgroundWidget(parent=self, transparent=False)
+        self.background = BackgroundWidget(
+            parent=self, transparent=False, background_color=BACKGR_COLOR_LIGHT_GREY2
+        )
         self.background.show()
 
     def create_cards_selection_widget(
-        self, label_text: str, cards_content_list: List[List]
+        self, cards_content_list: List[ModelCard]
     ) -> QWidget:
 
         # create a container
         scroll_container = self.create_container()
 
         # create scroll area with this widget
-        label = self.create_widget_label(label_text)
         scroll_area = self.create_scroll_area(cards_content_list)
 
         # add label and scroll area to the container
-        scroll_container.layout().addWidget(label)
         scroll_container.layout().addWidget(scroll_area)
 
         return scroll_container
@@ -106,7 +106,7 @@ class CardsListTemporaryWidget(QWidget):
         )
         return label
 
-    def create_scroll_area(self, cards_content_list: List[List]):
+    def create_scroll_area(self, cards_content_list: List[ModelCard]):
 
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")
@@ -122,37 +122,7 @@ class CardsListTemporaryWidget(QWidget):
         """Overwride in the inheriting widgets."""
         return
 
-    def create_load_more_btn(self):
-
-        load_more_btn = QPushButton()
-        load_more_btn.clicked.connect(lambda: self.load_more())
-        self.load_more_btn = load_more_btn
-        self.style_load_btn()
-
-    def style_load_btn(self, active: bool = True, text="Load more"):
-
-        if active:
-            self.load_more_btn.setStyleSheet(
-                "QWidget {"
-                + f"color:black;border-width:1px;border-color:rgba(100,100,100,1);border-radius: 5px;margin-top:0px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR_WHITE}"
-                + "} QWidget:hover { "
-                + f"{BACKGR_COLOR_LIGHT_GREY2};"
-                + " }"
-            )
-            self.load_more_btn.setText(text)
-            self.load_more_btn.setEnabled(True)
-        else:
-            self.load_more_btn.setStyleSheet(
-                "QWidget {"
-                + f"color:grey;border-width:1px;border-color:rgba(100,100,100,1);border-radius: 5px;margin-top:0px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR_WHITE}"
-                + "} QWidget:hover { "
-                + f"{BACKGR_COLOR_LIGHT_GREY2};"
-                + " }"
-            )
-            self.load_more_btn.setText(text)
-            self.load_more_btn.setEnabled(False)
-
-    def create_area_with_cards(self, cards_content_list: List[List]) -> QWidget:
+    def create_area_with_cards(self, cards_content_list: List[ModelCard]) -> QWidget:
 
         self.cards_list_widget = QWidget()
         self.cards_list_widget.setStyleSheet(
@@ -163,15 +133,17 @@ class CardsListTemporaryWidget(QWidget):
         # in case the input argument was missing or None, don't create any cards
         if isinstance(cards_content_list, list):
             for content in cards_content_list:
-                project_card = CardInListWidget(content)
+                label = self.create_widget_label(content.project_id)
+                project_card = ModelCardWidget(content)
+
+                self.cards_list_widget.layout().addWidget(label)
                 self.cards_list_widget.layout().addWidget(project_card)
 
-        self.create_load_more_btn()
         self.cards_list_widget.layout().addWidget(self.load_more_btn)
 
         return self.cards_list_widget
 
-    def add_more_cards(self, new_cards_content_list: list):
+    def add_new_card(self, new_cards_content_list: list):
 
         self.cards_list_widget.setParent(None)
 
@@ -215,17 +187,6 @@ class CardsListTemporaryWidget(QWidget):
     def mouseReleaseEvent(self, event):
         # print("Mouse Release Event")
         return
-        self.destroy()
 
     def destroy(self):
         return
-        # remove all buttons
-        for i in reversed(range(self.layout.count())):
-            self.layout.itemAt(i).widget().setParent(None)
-
-        # delete reference from the parent widget
-        for i in reversed(range(self.parentWidget.layout().count())):
-            current_widget = self.parentWidget.layout().itemAt(i).widget()
-            if current_widget is type(self):
-                current_widget.setParent(None)
-        self.parentWidget.widget_project_search = None

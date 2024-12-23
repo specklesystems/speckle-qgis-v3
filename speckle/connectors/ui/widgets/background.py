@@ -14,7 +14,7 @@ class BackgroundWidget(QWidget):
     message_card: QWidget
     send_data = pyqtSignal(object)
 
-    def __init__(self, parent=None, transparent=False):
+    def __init__(self, parent=None, transparent=False, background_color=None):
         super(BackgroundWidget, self).__init__(parent)
         self.parentWidget = parent
 
@@ -26,6 +26,10 @@ class BackgroundWidget(QWidget):
             )
         else:  # more overlaying widgets
             self.setStyleSheet(f"margin-top:{LABEL_HEIGHT};{BACKGR_COLOR_TRANSPARENT}")
+
+        # if custom color, overwrite
+        if isinstance(background_color, str):
+            self.setStyleSheet(f"margin-top:{LABEL_HEIGHT};{background_color}")
 
     def mouseReleaseEvent(self, event):
         self.setGeometry(0, 0, 0, 0)
