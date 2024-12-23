@@ -1,8 +1,7 @@
 from abc import ABC
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-from PyQt5.QtCore import pyqtSignal
-from specklepy_qt_ui.server_utils.exceptions_utils import ModelNotFound
+from specklepy_qt_ui.qt_ui_v3.utils.exceptions_utils import ModelNotFound
 
 
 @dataclass

@@ -8,7 +8,7 @@ from specklepy.core.api.models.current import (
     ResourceCollection,
 )
 from specklepy.core.api.resources.current.project_resource import ProjectResource
-from specklepy_qt_ui.server_utils.utils import (
+from specklepy_qt_ui.qt_ui_v3.utils.utils import (
     clear_models_cursor,
     clear_projects_cursor,
     get_accounts,
@@ -82,7 +82,7 @@ def get_model_search_widget_content(
     return content_list
 
 
-def add_send_model_card():
+def add_send_model_card(*args):
     pass
 
 

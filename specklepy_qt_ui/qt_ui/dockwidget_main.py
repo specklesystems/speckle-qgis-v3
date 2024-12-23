@@ -5,11 +5,11 @@ import inspect
 import os
 import threading
 from plugin_utils.helpers import string_diff
-from specklepy_qt_ui.qt_ui_v3.widget_model_search import ModelSearchWidget
-from specklepy_qt_ui.qt_ui_v3.widget_no_document import NoDocumentWidget
-from specklepy_qt_ui.qt_ui_v3.widget_no_model_cards import NoModelCardsWidget
-from specklepy_qt_ui.qt_ui_v3.widget_project_search import ProjectSearchWidget
-from specklepy_qt_ui.server_utils.connector_utils import (
+from specklepy_qt_ui.qt_ui_v3.widgets.widget_model_search import ModelSearchWidget
+from specklepy_qt_ui.qt_ui_v3.widgets.widget_no_document import NoDocumentWidget
+from specklepy_qt_ui.qt_ui_v3.widgets.widget_no_model_cards import NoModelCardsWidget
+from specklepy_qt_ui.qt_ui_v3.widgets.widget_project_search import ProjectSearchWidget
+from specklepy_qt_ui.qt_ui_v3.utils.connector_utils import (
     get_project_search_widget_content,
 )
 

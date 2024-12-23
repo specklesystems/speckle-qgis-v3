@@ -3,8 +3,8 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 
 
-from specklepy_qt_ui.qt_ui_v3.background import BackgroundWidget
-from specklepy_qt_ui.qt_ui_v3.widget_cards_list_temporary import (
+from specklepy_qt_ui.qt_ui_v3.widgets.background import BackgroundWidget
+from specklepy_qt_ui.qt_ui_v3.widgets.widget_cards_list_temporary import (
     CardsListTemporaryWidget,
 )
 

@@ -15,8 +15,8 @@ from specklepy_qt_ui.qt_ui.utils.global_resources import (
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
 )
-from specklepy_qt_ui.qt_ui_v3.background import BackgroundWidget
-from specklepy_qt_ui.qt_ui_v3.widget_card_from_list import CardInListWidget
+from specklepy_qt_ui.qt_ui_v3.widgets.background import BackgroundWidget
+from specklepy_qt_ui.qt_ui_v3.widgets.widget_card_from_list import CardInListWidget
 
 
 class CardsListTemporaryWidget(QWidget):
