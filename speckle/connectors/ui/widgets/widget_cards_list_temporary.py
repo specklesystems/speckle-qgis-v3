@@ -157,18 +157,21 @@ class CardsListTemporaryWidget(QWidget):
     def add_more_cards(self, new_cards_content_list: list):
 
         self.cards_list_widget.setParent(None)
+
         existing_content = []
         for i in range(self.cards_list_widget.layout().count()):
             widget = self.cards_list_widget.layout().itemAt(i).widget()
             if not isinstance(widget, CardInListWidget):
                 continue
-
             existing_content.append(widget.card_content)
 
         existing_content.extend(new_cards_content_list)
         assigned_cards_list_widget = self.create_area_with_cards(existing_content)
 
         self.scroll_area.setWidget(assigned_cards_list_widget)
+        # scroll down
+        vbar = self.scroll_area.verticalScrollBar()
+        vbar.setValue(vbar.maximum())
 
         return
         # remove load button from layout
