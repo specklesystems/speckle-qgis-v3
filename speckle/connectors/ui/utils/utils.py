@@ -11,7 +11,6 @@ from specklepy.core.api.models.current import (
     ResourceCollection,
 )
 
-QUERY_LIMIT = 25
 QUERY_BATCH_SIZE = 10
 
 
@@ -77,7 +76,7 @@ def get_models_from_client(
     if speckle_client is not None:
         # possible GraphQLException
         results: ProjectWithModels = speckle_client.project.get_with_models(
-            project_id=project.id, models_limit=QUERY_LIMIT, models_cursor=cursor
+            project_id=project.id, models_limit=QUERY_BATCH_SIZE, models_cursor=cursor
         ).models
 
         if not isinstance(results, ResourceCollection):

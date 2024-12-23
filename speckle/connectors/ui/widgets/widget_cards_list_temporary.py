@@ -124,12 +124,12 @@ class CardsListTemporaryWidget(QWidget):
 
     def create_load_more_btn(self):
 
-        load_more_btn = QPushButton("Load more")
+        load_more_btn = QPushButton()
         load_more_btn.clicked.connect(lambda: self.load_more())
         self.load_more_btn = load_more_btn
         self.style_load_btn()
 
-    def style_load_btn(self, active: bool = True):
+    def style_load_btn(self, active: bool = True, text="Load more"):
 
         if active:
             self.load_more_btn.setStyleSheet(
@@ -139,6 +139,8 @@ class CardsListTemporaryWidget(QWidget):
                 + f"{BACKGR_COLOR_LIGHT_GREY2};"
                 + " }"
             )
+            self.load_more_btn.setText(text)
+            self.load_more_btn.setEnabled(True)
         else:
             self.load_more_btn.setStyleSheet(
                 "QWidget {"
@@ -147,6 +149,8 @@ class CardsListTemporaryWidget(QWidget):
                 + f"{BACKGR_COLOR_LIGHT_GREY2};"
                 + " }"
             )
+            self.load_more_btn.setText(text)
+            self.load_more_btn.setEnabled(False)
 
     def create_area_with_cards(self, cards_content_list: List[List]) -> QWidget:
 

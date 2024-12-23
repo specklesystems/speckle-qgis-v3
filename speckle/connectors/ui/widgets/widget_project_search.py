@@ -60,9 +60,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         new_project_cards = self.ui_search_content.get_new_projects_content()
 
         if len(new_project_cards) == 0:
-            self.load_more_btn.setText("No more projects found")
-            self.style_load_btn(active=False)
-            self.load_more_btn.setEnabled(False)
+            self.style_load_btn(active=False, text="No more projects found")
             return
 
         self.modify_card_callback(new_project_cards)

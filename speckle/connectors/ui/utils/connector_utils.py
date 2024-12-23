@@ -1,4 +1,5 @@
 from typing import Any, List, Tuple
+from speckle.connectors.ui.models import SenderModelCard
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
 from specklepy.core.api.models.current import (
@@ -16,7 +17,7 @@ from speckle.connectors.ui.utils.utils import (
     get_projects_from_client,
     time_ago,
 )
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class UiSearchContent(QObject):
@@ -24,6 +25,7 @@ class UiSearchContent(QObject):
     cursor_projects: Any = None
     cursor_models: Any = None
     speckle_client: SpeckleClient = None
+    add_send_card_signal = pyqtSignal(SenderModelCard)
 
     def __init__(self):
         super().__init__()
@@ -90,7 +92,20 @@ class UiSearchContent(QObject):
         return content_list
 
     def add_send_model_card(self, *args):
-        pass
+
+        # leave "search widgets" area and send signal to the main dockwidget
+        # dockwidget will kill the search widgets and display a modelCards widget
+        self.add_send_card_signal.emit(
+            SenderModelCard(
+                model_card_id=None,
+                model_id=None,
+                project_id=None,
+                workspace_id=None,
+                account_id=None,
+                server_url=None,
+                settings=None,
+            )
+        )
 
     def get_version_search_widget_content(self, project: ProjectResource) -> List[List]:
         """Add search cards for models (only valid for Receive workflow)."""

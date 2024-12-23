@@ -52,6 +52,27 @@ class ModelCard(ABC):
 class SenderModelCard(ModelCard):
     send_filter: Optional[ISendFilter] = None
 
+    def __init__(
+        self,
+        model_card_id=None,
+        model_id=None,
+        project_id=None,
+        workspace_id=None,
+        account_id=None,
+        server_url=None,
+        settings=None,
+        send_filter=None,
+    ):
+
+        self.model_card_id = model_card_id
+        self.model_id = model_id
+        self.project_id = project_id
+        self.workspace_id = workspace_id
+        self.account_id = account_id
+        self.server_url = server_url
+        self.settings = settings
+        self.send_filter = send_filter
+
     def get_send_info(self, host_application: str) -> Optional[SendInfo]:
         return SendInfo(
             self.account_id,
