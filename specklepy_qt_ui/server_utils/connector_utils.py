@@ -1,18 +1,28 @@
 from typing import List, Tuple
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
-from specklepy.core.api.models.current import Model, Project, ProjectWithModels
+from specklepy.core.api.models.current import (
+    Model,
+    Project,
+    ProjectWithModels,
+    ResourceCollection,
+)
 from specklepy.core.api.resources.current.project_resource import ProjectResource
 from specklepy_qt_ui.server_utils.utils import (
+    clear_models_cursor,
+    clear_projects_cursor,
     get_accounts,
     get_authenticate_client_for_account,
-    get_first_models_from_client,
-    get_first_projects_from_client,
+    get_models_from_client,
+    get_projects_from_client,
     time_ago,
 )
 
 
 def get_project_search_widget_content() -> List[List]:
+
+    # clear cursor to start a new search
+    clear_projects_cursor()
 
     content_list: List[List] = []
 
@@ -23,7 +33,10 @@ def get_project_search_widget_content() -> List[List]:
         return
 
     speckle_client: SpeckleClient = get_authenticate_client_for_account(accounts[0])
-    projects_first: List[Project] = get_first_projects_from_client(speckle_client).items
+    projects_resource_collection: ResourceCollection[Project] = (
+        get_projects_from_client(speckle_client)
+    )
+    projects_first: List[Project] = projects_resource_collection.items
 
     for project in projects_first:
 
@@ -45,18 +58,22 @@ def get_model_search_widget_content(
     speckle_client: SpeckleClient, project: Project
 ) -> List[List]:
 
+    # clear cursor to start a new search
+    clear_models_cursor()
+
     content_list: List[List] = []
-    models_first: List[Model] = get_first_models_from_client(
+    models_resource_collection: ResourceCollection[Model] = get_models_from_client(
         speckle_client, project
-    ).items
+    )
+    models_first: List[Model] = models_resource_collection.items
 
     for model in models_first:
 
         # make sure to pass the actual model, not a reference to a variable
         model_content = [
-            lambda model=model: get_version_search_widget_content(
+            lambda model=model: add_send_model_card(
                 speckle_client, model
-            ),
+            ),  # if a receive workflow: get_version_search_widget_content(...)
             model.name,
             f"updated {time_ago(model.updatedAt)}",
         ]
@@ -65,8 +82,13 @@ def get_model_search_widget_content(
     return content_list
 
 
+def add_send_model_card():
+    pass
+
+
 def get_version_search_widget_content(
     speckle_client: SpeckleClient, project: ProjectResource
 ) -> List[List]:
+    """Add search cards for models (only valid for Receive workflow)."""
 
-    return []
+    raise NotImplementedError("Receive workflow is not implemented")
