@@ -1,9 +1,5 @@
-from typing import List, Tuple
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget
+from typing import List
 
-
-from speckle.connectors.ui.widgets.background import BackgroundWidget
 from speckle.connectors.ui.widgets.widget_cards_list_temporary import (
     CardsListTemporaryWidget,
 )
@@ -13,17 +9,42 @@ from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 
 class ProjectSearchWidget(CardsListTemporaryWidget):
 
+    ui_search_content: UiSearchContent = None
+
     def __init__(
         self,
         *,
         parent=None,
         label_text: str = "1/3 Select project",
-        cards_content_list: List[List] = None,
     ):
         self.parent = parent
-        # get content for project cards
-        projects_contents_list = UiSearchContent().get_project_search_widget_content()
 
+        # get content for project cards
+        self.ui_search_content = UiSearchContent()
+        projects_list = self.ui_search_content.get_project_search_widget_content()
+
+        self.modify_card_callback(projects_list)
+
+        super(ProjectSearchWidget, self).__init__(
+            parent=parent,
+            label_text=label_text,
+            cards_content_list=projects_list,
+        )
+
+        self.load_more_btn.clicked.connect(lambda: self.add_projects())
+
+    def overwrite_model_search_callback(self, card_function):
+        # current function returns a content list for models
+        self.parent.widget_model_search = ModelSearchWidget(
+            parent=self.parent,
+            cards_content_list=card_function(),
+        )
+
+        # add widgets to the layout
+        self.parent.layout().addWidget(self.parent.widget_model_search)
+        return self.parent.widget_model_search
+
+    def modify_card_callback(self, projects_contents_list: List):
         # add a function for generating model card widget
         for i, content in enumerate(projects_contents_list):
             callback = content[0]
@@ -33,19 +54,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
             projects_contents_list[i][0] = make_callback(callback)
 
-        super(ProjectSearchWidget, self).__init__(
-            parent=parent,
-            label_text=label_text,
-            cards_content_list=projects_contents_list,
-        )
-
-    def overwrite_model_search_callback(self, card_function):
-        # current function returns a content list for models
-        self.widget_model_search = ModelSearchWidget(
-            parent=self.parent,
-            cards_content_list=card_function(),
-        )
-
-        # add widgets to the layout
-        self.parent.layout().addWidget(self.widget_model_search)
-        return self.widget_model_search
+    def add_projects(self):
+        new_project_cards = self.ui_search_content.get_new_projects_content()
+        self.modify_card_callback(new_project_cards)
+        self.add_more_cards(new_project_cards)

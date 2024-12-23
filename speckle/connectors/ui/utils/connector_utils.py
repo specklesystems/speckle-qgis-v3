@@ -21,13 +21,13 @@ from PyQt5.QtCore import QObject
 
 
 class UiSearchContent(QObject):
-    cursor_projects: Any
-    cursor_models: Any
+
+    cursor_projects: Any = None
+    cursor_models: Any = None
+    speckle_client: SpeckleClient = None
 
     def __init__(self):
         super().__init__()
-        self.cursor_projects = None
-        self.cursor_models = None
 
     def get_project_search_widget_content(self) -> List[List]:
 
@@ -35,16 +35,18 @@ class UiSearchContent(QObject):
         if len(accounts) == 0:  # TODO handle no local accounts
             return
 
-        speckle_client: SpeckleClient = get_authenticate_client_for_account(accounts[0])
-        content_list = self.get_new_projects_content(speckle_client, None)
+        self.speckle_client: SpeckleClient = get_authenticate_client_for_account(
+            accounts[0]
+        )
+        content_list = self.get_new_projects_content()
 
         return content_list
 
-    def get_new_projects_content(self, speckle_client: SpeckleClient, cursor):
+    def get_new_projects_content(self):
 
         content_list: List[List] = []
         projects_resource_collection: ResourceCollection[Project] = (
-            get_projects_from_client(speckle_client, cursor)
+            get_projects_from_client(self.speckle_client, self.cursor_projects)
         )
         projects_batch: List[Project] = projects_resource_collection.items
         self.cursor_projects = projects_resource_collection.cursor
@@ -53,9 +55,7 @@ class UiSearchContent(QObject):
 
             # make sure to pass the actual project, not a reference to a variable
             project_content = [
-                lambda project=project: self.get_model_search_widget_content(
-                    speckle_client, project
-                ),
+                lambda project=project: self.get_model_search_widget_content(project),
                 project.name,
                 project.role.split(":")[-1],
                 f"updated {time_ago(project.updatedAt)}",
@@ -64,12 +64,13 @@ class UiSearchContent(QObject):
         return content_list
 
     def get_model_search_widget_content(
-        self, speckle_client: SpeckleClient, project: Project, cursor=None
+        self,
+        project: Project,
     ) -> List[List]:
 
         content_list: List[List] = []
         models_resource_collection: ResourceCollection[Model] = get_models_from_client(
-            speckle_client, project, cursor
+            self.speckle_client, project, self.cursor_models
         )
         models_first: List[Model] = models_resource_collection.items
         self.cursor_models = models_resource_collection.cursor
@@ -79,7 +80,7 @@ class UiSearchContent(QObject):
             # make sure to pass the actual model, not a reference to a variable
             model_content = [
                 lambda model=model: self.add_send_model_card(
-                    speckle_client, model
+                    model
                 ),  # if a receive workflow: get_version_search_widget_content(...)
                 model.name,
                 f"updated {time_ago(model.updatedAt)}",
@@ -91,9 +92,7 @@ class UiSearchContent(QObject):
     def add_send_model_card(self, *args):
         pass
 
-    def get_version_search_widget_content(
-        self, speckle_client: SpeckleClient, project: ProjectResource
-    ) -> List[List]:
+    def get_version_search_widget_content(self, project: ProjectResource) -> List[List]:
         """Add search cards for models (only valid for Receive workflow)."""
 
         raise NotImplementedError("Receive workflow is not implemented")

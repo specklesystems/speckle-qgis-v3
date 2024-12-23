@@ -156,16 +156,14 @@ class CardsListTemporaryWidget(QWidget):
     def add_more_cards(self, new_cards_content_list: list):
 
         # remove load button from layout
-        button_widget = self.layout.itemAt([self.layout.count() - 1]).widget()
-        button_widget.setParent(None)
+        self.load_more_btn.setParent(None)
 
         for content in new_cards_content_list:
             project_card = CardInListWidget(content)
             self.cards_list_widget.layout().addWidget(project_card)
 
         # return button
-        self.cards_list_widget.layout().addWidget(button_widget)
-        button_widget.setParent(self)
+        self.cards_list_widget.layout().addWidget(self.load_more_btn)
 
     def resizeEvent(self, event):
         QtWidgets.QWidget.resizeEvent(self, event)
