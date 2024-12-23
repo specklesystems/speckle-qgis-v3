@@ -41,6 +41,8 @@ except ModuleNotFoundError:
     pass
 
 
+from speckle.connectors.host_apps.QGIS.connectors.bindings import BasicConnectorBinding
+from speckle.connectors.host_apps.QGIS.connectors.host_app import QgisDocumentStore
 from specklepy.core.api import operations
 from specklepy.logging.exceptions import (
     SpeckleException,
@@ -301,26 +303,12 @@ class SpeckleQGISv3:
     def run(self):
         """Run method that performs all the real work"""
         from speckle.connectors.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
-        from speckle.utils.project_vars import (
-            get_project_streams,
-            get_survey_point,
-            get_rotation,
-            get_crs_offsets,
-            get_elevationLayer,
-            get_project_saved_layers,
-            get_transformations,
-        )
 
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        self.project = QgsProject.instance()
-        self.dataStorage = DataStorage()
-        self.dataStorage.plugin_version = self.version
-        self.dataStorage.project = self.project
-
-        get_transformations(self.dataStorage)
-
-        self.is_setup = self.dataStorage.check_for_accounts()
+        document_store = QgisDocumentStore()
+        bridge = None
+        self.basic_bindings = BasicConnectorBinding(document_store, bridge)
 
         if self.pluginIsActive:
             self.reloadUI()
@@ -329,53 +317,14 @@ class SpeckleQGISv3:
             self.pluginIsActive = True
             if self.dockwidget is None:
                 self.dockwidget = SpeckleQGISv3Dialog()
-
-                root = self.dataStorage.project.layerTreeRoot()
-                self.dataStorage.all_layers = getAllLayers(root)
-                self.dockwidget.addDataStorage(self)
                 self.dockwidget.runSetup(self)
-                # self.dockwidget.createMappingDialog(self)
-
-                self.project.fileNameChanged.connect(self.reloadUI)
-                self.project.homePathChanged.connect(self.reloadUI)
-
-                self.dockwidget.runButton.clicked.connect(self.onRunButtonClicked)
-
-                self.dockwidget.crsSettings.clicked.connect(self.customCRSDialogCreate)
-
-                self.dockwidget.signal_1.connect(addVectorMainThread)
-                self.dockwidget.signal_2.connect(addBimMainThread)
-                self.dockwidget.signal_3.connect(addCadMainThread)
-                self.dockwidget.signal_4.connect(addRasterMainThread)
-                self.dockwidget.signal_5.connect(addNonGeometryMainThread)
-                self.dockwidget.signal_6.connect(addExcelMainThread)
-                self.dockwidget.signal_cancel_operation.connect(
-                    self.dockwidget.cancelOperations
-                )
-
-                # self.signal_groupCreate.connect(tryCreateGroup)
-
-            else:
-                root = self.dataStorage.project.layerTreeRoot()
-                self.dataStorage.all_layers = getAllLayers(root)
-                self.dockwidget.addDataStorage(self)
-
-            get_project_streams(self)
-            get_rotation(self.dataStorage)
-            get_survey_point(self.dataStorage)
-            get_crs_offsets(self.dataStorage)
-            get_project_saved_layers(self)
-            self.dockwidget.populateSavedLayerDropdown(self)
-            get_elevationLayer(self.dataStorage)
 
             self.dockwidget.run(self)
-            self.dockwidget.saveLayerSelection.clicked.connect(
-                lambda: self.populateSelectedLayerDropdown()
-            )
-
             # show the dockwidget
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
-            self.dockwidget.enableElements(self)
+            self.verify_dependencies()
+
+    def verify_dependencies(self):
 
         import urllib3
         import requests
@@ -1117,40 +1066,10 @@ class SpeckleQGISv3:
         print("___RELOAD UI")
         try:
             self.dockwidget.signal_cancel_operation.emit()
-            # self.dockwidget.cancelOperations()
-            from speckle.utils.project_vars import (
-                get_project_streams,
-                get_survey_point,
-                get_rotation,
-                get_crs_offsets,
-                get_project_saved_layers,
-                get_transformations,
-            )
-
-            self.project = QgsProject.instance()
-
-            self.dataStorage = DataStorage()
-            self.dataStorage.plugin_version = self.version
-            self.dataStorage.project = self.project
-
-            get_transformations(self.dataStorage)
-
-            root = self.dataStorage.project.layerTreeRoot()
-            self.dataStorage.all_layers = getAllLayers(root)
-            self.dockwidget.addDataStorage(self)
-
-            self.is_setup = self.dataStorage.check_for_accounts()
 
             if self.dockwidget is not None:
-                self.active_stream = None
-                get_project_streams(self)
-                get_rotation(self.dataStorage)
-                get_survey_point(self.dataStorage)
-                get_crs_offsets(self.dataStorage)
-                get_project_saved_layers(self)
-                self.dockwidget.populateSavedLayerDropdown(self)
-
-                self.dockwidget.reloadDialogUI(self)
+                # unlink dockwdget
+                pass
 
         except Exception as e:
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self.dockwidget)
