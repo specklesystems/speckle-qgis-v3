@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from PyQt5.QtCore import pyqtSignal
@@ -6,59 +7,72 @@ from specklepy_qt_ui.server_utils.exceptions_utils import ModelNotFound
 
 @dataclass
 class SendInfo:
-    AccountId: str
-    ServerUrl: str
-    ProjectId: str
-    ModelId: str
-    hostApplication: str
+    # TODO
+    account_id: str
+    server_url: str
+    project_id: str
+    model_id: str
+    host_application: str
 
 
-@dataclass
-class SendFilter:
-    Id: str
-    Name: str
-    Summary: Optional[str]
-    IsDefault: bool
-    SelectedObjectIds: List[str]
-    IdMap: Optional[Dict[str, str]]
+class ISendFilter(ABC):
+    id: str
+    name: str
+    summary: Optional[str]
+    is_default: bool
+    selected_object_ids: List[str]
+    id_map: Optional[Dict[str, str]]
 
     def refresh_object_ids(self) -> List[str]:
         return []
 
 
-@dataclass
-class CardSetting:
-    Id: str
-    Value: dict
+class ICardSetting(ABC):
+    id: Optional[str]
+    title: Optional[str]
+    type: Optional[str]
+    value: Any
+    enum: Optional[List[str]]
 
 
-@dataclass
-class ModelCard:
-    ModelCardId: Optional[str] = None
-    ModelId: Optional[str] = None
-    ProjectId: Optional[str] = None
-    WorkspaceId: Optional[str] = None
-    AccountId: Optional[str] = None
-    ServerUrl: Optional[str] = None
-    Settings: Optional[List[CardSetting]] = None
+class CardSetting(ICardSetting):
+    # TODO
+    id: Optional[str]
+
+
+class ModelCard(ABC):
+    model_card_id: Optional[str] = None
+    model_id: Optional[str] = None
+    project_id: Optional[str] = None
+    workspace_id: Optional[str] = None
+    account_id: Optional[str] = None
+    server_url: Optional[str] = None
+    settings: Optional[List[CardSetting]] = None
 
 
 class SenderModelCard(ModelCard):
-    ISendFilter: Optional[SendFilter] = None
+    send_filter: Optional[ISendFilter] = None
 
-    def get_send_info(self, hostApplication: str) -> Optional[SendInfo]:
+    def get_send_info(self, host_application: str) -> Optional[SendInfo]:
         return SendInfo(
-            self.AccountId,
-            self.ServerUrl,
-            self.ProjectId,
-            self.ModelId,
-            hostApplication,
+            self.account_id,
+            self.server_url,
+            self.project_id,
+            self.model_id,
+            host_application,
         )
 
 
+@dataclass
+class DocumentInfo:
+    location: str
+    name: str
+    id: str
+
+
 class DocumentModelStore:
-    Models: List[ModelCard] = None
-    IsDocumentInit: bool = None
+    models: List[ModelCard] = None
+    is_document_init: bool = None
 
     def document_changed(self):
         """Placeholder for connector to define."""
@@ -66,26 +80,26 @@ class DocumentModelStore:
 
     def get_model_by_id(self, id: str) -> ModelCard:
         try:
-            return next(x for x in self.Models if x.ModelCardId == id)
+            return next(x for x in self.models if x.model_card_id == id)
         except StopIteration:
             raise ModelNotFound(message="Model card not found.")
 
     def add_model(self, model_card: ModelCard) -> None:
-        self.Models.append(model_card)
+        self.models.append(model_card)
         self.save_state()
 
     def clear_and_save(self) -> None:
-        self.Models.clear()
+        self.models.clear()
         self.save_state()
 
     def update_model(self, model_card: ModelCard) -> None:
         try:
             index: int = next(
                 i
-                for i, x in enumerate(self.Models)
-                if x.ModelCardId == model_card.ModelCardId
+                for i, x in enumerate(self.models)
+                if x.model_card_id == model_card.model_card_id
             )
-            self.Models[index] = model_card
+            self.models[index] = model_card
             self.save_state()
 
         except StopIteration:
@@ -95,10 +109,10 @@ class DocumentModelStore:
         try:
             index: int = next(
                 i
-                for i, x in enumerate(self.Models)
-                if x.ModelCardId == model_card.ModelCardId
+                for i, x in enumerate(self.models)
+                if x.model_card_id == model_card.model_card_id
             )
-            self.Models.pop(index)
+            self.models.pop(index)
             self.save_state()
 
         except StopIteration:
@@ -109,7 +123,7 @@ class DocumentModelStore:
         return
 
     def get_senders(self) -> List[SenderModelCard]:
-        return [x for x in self.Models if isinstance(x, SenderModelCard)]
+        return [x for x in self.models if isinstance(x, SenderModelCard)]
 
     def serialize(self) -> str:
         # TODO
@@ -131,7 +145,7 @@ class DocumentModelStore:
         return
 
     def load_from_string(self, models: Optional[str]) -> None:
-        self.Models.clear()
+        self.models.clear()
         if not models:
             return
-        self.Models.extend(self.deserialize(models))
+        self.models.extend(self.deserialize(models))
