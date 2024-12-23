@@ -341,13 +341,6 @@ class SpeckleQGISv3:
         # set the project instance
         self.project = QgsProject.instance()
         self.dataStorage.project = self.project
-        self.dockwidget.msgLog.setGeometry(
-            0,
-            0,
-            self.dockwidget.frameSize().width(),
-            self.dockwidget.frameSize().height(),
-        )
-
         self.dockwidget.reportBtn.setEnabled(True)
 
         # https://www.opengis.ch/2016/09/07/using-threads-in-qgis-python-plugins/
@@ -781,8 +774,6 @@ class SpeckleQGISv3:
                     plugin=self.dockwidget,
                 )
 
-            self.dockwidget.msgLog.dataStorage = self.dataStorage
-
             logToUser(
                 "Data sent to '"
                 + str(streamName)
@@ -1005,7 +996,6 @@ class SpeckleQGISv3:
                 time_end_transfer - time_start_transfer
             )
 
-            self.dockwidget.msgLog.dataStorage = self.dataStorage
             # if self.dockwidget.experimental.isChecked(): time.sleep(3)
             logToUser(
                 "Data received",
@@ -1141,9 +1131,6 @@ class SpeckleQGISv3:
                 self.dockwidget.signal_4.connect(addRasterMainThread)
                 self.dockwidget.signal_5.connect(addNonGeometryMainThread)
                 self.dockwidget.signal_6.connect(addExcelMainThread)
-                self.dockwidget.signal_remove_btn_url.connect(
-                    self.dockwidget.msgLog.removeBtnUrl
-                )
                 self.dockwidget.signal_cancel_operation.connect(
                     self.dockwidget.cancelOperations
                 )
@@ -1171,7 +1158,6 @@ class SpeckleQGISv3:
             # show the dockwidget
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
             self.dockwidget.enableElements(self)
-            self.dockwidget.overwriteStartSettings()
 
         import urllib3
         import requests

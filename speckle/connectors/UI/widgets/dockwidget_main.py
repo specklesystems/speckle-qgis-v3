@@ -15,7 +15,6 @@ from speckle.connectors.UI.utils.connector_utils import (
 
 try:
     from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
-    from specklepy_qt_ui.qt_ui.LogWidget import LogWidget
     from speckle.connectors.UI.widgets.utils.logger import logToUser
     from speckle.connectors.UI.widgets.utils.utils import constructCommitURL
     from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
@@ -47,7 +46,6 @@ try:
     )
 except ModuleNotFoundError:
     from speckle.specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
-    from speckle.specklepy_qt_ui.qt_ui.LogWidget import LogWidget
     from speckle.specklepy_qt_ui.qt_ui.utils.logger import logToUser
     from speckle.specklepy_qt_ui.qt_ui.utils.utils import constructCommitURL
     from speckle.specklepy_qt_ui.qt_ui.DataStorage import DataStorage
@@ -108,7 +106,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     runButton: QtWidgets.QPushButton
     setMapping: QtWidgets.QPushButton
     experimental: QCheckBox
-    msgLog: LogWidget = None
     dataStorage: DataStorage = None
     mappingSendDialog = None
     custom_crs_modal = None
@@ -347,15 +344,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
 
     def addProps(self, plugin):
         # add widgets that will only show on event trigger
-        logWidget = LogWidget(parent=self)
-        logWidget.dataStorage = self.dataStorage
-
-        self.layout().addWidget(logWidget)
-        self.msgLog = logWidget
-        self.msgLog.dockwidget = self
-
-        self.msgLog.active_account = plugin.dataStorage.active_account
-        self.msgLog.speckle_version = plugin.version
 
         self.setMapping.setFlat(True)
         self.setMapping.setStyleSheet(
@@ -494,15 +482,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             logToUser(e, level=2, func=inspect.stack()[0][3], plugin=self)
             return
 
-    def addMsg(self, obj: dict):
-        self.msgLog.addButton(obj)
-
     def setupOnFirstLoad(self, plugin):
         try:
-            # print("setupOnFirstLoad")
-            self.msgLog.sendMessage.connect(self.addMsg)
             self.setMapping.clicked.connect(self.showMappingDialog)
-            self.reportBtn.clicked.connect(self.msgLog.showReport)
 
             self.streams_add_button.clicked.connect(plugin.onStreamAddButtonClicked)
             self.commit_web_view.clicked.connect(
@@ -1142,93 +1124,3 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
                 t.kill()
                 t.join()
 
-    def overwriteStartSettings(self):
-        self.reportBtn.disconnect()
-        self.reportBtn.clicked.connect(self.showDebugReport)
-
-    def showDebugReport(self):
-        return
-        from plugin_utils.installer import _debug
-
-        self.msgLog.showReport()
-        if _debug is True:
-            text = ""
-            report_new = self.dataStorage.flat_report_receive
-            report_old = self.dataStorage.flat_report_latest
-
-            for key, val in report_new.items():
-                if key in report_old:
-                    if report_new[key]["hash"] != report_old[key]["hash"]:
-
-                        diff: str = "GEOMETRY"
-                        diff_string = ""
-                        if (
-                            report_old[key]["attributes"]
-                            != report_new[key]["attributes"]
-                        ):
-                            diff = "ATTRIBUTES"
-                            diff_string = string_diff(
-                                report_new[key]["attributes"],
-                                report_old[key]["attributes"],
-                            )
-                            if (
-                                report_old[key]["geometry"]
-                                != report_new[key]["geometry"]
-                            ):
-                                diff = "BOTH"
-                                diff_string += "\n" + string_diff(
-                                    report_new[key]["attributes"],
-                                    report_old[key]["attributes"],
-                                )
-                        if diff == "GEOMETRY":
-                            diff_string = string_diff(
-                                report_new[key]["geometry"],
-                                report_old[key]["geometry"],
-                            )
-
-                        # add symbol
-                        if diff == "ATTRIBUTES":
-                            text += "🔶 "
-                        elif diff == "GEOMETRY":
-                            text += "🔷 "
-                        else:
-                            text += "🔷🔶 "
-
-                        # basic report item
-                        text += f"{key}:\ndiff: {diff},\nlayer_name: {report_new[key]['layer_name']},\nspeckle_ids: [{report_old[key]['speckle_id']}, {report_new[key]['speckle_id']}]\n{diff_string}\n\n"
-
-                        # add extra details about diff
-                        if diff in ["ATTRIBUTES", "GEOMETRY"]:
-
-                            text += f"{diff.lower()}: {report_old[key][diff.lower()]}\n"
-                            text += (
-                                f"{diff.lower()}: {report_new[key][diff.lower()]}\n\n"
-                            )
-
-                        else:
-                            for keyword in ["ATTRIBUTES", "GEOMETRY"]:
-                                text += f"{keyword.lower()}: {report_old[key][keyword.lower()]}\n"
-                                text += f"{keyword.lower()}: {report_new[key][keyword.lower()]}\n\n"
-
-                else:
-                    text += f"✅ {key}:\ndiff: ADDED,\nlayer_name: {report_new[key]['layer_name']},\nspeckle_ids: [{report_new[key]['speckle_id']},]\n\n"
-
-                    # extra details
-                    for keyword in ["ATTRIBUTES", "GEOMETRY"]:
-                        text += (
-                            f"{keyword.lower()}: {report_new[key][keyword.lower()]}\n"
-                        )
-                    text += "\n"
-
-            for key, val in report_old.items():
-                if key not in report_new:
-                    text += f"❌ {key}:\ndiff: DELETED,\nlayer_name: {report_old[key]['layer_name']},\nspeckle_ids: [{report_old[key]['speckle_id']},]\n\n"
-
-                    # extra details
-                    for keyword in ["ATTRIBUTES", "GEOMETRY"]:
-                        text += (
-                            f"{keyword.lower()}: {report_old[key][keyword.lower()]}\n"
-                        )
-                    text += "\n"
-
-            self.msgLog.reportDialog.report_text.setText(str(text))

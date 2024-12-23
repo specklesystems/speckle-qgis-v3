@@ -20,15 +20,6 @@ def logToUser(
             return
 
         new_msg = splitTextIntoLines(msg)
-        dockwidget.msgLog.sendMessage.emit(
-            {
-                "text": new_msg,
-                "level": level,
-                "url": url,
-                "blue": blue,
-                "report": report,
-            }
-        )
 
     except Exception as e:
         print(e)
