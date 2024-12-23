@@ -10,14 +10,14 @@ from PyQt5.QtWidgets import (
     QLabel,
 )
 
-from speckle.connectors.UI_.widgets.utils.global_resources import (
+from speckle.connectors.ui.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
     LABEL_HEIGHT,
 )
-from speckle.connectors.UI_.widgets.background import BackgroundWidget
-from speckle.connectors.UI_.widgets.widget_card_from_list import CardInListWidget
+from speckle.connectors.ui.widgets.background import BackgroundWidget
+from speckle.connectors.ui.widgets.widget_card_from_list import CardInListWidget
 
 
 class CardsListTemporaryWidget(QWidget):

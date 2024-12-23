@@ -1,4 +1,4 @@
-from speckle.connectors.UI_.models import DocumentModelStore
+from speckle.connectors.ui.models import DocumentModelStore
 
 
 class QgisDocumentStore(DocumentModelStore):

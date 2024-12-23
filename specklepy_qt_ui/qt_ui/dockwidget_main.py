@@ -5,21 +5,21 @@ import inspect
 import os
 import threading
 from plugin_utils.helpers import string_diff
-from speckle.connectors.UI_.widgets.widget_model_search import ModelSearchWidget
-from speckle.connectors.UI_.widgets.widget_no_document import NoDocumentWidget
-from speckle.connectors.UI_.widgets.widget_no_model_cards import NoModelCardsWidget
-from speckle.connectors.UI_.widgets.widget_project_search import ProjectSearchWidget
-from speckle.connectors.UI_.utils.connector_utils import (
+from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
+from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
+from speckle.connectors.ui.widgets.widget_no_model_cards import NoModelCardsWidget
+from speckle.connectors.ui.widgets.widget_project_search import ProjectSearchWidget
+from speckle.connectors.ui.utils.connector_utils import (
     get_project_search_widget_content,
 )
 
 try:
     from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
     from specklepy_qt_ui.qt_ui.LogWidget import LogWidget
-    from speckle.connectors.UI_.widgets.utils.logger import logToUser
-    from speckle.connectors.UI_.widgets.utils.utils import constructCommitURL
+    from speckle.connectors.ui.widgets.utils.logger import logToUser
+    from speckle.connectors.ui.widgets.utils.utils import constructCommitURL
     from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from speckle.connectors.UI_.widgets.utils.global_resources import (
+    from speckle.connectors.ui.widgets.utils.global_resources import (
         COLOR_HIGHLIGHT,
         SPECKLE_COLOR,
         SPECKLE_COLOR_LIGHT,

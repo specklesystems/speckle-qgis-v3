@@ -8,7 +8,7 @@ from specklepy.core.api.models.current import (
     ResourceCollection,
 )
 from specklepy.core.api.resources.current.project_resource import ProjectResource
-from speckle.connectors.UI_.utils.utils import (
+from speckle.connectors.ui.utils.utils import (
     clear_models_cursor,
     clear_projects_cursor,
     get_accounts,

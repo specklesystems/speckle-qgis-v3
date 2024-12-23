@@ -1,9 +1,9 @@
 from typing import Any, Optional
-from speckle.connectors.UI_.bindings import (
+from speckle.connectors.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
 )
-from speckle.connectors.UI_.models import DocumentInfo, DocumentModelStore, ModelCard
+from speckle.connectors.ui.models import DocumentInfo, DocumentModelStore, ModelCard
 
 
 class BasicConnectorBinding(IBasicConnectorBinding):

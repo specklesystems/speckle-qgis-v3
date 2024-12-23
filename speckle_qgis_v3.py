@@ -300,7 +300,7 @@ class SpeckleQGISv3:
 
     def run(self):
         """Run method that performs all the real work"""
-        from speckle.connectors.UI_.widgets.dockwidget_main import SpeckleQGISv3Dialog
+        from speckle.connectors.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
         from speckle.utils.project_vars import (
             get_project_streams,
             get_survey_point,

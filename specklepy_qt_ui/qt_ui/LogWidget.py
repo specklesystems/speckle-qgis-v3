@@ -10,7 +10,7 @@ from specklepy.logging import metrics
 from specklepy.core.api.credentials import Account
 
 try:
-    from speckle.connectors.UI_.widgets.utils.global_resources import (
+    from speckle.connectors.ui.widgets.utils.global_resources import (
         BACKGR_COLOR,
         BACKGR_COLOR_LIGHT,
         BACKGR_COLOR_GREY,

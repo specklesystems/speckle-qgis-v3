@@ -2,7 +2,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 
-from speckle.connectors.UI_.widgets.utils.global_resources import (
+from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_DARK_GREY_SEMI,
     BACKGR_COLOR_TRANSPARENT,
     LABEL_HEIGHT,
