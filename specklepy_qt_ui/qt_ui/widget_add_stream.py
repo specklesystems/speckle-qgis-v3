@@ -5,9 +5,9 @@ import urllib.parse
 
 try:
     from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-    from speckle.connectors.UI.widgets.utils.logger import logToUser
-    from speckle.connectors.UI.widgets.utils.utils import constructCommitURLfromServerCommit
-    from speckle.connectors.UI.widgets.utils.logger import displayUserMsg
+    from speckle.connectors.UI_.widgets.utils.logger import logToUser
+    from speckle.connectors.UI_.widgets.utils.utils import constructCommitURLfromServerCommit
+    from speckle.connectors.UI_.widgets.utils.logger import displayUserMsg
 except ModuleNotFoundError: 
     from speckle.specklepy_qt_ui.qt_ui.DataStorage import DataStorage
     from speckle.specklepy_qt_ui.qt_ui.utils.logger import logToUser

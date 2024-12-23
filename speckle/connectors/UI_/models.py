@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-from speckle.connectors.UI.utils.exceptions_utils import ModelNotFound
+from speckle.connectors.UI_.utils.exceptions_utils import ModelNotFound
 
 
 @dataclass

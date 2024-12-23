@@ -13,7 +13,7 @@ from specklepy.core.api.wrapper import StreamWrapper
 from specklepy.logging import metrics
 
 from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
-from speckle.connectors.UI.widgets.utils.logger import logToUser
+from speckle.connectors.UI_.widgets.utils.logger import logToUser
 from speckle.utils.validation import tryGetStream
 
 

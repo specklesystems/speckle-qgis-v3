@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
 )
 
-from speckle.connectors.UI.widgets.utils.global_resources import (
+from speckle.connectors.UI_.widgets.utils.global_resources import (
     ZERO_MARGIN_PADDING,
     SPECKLE_COLOR,
     BACKGR_COLOR_TRANSPARENT,
