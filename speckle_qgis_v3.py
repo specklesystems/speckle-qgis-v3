@@ -41,8 +41,8 @@ except ModuleNotFoundError:
     pass
 
 
-from speckle.connectors.host_apps.QGIS1.connectors.bindings import BasicConnectorBinding
-from speckle.connectors.host_apps.QGIS1.connectors.host_app import QgisDocumentStore
+from speckle.connectors.host_apps.qgis.connectors.bindings import BasicConnectorBinding
+from speckle.connectors.host_apps.qgis.connectors.host_app import QgisDocumentStore
 from specklepy.core.api import operations
 from specklepy.logging.exceptions import (
     SpeckleException,
