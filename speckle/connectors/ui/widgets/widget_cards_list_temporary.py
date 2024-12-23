@@ -1,20 +1,15 @@
 from typing import List
 from PyQt5 import QtCore
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtGui import QIcon, QPixmap, QCursor
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import (
-    QVBoxLayout,
-    QWidget,
-    QStackedLayout,
-    QLabel,
-)
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QStackedLayout, QLabel, QPushButton
 
 from speckle.connectors.ui.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
     LABEL_HEIGHT,
+    BACKGR_COLOR_LIGHT_GREY2,
 )
 from speckle.connectors.ui.widgets.background import BackgroundWidget
 from speckle.connectors.ui.widgets.widget_card_from_list import CardInListWidget
@@ -23,9 +18,8 @@ from speckle.connectors.ui.widgets.widget_card_from_list import CardInListWidget
 class CardsListTemporaryWidget(QWidget):
     context_stack = None
     background: BackgroundWidget = None
-    project_selection_widget: QWidget
     cards_list_widget: QWidget  # needed here to resize child elements
-    send_data = pyqtSignal(object)
+    load_more_btn: QPushButton
 
     def __init__(
         self,
@@ -123,6 +117,23 @@ class CardsListTemporaryWidget(QWidget):
 
         return scroll_area
 
+    def load_more(self):
+        """Overwride in the inheriting widgets."""
+        return
+
+    def create_load_more_btn(self):
+
+        load_more_btn = QPushButton("Load more")
+        load_more_btn.clicked.connect(lambda: self.load_more())
+        load_more_btn.setStyleSheet(
+            "QWidget {"
+            + f"color:black;border-width:1px;border-color:rgba(100,100,100,1);border-radius: 5px;margin-top:0px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR_WHITE}"
+            + "} QWidget:hover { "
+            + f"{BACKGR_COLOR_LIGHT_GREY2};"
+            + " }"
+        )
+        self.load_more_btn = load_more_btn
+
     def create_area_with_cards(self, cards_content_list: List[List]) -> QWidget:
 
         self.cards_list_widget = QWidget()
@@ -137,7 +148,23 @@ class CardsListTemporaryWidget(QWidget):
                 project_card = CardInListWidget(content)
                 self.cards_list_widget.layout().addWidget(project_card)
 
+        self.create_load_more_btn()
+        self.cards_list_widget.layout().addWidget(self.load_more_btn)
+
         return self.cards_list_widget
+
+    def add_more_cards(self, new_cards_content_list: list):
+
+        # remove load button from layout
+        button_widget = self.layout.itemAt([self.layout.count() - 1]).widget()
+        button_widget.setParent(None)
+
+        for content in new_cards_content_list:
+            project_card = CardInListWidget(content)
+            self.cards_list_widget.layout().addWidget(project_card)
+
+        # return button
+        button_widget.setParent(self)
 
     def resizeEvent(self, event):
         QtWidgets.QWidget.resizeEvent(self, event)

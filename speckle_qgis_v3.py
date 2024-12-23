@@ -51,9 +51,9 @@ from specklepy.logging.exceptions import (
 )
 from specklepy.core.api.models import Stream, Branch, Commit
 from specklepy.core.api.wrapper import StreamWrapper
-from specklepy.objects import Base
-from specklepy.objects.other import Collection
-from specklepy.objects.units import get_units_from_string
+from specklepy.objects.base import Base
+from specklepy.objects.models.collections.collection import Collection
+from specklepy.objects.models.units import get_units_from_string
 from specklepy.core.api.credentials import (
     Account,
 )
@@ -62,7 +62,6 @@ from specklepy.logging import metrics
 
 # Initialize Qt resources from file resources.py
 from resources import *
-from plugin_utils.object_utils import callback, traverseObject
 from speckle.converter.layers import (
     getAllLayers,
     getSavedLayers,
@@ -70,15 +69,6 @@ from speckle.converter.layers import (
     getSelectedLayersWithStructure,
 )
 
-from speckle.converter.layers.layer_conversions import (
-    addBimMainThread,
-    addCadMainThread,
-    addExcelMainThread,
-    addNonGeometryMainThread,
-    addRasterMainThread,
-    addVectorMainThread,
-    convertSelectedLayersToSpeckle,
-)
 from speckle.converter.layers import findAndClearLayerGroup
 
 from specklepy_qt_ui.qt_ui.DataStorage import DataStorage
@@ -108,6 +98,7 @@ SPECKLE_COLOR_LIGHT = (69, 140, 255)
 class SpeckleQGISv3:
     """Speckle Connector Plugin for QGIS"""
 
+    basic_binding: BasicConnectorBinding
     dockwidget: Optional["QDockWidget"]
     version: str
     gis_version: str
@@ -123,7 +114,7 @@ class SpeckleQGISv3:
     active_branch: Optional[Branch] = None
     active_commit: Optional[Commit] = None
 
-    project: "QgsProject"
+    project: QgsProject
     accounts: List[Account]
 
     theads_total: int
@@ -308,7 +299,7 @@ class SpeckleQGISv3:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         document_store = QgisDocumentStore()
         bridge = None
-        self.basic_bindings = BasicConnectorBinding(document_store, bridge)
+        self.basic_binding = BasicConnectorBinding(document_store, bridge)
 
         if self.pluginIsActive:
             self.reloadUI()
@@ -316,7 +307,7 @@ class SpeckleQGISv3:
             print("Plugin inactive, launch")
             self.pluginIsActive = True
             if self.dockwidget is None:
-                self.dockwidget = SpeckleQGISv3Dialog()
+                self.dockwidget = SpeckleQGISv3Dialog(parent=None)
                 self.dockwidget.runSetup(self)
 
             # show the dockwidget
@@ -471,7 +462,7 @@ class SpeckleQGISv3:
         try:
             if not self.dockwidget:
                 return
-
+            return
             projectCRS = self.project.crs()
 
             bySelection = True
@@ -1004,7 +995,6 @@ class SpeckleQGISv3:
             time_start_conversion = self.dataStorage.latestConversionTime = (
                 datetime.now()
             )
-            traverseObject(self, commitObj, callback, check, str(newGroupName), "")
             time_end_conversion = self.dataStorage.latestConversionTime
 
             # add time stats to the report

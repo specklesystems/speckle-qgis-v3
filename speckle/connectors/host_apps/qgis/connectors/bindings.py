@@ -1,9 +1,18 @@
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
+from speckle.connectors.host_apps.qgis.converters.utils import QgisConversionSettings
 from speckle.connectors.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
+    IBrowserBridge,
+    ISendBinding,
+    SendBindingUICommands,
 )
-from speckle.connectors.ui.models import DocumentInfo, DocumentModelStore, ModelCard
+from speckle.connectors.ui.models import (
+    DocumentInfo,
+    DocumentModelStore,
+    ISendFilter,
+    ModelCard,
+)
 
 
 class BasicConnectorBinding(IBasicConnectorBinding):
@@ -51,4 +60,61 @@ class BasicConnectorBinding(IBasicConnectorBinding):
         return
 
     def highlight_objects(self, ids: str) -> None:
+        return
+
+
+class QgisSendBinding(ISendBinding):
+    name: str = "sendBinding"
+    commands: SendBindingUICommands
+    parent: IBrowserBridge
+    store: DocumentModelStore
+    _service_provider: "IServiceProvider"
+    _send_filters: List[ISendFilter]
+    _cancellation_manager: "CancellationManager"
+    _send_conversion_cache: "ISendConversionCache"
+    _operation_progress_manager: "IOperationProgressManager"
+    _logger: "ILogger[QGISSendBinding]"
+    _top_level_exception_handler: "ITopLevelExceptionHandler"
+    _qgis_conversion_settings: QgisConversionSettings
+
+    changed_objects_ids: Dict[str, bytes]
+    subscribed_layers: List[Any]
+
+    def __init__(
+        self,
+        parent: IBrowserBridge,
+        store: DocumentModelStore,
+        _service_provider: "IServiceProvider",
+        _send_filters: List[ISendFilter],
+        _cancellation_manager: "CancellationManager",
+        send_conversion_cache: "ISendConversionCache",
+        _operation_progress_manager: "IOperationProgressManager",
+        _logger: "ILogger[QGISSendBinding]",
+        _top_level_exception_handler: "ITopLevelExceptionHandler",
+        _qgis_conversion_settings: QgisConversionSettings,
+    ):
+
+        self.store = store
+        self._service_provider = _service_provider
+        self._send_filters = _send_filters
+        self._cancellation_manager = _cancellation_manager
+        self.send_conversion_cache = send_conversion_cache
+        self._operation_progress_manager = _operation_progress_manager
+        self._logger = _logger
+        self._top_level_exception_handler = _top_level_exception_handler
+        self._qgis_conversion_settings = _qgis_conversion_settings
+
+        self.parent = parent
+        self.commads = SendBindingUICommands(parent)
+        self.subscribe_to_qgis_events()
+
+        def new_func():
+            self.store.document_changed()
+            # TODO
+            # self.send_conversion_cache.clear_cache()
+
+        self.store.document_changed = new_func
+
+    def subscribe_to_qgis_events(self):
+        # TODO
         return

@@ -5,8 +5,7 @@ from textwrap import wrap
 import inspect
 from difflib import SequenceMatcher
 
-from specklepy.objects.units import get_units_from_string
-from specklepy.objects.units import get_scale_factor_to_meters
+from specklepy.objects.models.units import get_units_from_string, get_scale_factor_to_meters
 from specklepy.core.api.client import SpeckleClient
 
 
