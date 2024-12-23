@@ -64,9 +64,9 @@ def get_projects_from_client(
     return results
 
 
-def clear_projects_cursor():
-    # TODO: clear cursor from ContextStack
-    pass
+# def clear_projects_cursor():
+#    # TODO: clear cursor from ContextStack
+#    pass
 
 
 def get_models_from_client(
@@ -91,9 +91,9 @@ def get_models_from_client(
     return results
 
 
-def clear_models_cursor():
-    # TODO: clear cursor from ContextStack
-    pass
+# def clear_models_cursor():
+#    # TODO: clear cursor from ContextStack
+#    pass
 
 
 def time_ago(timestamp: datetime) -> str:

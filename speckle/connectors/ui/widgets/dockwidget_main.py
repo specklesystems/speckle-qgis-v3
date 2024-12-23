@@ -10,9 +10,7 @@ from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
 from speckle.connectors.ui.widgets.widget_no_model_cards import NoModelCardsWidget
 from speckle.connectors.ui.widgets.widget_project_search import ProjectSearchWidget
-from speckle.connectors.ui.utils.connector_utils import (
-    get_project_search_widget_content,
-)
+from speckle.connectors.ui.utils.connector_utils import UiSearchContent
 
 from specklepy_qt_ui.qt_ui.widget_transforms import MappingSendDialog
 from speckle.connectors.ui.widgets.utils.logger import logToUser
@@ -260,11 +258,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     def open_select_projects_widget(self):
 
         # get content for project cards
-        projects_contents_list = get_project_search_widget_content()
+        projects_contents_list = UiSearchContent().get_project_search_widget_content()
 
         # add a function for generating model card widget
         for i, content in enumerate(projects_contents_list):
-
             callback = content[0]
 
             def make_callback(v):

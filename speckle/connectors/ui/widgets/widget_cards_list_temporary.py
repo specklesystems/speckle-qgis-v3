@@ -164,6 +164,7 @@ class CardsListTemporaryWidget(QWidget):
             self.cards_list_widget.layout().addWidget(project_card)
 
         # return button
+        self.cards_list_widget.layout().addWidget(button_widget)
         button_widget.setParent(self)
 
     def resizeEvent(self, event):
