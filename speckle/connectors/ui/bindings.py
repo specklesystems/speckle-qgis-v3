@@ -166,7 +166,8 @@ class SendBindingUICommands(BasicConnectorBindingCommands):
     ) -> None:
         # TODO
         # bridge.send(SET_MODEL_SEND_RESULT_UI_COMMAND_NAME, model_card_id, version_id, send_conversion_results)
-        raise NotImplementedError
+        # pass results to the UI
+        return
 
 
 class ISendBinding(IBinding):

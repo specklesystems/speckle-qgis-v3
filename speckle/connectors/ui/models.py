@@ -1,7 +1,6 @@
 from abc import ABC
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-from speckle.connectors.ui.utils.exceptions_utils import ModelNotFound
 
 
 @dataclass
@@ -106,9 +105,10 @@ class DocumentModelStore:
         try:
             return next(x for x in self.models if x.model_card_id == id)
         except StopIteration:
-            raise ModelNotFound(message="Model card not found.")
+            raise Exception("Model card not found.")
 
     def add_model(self, model_card: ModelCard) -> None:
+        print(f"Adding model: {model_card.model_card_id}")
         self.models.append(model_card)
         self.save_state()
 
@@ -127,7 +127,7 @@ class DocumentModelStore:
             self.save_state()
 
         except StopIteration:
-            raise ModelNotFound(message="Model card not found to update.")
+            raise Exception("Model card not found to update.")
 
     def remove_model(self, model_card: ModelCard) -> None:
         try:
@@ -140,7 +140,7 @@ class DocumentModelStore:
             self.save_state()
 
         except StopIteration:
-            raise ModelNotFound(message="Model card not found to update.")
+            raise Exception("Model card not found to update.")
 
     def on_document_changed(self) -> None:
         self.document_changed()

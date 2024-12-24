@@ -34,8 +34,12 @@ class ModelCardsWidget(QWidget):
     cards_list_widget: QWidget = None  # needed here to resize child elements
     scroll_area: QtWidgets.QScrollArea = None
     global_publish_btn: QPushButton = None
+
     add_projects_search_signal = pyqtSignal()
+    add_model_signal = pyqtSignal(ModelCard)
+    remove_model_signal = pyqtSignal(ModelCard)
     send_model_signal = pyqtSignal(ModelCard)
+
     child_cards: List[ModelCardWidget]
 
     def __init__(
@@ -199,9 +203,6 @@ class ModelCardsWidget(QWidget):
 
         return self.cards_list_widget
 
-    def emit_from_child_card(self, model_card: ModelCard):
-        self.send_model_signal.emit(model_card)
-
     def modify_area_with_cards(self, widgets_list: List[Any]) -> QWidget:
 
         cards_list_widget = QWidget()
@@ -220,6 +221,10 @@ class ModelCardsWidget(QWidget):
 
         self.cards_list_widget = cards_list_widget
         return self.cards_list_widget
+
+    def emit_from_child_card(self, model_card: ModelCard):
+        # declared as a separate function, because it's used several times
+        self.send_model_signal.emit(model_card)
 
     def add_new_card(self, new_card: ModelCard):
 
@@ -261,6 +266,9 @@ class ModelCardsWidget(QWidget):
 
         assigned_cards_list_widget = self.modify_area_with_cards(all_widgets)
         self.scroll_area.setWidget(assigned_cards_list_widget)
+
+        print("Emit Add card")
+        # self.add_model_signal.emit(new_card)
 
         # adjust size of new widget:
         self.resizeEvent()
@@ -309,6 +317,9 @@ class ModelCardsWidget(QWidget):
 
         assigned_cards_list_widget = self.modify_area_with_cards(all_widgets)
         self.scroll_area.setWidget(assigned_cards_list_widget)
+
+        print("Emit Remove")
+        # self.remove_model_signal.emit(new_card)
 
         # adjust size of new widget:
         self.resizeEvent()

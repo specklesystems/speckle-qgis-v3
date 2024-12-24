@@ -3,7 +3,9 @@ from typing import Any, Optional
 
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
+from specklepy.core.api import operations
 from specklepy.objects.base import Base
+from specklepy.transports.server.server import ServerTransport
 
 
 class IClientFactory(ABC):
@@ -24,3 +26,13 @@ class IOperations(ABC):
         cancellation_token: Any = None,
     ):
         raise NotImplementedError
+
+
+# not in C#
+class ClientFactory(IClientFactory):
+    def create(slef, account) -> SpeckleClient:
+        speckle_client = SpeckleClient(
+            account.serverInfo.url, account.serverInfo.url.startswith("https")
+        )
+        speckle_client.authenticate_with_account(account)
+        return speckle_client

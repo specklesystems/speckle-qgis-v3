@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from speckle.connectors.common.conversion import SendConversionResult
 from specklepy.objects.base import Base
@@ -12,7 +12,7 @@ class RootObjectBuilderResult:
 
 
 class IRootObjectBuilder(ABC):
-
+    @abstractmethod
     def build(
         objects: List[Any],
         send_info: str,

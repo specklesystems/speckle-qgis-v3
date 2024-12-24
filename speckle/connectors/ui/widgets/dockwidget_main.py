@@ -2,6 +2,7 @@
 
 import os
 from speckle.connectors.ui.bindings import IBasicConnectorBinding
+from speckle.connectors.ui.models import ModelCard
 from speckle.connectors.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
@@ -30,6 +31,7 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap, QCursor
 from PyQt5.QtWidgets import QHBoxLayout, QWidget
 from PyQt5 import QtCore
+from PyQt5.QtCore import pyqtSignal
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -46,7 +48,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     widget_model_search: ModelSearchWidget = None
     widget_model_cards: ModelCardsWidget = None
 
-    send_model_signal = QtCore.pyqtSignal(object)
+    send_model_signal = pyqtSignal(object)
+    add_model_signal = pyqtSignal(ModelCard)
+    remove_model_signal = pyqtSignal(ModelCard)
 
     def __init__(self, parent=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
@@ -272,32 +276,47 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         elif self.widget_model_cards == widget:
             self.remove_widget_model_cards()
 
-    def create_model_cards_widget(self, model_card):
+    def create_or_add_model_cards_widget(self, model_card):
         self.remove_process_widgets()
         if not self.widget_model_cards:
-            self.widget_model_cards = ModelCardsWidget(
-                parent=self, cards_list=[model_card]
-            )
-            self.widget_model_cards.send_model_signal.connect(
-                self.send_model_signal_received
-            )
-            # add widgets to the layout
-            self.layout().addWidget(self.widget_model_cards)
 
+            self.widget_model_cards = ModelCardsWidget(parent=self, cards_list=[])
+
+            # TODO
+            # right now the cards are emitting too many signals on single click
+
+            # subscribe to all Add Card events from all future ModelCards
+            self.widget_model_cards.add_model_signal.connect(
+                lambda model_card=model_card: self.add_model_signal.emit(model_card)
+            )
+            # subscribe to all Remove Card events from all future ModelCards
+            self.widget_model_cards.remove_model_signal.connect(
+                lambda model_card=model_card: self.remove_model_signal.emit(model_card)
+            )
+            # subscribe to all Send events from all future ModelCards
+            self.widget_model_cards.send_model_signal.connect(
+                lambda model_card=model_card: self.send_model_signal.emit(model_card)
+            )
+            # subscribe to PUBLISH button to open project search
             self.widget_model_cards.add_projects_search_signal.connect(
                 self.open_select_projects_widget
             )
+
+            # emit signal, for the card that was just added (because we subscribed after creating a widget)
+            self.widget_model_cards.add_new_card(model_card)
+            self.add_model_signal.emit(model_card)
+
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_model_cards)
+
         else:
             self.widget_model_cards.add_new_card(model_card)
-
-    def send_model_signal_received(self, model_card):
-        self.send_model_signal.emit(model_card)
 
     def open_select_projects_widget(self):
 
         self.widget_project_search = ProjectSearchWidget(parent=self)
         self.widget_project_search.ui_search_content.add_send_card_signal.connect(
-            self.create_model_cards_widget
+            self.create_or_add_model_cards_widget
         )
 
         # add widgets to the layout

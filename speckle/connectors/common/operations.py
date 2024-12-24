@@ -8,9 +8,12 @@ from speckle.connectors.common.builders import (
 )
 from speckle.connectors.common.credentials import IAccountManager
 from speckle.connectors.ui.models import SendInfo
+from specklepy.core.api import operations
+from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
 from specklepy.core.api.inputs.version_inputs import CreateVersionInput
 from specklepy.objects.base import Base
+from specklepy.transports.server.server import ServerTransport
 
 
 class AccountService:
@@ -44,7 +47,7 @@ class SendOperationResult:
 class SendOperation:
     root_object_builder: IRootObjectBuilder
     send_conversion_cache: "ISendConversionCache"
-    account_service: "AccountService"
+    account_service: AccountService
     send_progress: "ISendProgress"
     operations: IOperations
     client_factory: IClientFactory
@@ -54,7 +57,7 @@ class SendOperation:
         self,
         root_object_builder: IRootObjectBuilder,
         send_conversion_cache: "ISendConversionCache",
-        account_service: "AccountService",
+        account_service: AccountService,
         send_progress: "ISendProgress",
         operations: IOperations,
         client_factory: IClientFactory,
@@ -86,7 +89,6 @@ class SendOperation:
 
         return SendOperationResult(
             obj_id_and_converted_refs[0],
-            obj_id_and_converted_refs[1],
             build_result.conversion_results,
         )
 
@@ -104,6 +106,7 @@ class SendOperation:
         account: Account = self.account_service.get_account_with_server_url_fallback(
             account_id=send_info.account_id, server_url=send_info.server_url
         )
+        r"""
         obj_id_and_converted_refs = self.operations.send(
             send_info.server_url,
             send_info.project_id,
@@ -112,21 +115,28 @@ class SendOperation:
             on_operation_progressed,
             ct,
         )
+        """
+        transport = ServerTransport(
+            client=self.client_factory.create(account=account),
+            account=account,
+            stream_id=send_info.project_id,
+        )
+        obj_id = operations.send(base=commit_object, transports=[transport])
         # store cache
         # ct.ThrowIfCancellationRequested()
         # on_operation_progressed.report(CardProgress(status="Linking version to model...",progress=None))
 
         # create a version in the project
-        api_client = self.client_factory.create(account)
+        api_client: SpeckleClient = self.client_factory.create(account)
 
         _ = api_client.version.create(
             CreateVersionInput(
-                objectId=obj_id_and_converted_refs[0],
+                objectId=obj_id,
                 modelId=send_info.model_id,
                 projectId=send_info.project_id,
                 message="Sent from QGIS v3",
-                sourceApplication=send_info.host_application
+                sourceApplication=send_info.host_application,
             )
         )
 
-        return obj_id_and_converted_refs
+        return (obj_id, {})
