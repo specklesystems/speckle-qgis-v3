@@ -110,17 +110,19 @@ class ModelCardWidget(QWidget):
         model: Model = self.parent.ui_model_card_utils.get_model_by_id_from_client(
             self.card_content
         )
-        layout_top_line.addWidget(self.add_text(model.name))
+        layout_top_line.addWidget(
+            self.add_text(model.name, other_props="font-size: 14px;font-weight: bold;")
+        )
 
         return top_line
 
     def add_send_btn(self):
 
-        button_publish = QPushButton("Publish")
+        button_publish = QPushButton("↑")
         button_publish.clicked.connect(lambda: None)
         button_publish.setStyleSheet(
             "QPushButton {"
-            + f"color:white; border-radius: 5px;{ZERO_MARGIN_PADDING}"
+            + f"color:white; border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 24px;font-weight: bold;"
             + f"{BACKGR_COLOR} height:20px;text-align: center; padding: 0px 10px;"
             + "} QPushButton:hover { "
             + f"{BACKGR_COLOR_LIGHT};"
@@ -129,7 +131,7 @@ class ModelCardWidget(QWidget):
         button_publish.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         return button_publish
 
-    def add_text(self, content: str, color: str = "black"):
+    def add_text(self, content: str, color: str = "black", other_props=""):
 
         # add label text (in a shape of QPushButton for easier styling)
         text = QPushButton(content)
@@ -138,7 +140,7 @@ class ModelCardWidget(QWidget):
         text.setStyleSheet(
             "QPushButton {"
             + f"color:{color};border-radius: 7px;{ZERO_MARGIN_PADDING}"
-            + f" {BACKGR_COLOR_TRANSPARENT} height: 20px;text-align: left;"
+            + f" {BACKGR_COLOR_TRANSPARENT} height: 20px;text-align: left;{other_props}"
             + "}"
         )
         return text

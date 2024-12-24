@@ -135,8 +135,8 @@ class ModelCardsWidget(QWidget):
 
         # for some reason, "margin-left" doesn't make any effect here
         label.setStyleSheet(
-            "QLabel {"
-            + f"{ZERO_MARGIN_PADDING}padding-left:{int(WIDGET_SIDE_BUFFER/2)}; padding-top:{int(WIDGET_SIDE_BUFFER/4)}; margin-bottom:{int(WIDGET_SIDE_BUFFER/4)}; text-align:left;"
+            "QLabel {font-size: 14px;color:rgba(130,130,130,1);"
+            + f"{ZERO_MARGIN_PADDING}padding-left:{int(WIDGET_SIDE_BUFFER/5)}; padding-top:{int(WIDGET_SIDE_BUFFER/4)}; text-align:left;"
             + "}"
         )
         return label
@@ -209,10 +209,13 @@ class ModelCardsWidget(QWidget):
                     widget.card_content.server_url == new_card.server_url
                     and widget.card_content.project_id == new_card.project_id
                 ):
-                    # if the same model, remove it
-                    existing_content.pop()
-                    cards_count -= 1
                     insert_index = cards_count
+
+                    # if the same model, remove it
+                    if widget.card_content.model_id == new_card.model_id:
+                        existing_content.pop()
+                        cards_count -= 1
+                        insert_index = cards_count
 
                 cards_count += 1
 
@@ -221,6 +224,31 @@ class ModelCardsWidget(QWidget):
             existing_content.append(new_card)
         else:
             existing_content.insert(insert_index + 1, new_card)
+
+        assigned_cards_list_widget = self.create_area_with_cards(existing_content)
+        self.scroll_area.setWidget(assigned_cards_list_widget)
+
+        # adjust size of new widget:
+        self.resizeEvent()
+
+    def remove_card(self, new_card: ModelCard):
+
+        self.cards_list_widget.setParent(None)
+
+        existing_content = []
+        for i in range(self.cards_list_widget.layout().count()):
+            widget = self.cards_list_widget.layout().itemAt(i).widget()
+            if isinstance(widget, ModelCardWidget):
+                # check if it's the card that needs to be removed
+                if (
+                    widget.card_content.server_url == new_card.server_url
+                    and widget.card_content.project_id == new_card.project_id
+                    and widget.card_content.model_id == new_card.model_id
+                ):
+                    # if the same model, remove it
+                    continue
+
+                existing_content.append(widget.card_content)
 
         assigned_cards_list_widget = self.create_area_with_cards(existing_content)
         self.scroll_area.setWidget(assigned_cards_list_widget)
