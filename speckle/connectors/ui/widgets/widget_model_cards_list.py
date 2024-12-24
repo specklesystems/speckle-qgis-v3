@@ -56,21 +56,17 @@ class ModelCardsWidget(QWidget):
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
 
-        self.create_search_button()
+        self.create_search_button()  # will be added later to the child widget
 
         ##########################
         cards_selection_widget = self.create_cards_selection_widget(cards_list)
 
         content = QWidget()
         content.layout = QVBoxLayout(self)
-        content.layout.setContentsMargins(
-            0,
-            LABEL_HEIGHT,
-            0,
-            0,
-        )
+        content.layout.setContentsMargins(0, LABEL_HEIGHT, 0, 0)
         content.layout.setAlignment(Qt.AlignCenter)
         content.layout.addWidget(cards_selection_widget)
+        content.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
         ##########################
 
         # add both overlapping elements to widget
@@ -113,7 +109,6 @@ class ModelCardsWidget(QWidget):
 
         # add label and scroll area to the container
         scroll_container.layout().addWidget(scroll_area)
-
         scroll_container.layout().addWidget(self.global_publish_btn)
 
         return scroll_container
@@ -140,7 +135,7 @@ class ModelCardsWidget(QWidget):
         # for some reason, "margin-left" doesn't make any effect here
         label.setStyleSheet(
             "QLabel {font-size: 14px;color:rgba(130,130,130,1);"
-            + f"{ZERO_MARGIN_PADDING}padding-left:{int(WIDGET_SIDE_BUFFER/5)}; padding-top:{int(WIDGET_SIDE_BUFFER/4)}; text-align:left;"
+            + f"{ZERO_MARGIN_PADDING}padding-left:{int(WIDGET_SIDE_BUFFER/6)}; padding-top:{int(WIDGET_SIDE_BUFFER/4)}; text-align:left;"
             + "}"
         )
         return label
@@ -150,7 +145,7 @@ class ModelCardsWidget(QWidget):
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setStyleSheet(
             "QScrollArea {"
-            + f"{ZERO_MARGIN_PADDING}margin-bottom:{LABEL_HEIGHT};"
+            + f"{ZERO_MARGIN_PADDING}margin-bottom:{LABEL_HEIGHT};"  # space fot Publish btn
             + "}"
         )
         self.scroll_area.setAlignment(Qt.AlignHCenter)
@@ -163,11 +158,9 @@ class ModelCardsWidget(QWidget):
 
     def create_area_with_cards(self, cards_content_list: List[ModelCard]) -> QWidget:
 
-        self.cards_list_widget = QWidget()
-        self.cards_list_widget.setStyleSheet(
-            "QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}"
-        )
-        _ = QVBoxLayout(self.cards_list_widget)
+        cards_list_widget = QWidget()
+        cards_list_widget.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
+        _ = QVBoxLayout(cards_list_widget)
 
         all_widgets = []
 
@@ -193,7 +186,9 @@ class ModelCardsWidget(QWidget):
                 all_widgets.append(project_card)
 
         for project_card in all_widgets:
-            self.cards_list_widget.layout().addWidget(project_card)
+            cards_list_widget.layout().addWidget(project_card)
+
+        self.cards_list_widget = cards_list_widget
 
         return self.cards_list_widget
 
@@ -311,7 +306,7 @@ class ModelCardsWidget(QWidget):
                 self.parentWidget.frameSize().height(),
             )
             self.cards_list_widget.resize(
-                self.parentWidget.frameSize().width() - 1 * WIDGET_SIDE_BUFFER,
+                self.parentWidget.frameSize().width() - int(0.5 * WIDGET_SIDE_BUFFER),
                 self.cards_list_widget.height(),
             )
         except RuntimeError as e:

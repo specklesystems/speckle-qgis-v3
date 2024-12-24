@@ -45,7 +45,7 @@ class NoModelCardsWidget(QWidget):
         self.message_card = QWidget()
         self.message_card.setStyleSheet(
             "QWidget {"
-            + f"border-radius: 10px;padding: 20px;margin:{WIDGET_SIDE_BUFFER};height: 100px;{BACKGR_COLOR_WHITE}"
+            + f"border-radius: 10px;padding: 20px;margin:{int(0.5 * WIDGET_SIDE_BUFFER)};height: 100px;{BACKGR_COLOR_WHITE}"
             + "}"
         )
         self.fill_message_card()
