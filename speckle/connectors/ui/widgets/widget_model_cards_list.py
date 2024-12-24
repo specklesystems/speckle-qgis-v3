@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
 from PyQt5 import QtWidgets
@@ -169,7 +169,9 @@ class ModelCardsWidget(QWidget):
         self.cards_list_widget.setStyleSheet(
             "QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}"
         )
-        layout = QVBoxLayout(self.cards_list_widget)
+        _ = QVBoxLayout(self.cards_list_widget)
+
+        all_widgets = []
 
         # in case the input argument was missing or None, don't create any cards
         if isinstance(cards_content_list, list):
@@ -187,48 +189,69 @@ class ModelCardsWidget(QWidget):
                     pass
                 else:
                     label = self.create_widget_label(project.name)
-                    self.cards_list_widget.layout().addWidget(label)
+                    all_widgets.append(label)
 
                 project_card = ModelCardWidget(self, content)
+                all_widgets.append(project_card)
 
-                layout.addWidget(project_card)
+        for project_card in all_widgets:
+            self.cards_list_widget.layout().addWidget(project_card)
 
+        return self.cards_list_widget
+
+    def modify_area_with_cards(self, widgets_list: List[Any]) -> QWidget:
+
+        cards_list_widget = QWidget()
+        cards_list_widget.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
+        _ = QVBoxLayout(cards_list_widget)
+
+        # in case the input argument was missing or None, don't create any cards
+        if isinstance(widgets_list, list):
+            for widget in widgets_list:
+                cards_list_widget.layout().addWidget(widget)
+
+        self.cards_list_widget = cards_list_widget
         return self.cards_list_widget
 
     def add_new_card(self, new_card: ModelCard):
 
-        self.cards_list_widget.setParent(None)
-
-        existing_content = []
-        cards_count = 0
-        insert_index = -1
+        all_widgets = []
+        new_card_widget = None
         for i in range(self.cards_list_widget.layout().count()):
             widget = self.cards_list_widget.layout().itemAt(i).widget()
             if isinstance(widget, ModelCardWidget):
-                existing_content.append(widget.card_content)
 
                 # check if it's the same project, to group together
                 if (
                     widget.card_content.server_url == new_card.server_url
                     and widget.card_content.project_id == new_card.project_id
                 ):
-                    insert_index = cards_count
-
-                    # if the same model, remove it
+                    # if the same model, only add new
                     if widget.card_content.model_id == new_card.model_id:
-                        existing_content.pop()
-                        cards_count -= 1
-                        insert_index = cards_count
+                        if new_card_widget is None:
+                            new_card_widget = ModelCardWidget(self, new_card)
+                            all_widgets.append(new_card_widget)
+                    else:  # add the old one and the new one
+                        all_widgets.append(widget)
+                        if new_card_widget is None:
+                            new_card_widget = ModelCardWidget(self, new_card)
+                            all_widgets.append(new_card_widget)
+                else:
+                    all_widgets.append(widget)
 
-                cards_count += 1
+            else:  # labels
+                all_widgets.append(widget)
 
-        # add card to the end, or group with the same project cards
-        if insert_index == -1:
-            existing_content.append(new_card)
-        else:
-            existing_content.insert(insert_index + 1, new_card)
+        if new_card_widget is None:
+            project: Project = self.ui_model_card_utils.get_project_by_id_from_client(
+                new_card
+            )
+            label = self.create_widget_label(project.name)
+            all_widgets.append(label)
+            new_card_widget = ModelCardWidget(self, new_card)
+            all_widgets.append(new_card_widget)
 
-        assigned_cards_list_widget = self.create_area_with_cards(existing_content)
+        assigned_cards_list_widget = self.modify_area_with_cards(all_widgets)
         self.scroll_area.setWidget(assigned_cards_list_widget)
 
         # adjust size of new widget:
@@ -236,9 +259,10 @@ class ModelCardsWidget(QWidget):
 
     def remove_card(self, new_card: ModelCard):
 
-        self.cards_list_widget.setParent(None)
-
+        all_widgets = []
         existing_content = []
+        all_projects = []
+
         for i in range(self.cards_list_widget.layout().count()):
             widget = self.cards_list_widget.layout().itemAt(i).widget()
             if isinstance(widget, ModelCardWidget):
@@ -248,17 +272,34 @@ class ModelCardsWidget(QWidget):
                     and widget.card_content.project_id == new_card.project_id
                     and widget.card_content.model_id == new_card.model_id
                 ):
-                    # if the same model, remove it
-                    continue
+                    # if the same model, don't add it
+                    pass
+                else:
+                    existing_content.append(widget.card_content)
+                    all_widgets.append(widget)
+                    all_projects.append(widget.card_content.model_id)
 
-                existing_content.append(widget.card_content)
+            else:  # labels
+                # check if previous project group has at least 1 project
+                if len(all_projects) > 0:
+                    # only add label if there are projects in the group
+                    if len(all_projects[-1]) > 0:
+                        all_widgets.append(widget)
+                else:  # cannot verify, no project groups yey
+                    all_widgets.append(widget)
+
+                all_projects.append([])
+
+        # delete label if the last project group is empty
+        if len(all_projects) > 0 and len(all_projects[-1]) == 0:
+            all_widgets.pop()
 
         # if no cards left, remove widget completely
         if len(existing_content) == 0:
             self.parentWidget.remove_widget_model_cards()
             return
 
-        assigned_cards_list_widget = self.create_area_with_cards(existing_content)
+        assigned_cards_list_widget = self.modify_area_with_cards(all_widgets)
         self.scroll_area.setWidget(assigned_cards_list_widget)
 
         # adjust size of new widget:
