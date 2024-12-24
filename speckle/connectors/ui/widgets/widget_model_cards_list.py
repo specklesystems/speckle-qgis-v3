@@ -199,6 +199,7 @@ class ModelCardsWidget(QWidget):
         self.cards_list_widget.setParent(None)
 
         existing_content = []
+        cards_count = 0
         insert_index = -1
         for i in range(self.cards_list_widget.layout().count()):
             widget = self.cards_list_widget.layout().itemAt(i).widget()
@@ -210,13 +211,19 @@ class ModelCardsWidget(QWidget):
                     widget.card_content.server_url == new_card.server_url
                     and widget.card_content.project_id == new_card.project_id
                 ):
-                    insert_index = i
+                    # if the same model, remove it
+                    existing_content.pop()
+                    cards_count -= 1
+                    insert_index = cards_count
+
+                cards_count += 1
+
         # add card to the end, or group with the same project cards
         if insert_index == -1:
             existing_content.append(new_card)
         else:
             existing_content.insert(insert_index + 1, new_card)
-        print(existing_content)
+
         assigned_cards_list_widget = self.create_area_with_cards(existing_content)
         self.scroll_area.setWidget(assigned_cards_list_widget)
 

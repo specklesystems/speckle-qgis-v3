@@ -1,3 +1,4 @@
+from functools import partial
 from typing import List
 
 from speckle.connectors.ui.widgets.widget_cards_list_temporary import (
@@ -51,10 +52,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         for i, content in enumerate(projects_contents_list):
             callback = content[0]
 
-            def make_callback(v):
-                return lambda: self.overwrite_model_search_callback(v)
-
-            projects_contents_list[i][0] = make_callback(callback)
+            projects_contents_list[i][0] = partial(
+                self.overwrite_model_search_callback, callback
+            )
 
     def add_projects(self):
 
