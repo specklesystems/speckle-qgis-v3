@@ -285,10 +285,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             # TODO
             # right now the cards are emitting too many signals on single click
 
-            # subscribe to all Add Card events from all future ModelCards
-            self.widget_model_cards.add_model_signal.connect(
-                lambda model_card=model_card: self.add_model_signal.emit(model_card)
-            )
             # subscribe to all Remove Card events from all future ModelCards
             self.widget_model_cards.remove_model_signal.connect(
                 lambda model_card=model_card: self.remove_model_signal.emit(model_card)
@@ -311,6 +307,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
 
         else:
             self.widget_model_cards.add_new_card(model_card)
+            self.add_model_signal.emit(model_card)
 
     def open_select_projects_widget(self):
 
