@@ -2,7 +2,14 @@ from typing import List
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QStackedLayout, QLabel, QPushButton
+from PyQt5.QtWidgets import (
+    QVBoxLayout,
+    QWidget,
+    QStackedLayout,
+    QLabel,
+    QPushButton,
+    QGraphicsDropShadowEffect,
+)
 
 from speckle.connectors.ui.models import ModelCard
 from speckle.connectors.ui.utils.model_cards_widget_utils import UiModelCardsUtils
@@ -11,8 +18,8 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT,
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
-    BACKGR_COLOR_WHITE,
     LABEL_HEIGHT,
+    BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR_LIGHT_GREY2,
 )
 from speckle.connectors.ui.widgets.background import BackgroundWidget
@@ -64,22 +71,8 @@ class ModelCardsWidget(QWidget):
         content.layout.addWidget(cards_selection_widget)
         ##########################
 
-        # add Publish putton
-        button_publish = self.create_search_button()
-        publish_card = QWidget()
-        publish_card.layout = QVBoxLayout(self)
-        publish_card.layout.setContentsMargins(
-            0,
-            LABEL_HEIGHT,
-            0,
-            0,
-        )
-        publish_card.layout.setAlignment(Qt.AlignBottom)
-        publish_card.layout.addWidget(button_publish)
-
         # add both overlapping elements to widget
         self.layout.addWidget(content)
-        self.layout.addWidget(publish_card)
 
     def create_search_button(self) -> QPushButton:
 
@@ -124,7 +117,9 @@ class ModelCardsWidget(QWidget):
         scroll_container.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         scroll_container.setStyleSheet(
             "QWidget {"
-            f"{ZERO_MARGIN_PADDING}" + f"border-radius:0px; {BACKGR_COLOR_WHITE}" + "}"
+            f"{ZERO_MARGIN_PADDING}{BACKGR_COLOR_LIGHT_GREY}"
+            + "border-radius:0px;"  # border-color:rgba(220,220,220,1);border-width:1px;border-style:solid;"
+            + "}"
         )
         scroll_container_layout = QVBoxLayout(scroll_container)
         scroll_container_layout.setAlignment(Qt.AlignHCenter)
@@ -165,7 +160,7 @@ class ModelCardsWidget(QWidget):
         self.cards_list_widget.setStyleSheet(
             "QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}"
         )
-        _ = QVBoxLayout(self.cards_list_widget)
+        layout = QVBoxLayout(self.cards_list_widget)
 
         # in case the input argument was missing or None, don't create any cards
         if isinstance(cards_content_list, list):
@@ -187,10 +182,10 @@ class ModelCardsWidget(QWidget):
 
                 project_card = ModelCardWidget(self, content)
 
-                self.cards_list_widget.layout().addWidget(project_card)
+                layout.addWidget(project_card)
 
         self.create_search_button()
-        self.cards_list_widget.layout().addWidget(self.global_publish_btn)
+        layout.addWidget(self.global_publish_btn)
 
         return self.cards_list_widget
 

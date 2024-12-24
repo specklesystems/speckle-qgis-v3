@@ -13,7 +13,7 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     ZERO_MARGIN_PADDING,
     SPECKLE_COLOR,
     BACKGR_COLOR_TRANSPARENT,
-    BACKGR_COLOR_LIGHT_GREY2,
+    BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR_GREY,
 )
 
@@ -34,7 +34,7 @@ class CardInListWidget(QWidget):
         self.setStyleSheet(
             "QWidget {"
             + "border-radius:5px; margin-bottom:3px; min-height:50px;"
-            + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_LIGHT_GREY2}"
+            + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_LIGHT_GREY}"
             + "} QWidget:hover { "
             + f"{BACKGR_COLOR_GREY}"
             + "}"

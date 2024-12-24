@@ -1,6 +1,13 @@
 from PyQt5 import QtCore
+from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt5.QtWidgets import (
+    QVBoxLayout,
+    QWidget,
+    QPushButton,
+    QLabel,
+    QGraphicsDropShadowEffect,
+)
 
 from speckle.connectors.ui.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
@@ -16,6 +23,7 @@ class NoModelCardsWidget(QWidget):
     context_stack = None
     message_card: QWidget
     send_data = pyqtSignal(object)
+    shadow_effect = None
 
     def __init__(self, parent=None):
         super(NoModelCardsWidget, self).__init__(parent)
@@ -41,7 +49,20 @@ class NoModelCardsWidget(QWidget):
             + "}"
         )
         self.fill_message_card()
+        self.add_drop_shadow(self.message_card)
+
         self.layout.addWidget(self.message_card)
+
+    def add_drop_shadow(self, item=None):
+        if not item:
+            item = self
+        # create drop shadow effect
+        self.shadow_effect = QGraphicsDropShadowEffect()
+        self.shadow_effect.setOffset(2, 2)
+        self.shadow_effect.setBlurRadius(8)
+        self.shadow_effect.setColor(QColor.fromRgb(100, 100, 100, 150))
+
+        item.setGraphicsEffect(self.shadow_effect)
 
     def fill_message_card(self):
         boxLayout = QVBoxLayout(self.message_card)

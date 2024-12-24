@@ -1,5 +1,5 @@
-from typing import List
 from PyQt5 import QtCore
+from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QCursor
@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QWidget,
     QPushButton,
+    QGraphicsDropShadowEffect,
 )
 
 from speckle.connectors.ui.models import ModelCard, SenderModelCard
@@ -15,7 +16,7 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
     ZERO_MARGIN_PADDING,
-    SPECKLE_COLOR,
+    BACKGR_COLOR_WHITE,
     BACKGR_COLOR_TRANSPARENT,
     BACKGR_COLOR_LIGHT_GREY2,
     BACKGR_COLOR_GREY,
@@ -26,6 +27,7 @@ from specklepy.core.api.models.current import Model
 class ModelCardWidget(QWidget):
     card_content: ModelCard = None
     send_data = pyqtSignal(object)
+    shadow_effect = None
 
     def __init__(self, parent=None, card_content: ModelCard = None):
         super(ModelCardWidget, self).__init__(None)
@@ -40,15 +42,28 @@ class ModelCardWidget(QWidget):
         self.setStyleSheet(
             "QWidget {"
             + f"border-radius:5px;{ZERO_MARGIN_PADDING} margin-bottom:3px; min-height:40px;"
-            + f"{BACKGR_COLOR_LIGHT_GREY2}"
+            + f"{BACKGR_COLOR_WHITE}"
             + "}"
         )
+
+        self.add_drop_shadow()
 
         # create areas in the card
         top_section = self.create_card_header(card_content)
 
         # add to layout
         layout.addWidget(top_section)
+
+    def add_drop_shadow(self, item=None):
+        if not item:
+            item = self
+        # create drop shadow effect
+        self.shadow_effect = QGraphicsDropShadowEffect()
+        self.shadow_effect.setOffset(2, 2)
+        self.shadow_effect.setBlurRadius(8)
+        self.shadow_effect.setColor(QColor.fromRgb(100, 100, 100, 150))
+
+        item.setGraphicsEffect(self.shadow_effect)
 
     def create_card_header(self, card_content: ModelCard):
         top_line = QWidget()
