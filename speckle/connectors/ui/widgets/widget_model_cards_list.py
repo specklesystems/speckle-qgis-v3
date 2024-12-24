@@ -2,7 +2,7 @@ from typing import Any, List
 from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
@@ -34,6 +34,7 @@ class ModelCardsWidget(QWidget):
     cards_list_widget: QWidget = None  # needed here to resize child elements
     scroll_area: QtWidgets.QScrollArea = None
     global_publish_btn: QPushButton = None
+    add_projects_search_signal = pyqtSignal()
 
     def __init__(
         self,
@@ -42,7 +43,7 @@ class ModelCardsWidget(QWidget):
         cards_list: List[ModelCard] = None,
     ):
         super(ModelCardsWidget, self).__init__(parent=parent)
-        self.parentWidget: "SpeckleQGISv3Dialog" = parent
+        self.parentWidget: Any = parent
         self.ui_model_card_utils = UiModelCardsUtils()
 
         # align with the parent widget size
@@ -75,9 +76,7 @@ class ModelCardsWidget(QWidget):
     def create_search_button(self) -> QPushButton:
 
         button_publish = QPushButton("Publish")
-        button_publish.clicked.connect(
-            lambda: self.parentWidget.open_select_projects_widget()
-        )
+        button_publish.clicked.connect(lambda: self.add_projects_search_signal.emit())
         button_publish.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 7px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"

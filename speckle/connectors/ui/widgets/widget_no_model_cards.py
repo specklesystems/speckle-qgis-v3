@@ -22,7 +22,7 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
 class NoModelCardsWidget(QWidget):
     context_stack = None
     message_card: QWidget
-    send_data = pyqtSignal(object)
+    add_projects_search_signal = pyqtSignal()
     shadow_effect = None
 
     def __init__(self, parent=None):
@@ -83,9 +83,7 @@ class NoModelCardsWidget(QWidget):
     def create_search_button(self) -> QPushButton:
 
         button_publish = QPushButton("Publish")
-        button_publish.clicked.connect(
-            lambda: self.parentWidget.open_select_projects_widget()
-        )
+        button_publish.clicked.connect(lambda: self.add_projects_search_signal.emit())
         button_publish.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 7px;margin-top:0px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"

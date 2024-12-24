@@ -227,6 +227,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.layout().addWidget(no_model_cards_widget)
             self.widget_no_model_cards = no_model_cards_widget
 
+            self.widget_no_model_cards.add_projects_search_signal.connect(
+                self.open_select_projects_widget
+            )
+
     def remove_all_widgets(self):
         if self.widget_no_document:
             self.widget_no_document.setParent(None)
@@ -274,6 +278,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             )
             # add widgets to the layout
             self.layout().addWidget(self.widget_model_cards)
+
+            self.widget_model_cards.add_projects_search_signal.connect(
+                self.open_select_projects_widget
+            )
         else:
             self.widget_model_cards.add_new_card(model_card)
 
