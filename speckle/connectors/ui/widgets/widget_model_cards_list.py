@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget, QStackedLayout, QLabel, QPushB
 from speckle.connectors.ui.models import ModelCard
 from speckle.connectors.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.connectors.ui.widgets.utils.global_resources import (
+    BACKGR_COLOR,
+    BACKGR_COLOR_LIGHT,
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
@@ -25,7 +27,6 @@ class ModelCardsWidget(QWidget):
     ui_model_card_utils: UiModelCardsUtils = None
     background: BackgroundWidget = None
     cards_list_widget: QWidget = None  # needed here to resize child elements
-    load_more_btn: QPushButton = None
     scroll_area: QtWidgets.QScrollArea = None
 
     def __init__(
@@ -34,7 +35,7 @@ class ModelCardsWidget(QWidget):
         parent=None,
         cards_list: List[ModelCard] = None,
     ):
-        super(ModelCardsWidget, self).__init__(parent)
+        super(ModelCardsWidget, self).__init__(parent=parent)
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
         self.ui_model_card_utils = UiModelCardsUtils()
 
@@ -54,15 +55,45 @@ class ModelCardsWidget(QWidget):
         content = QWidget()
         content.layout = QVBoxLayout(self)
         content.layout.setContentsMargins(
-            WIDGET_SIDE_BUFFER,
-            WIDGET_SIDE_BUFFER + LABEL_HEIGHT,
-            WIDGET_SIDE_BUFFER,
-            WIDGET_SIDE_BUFFER,
+            0,
+            LABEL_HEIGHT,
+            0,
+            0,
         )
         content.layout.setAlignment(Qt.AlignCenter)
         content.layout.addWidget(cards_selection_widget)
 
+        # add Publish putton
+        button_publish = self.create_search_button()
+        publish_card = QWidget()
+        publish_card.layout = QVBoxLayout(self)
+        publish_card.layout.setContentsMargins(
+            0,
+            LABEL_HEIGHT,
+            0,
+            0,
+        )
+        publish_card.layout.setAlignment(Qt.AlignBottom)
+        publish_card.layout.addWidget(button_publish)
+
+        # add both overlapping elements to widget
         self.layout.addWidget(content)
+        self.layout.addWidget(publish_card)
+
+    def create_search_button(self) -> QPushButton:
+
+        button_publish = QPushButton("Publish")
+        button_publish.clicked.connect(
+            lambda: self.parentWidget.open_select_projects_widget()
+        )
+        button_publish.setStyleSheet(
+            "QWidget {"
+            + f"color:white;border-radius: 7px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
+            + "} QWidget:hover { "
+            + f"{BACKGR_COLOR_LIGHT};"
+            + " }"
+        )
+        return button_publish
 
     def add_background(self):
         self.background = BackgroundWidget(
@@ -91,7 +122,7 @@ class ModelCardsWidget(QWidget):
         scroll_container.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         scroll_container.setStyleSheet(
             "QWidget {"
-            f"{ZERO_MARGIN_PADDING}" + f"border-radius:5px; {BACKGR_COLOR_WHITE}" + "}"
+            f"{ZERO_MARGIN_PADDING}" + f"border-radius:0px; {BACKGR_COLOR_WHITE}" + "}"
         )
         scroll_container_layout = QVBoxLayout(scroll_container)
         scroll_container_layout.setAlignment(Qt.AlignHCenter)
@@ -113,7 +144,11 @@ class ModelCardsWidget(QWidget):
     def create_scroll_area(self, cards_content_list: List[ModelCard]):
 
         self.scroll_area = QtWidgets.QScrollArea()
-        self.scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")
+        self.scroll_area.setStyleSheet(
+            "QScrollArea {"
+            + f"{ZERO_MARGIN_PADDING}margin-bottom:{LABEL_HEIGHT};"
+            + "}"
+        )
         self.scroll_area.setAlignment(Qt.AlignHCenter)
 
         # create a widget inside scroll area
@@ -121,10 +156,6 @@ class ModelCardsWidget(QWidget):
         self.scroll_area.setWidget(cards_list_widget)
 
         return self.scroll_area
-
-    def load_more(self):
-        """Overwride in the inheriting widgets."""
-        return
 
     def create_area_with_cards(self, cards_content_list: List[ModelCard]) -> QWidget:
 
@@ -145,8 +176,6 @@ class ModelCardsWidget(QWidget):
 
                 self.cards_list_widget.layout().addWidget(label)
                 self.cards_list_widget.layout().addWidget(project_card)
-
-        self.cards_list_widget.layout().addWidget(self.load_more_btn)
 
         return self.cards_list_widget
 
@@ -177,7 +206,7 @@ class ModelCardsWidget(QWidget):
                 self.parentWidget.frameSize().height(),
             )
             self.cards_list_widget.resize(
-                self.parentWidget.frameSize().width() - 3 * WIDGET_SIDE_BUFFER,
+                self.parentWidget.frameSize().width() - 1 * WIDGET_SIDE_BUFFER,
                 self.cards_list_widget.height(),
             )
         except RuntimeError as e:

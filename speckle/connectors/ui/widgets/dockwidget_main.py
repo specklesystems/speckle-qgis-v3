@@ -282,6 +282,12 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
                 self.frameSize().height(),
             )
 
+        if self.widget_model_cards:
+            self.widget_model_cards.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
+
     def addDataStorage(self, plugin):
         self.dataStorage = plugin.dataStorage
         try:
