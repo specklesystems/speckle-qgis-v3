@@ -224,6 +224,7 @@ class SpeckleQGISv3:
 
     def send_model(self, model_card):
         print(model_card.model_id)
+        # TODO: send data
 
     def verify_dependencies(self):
 

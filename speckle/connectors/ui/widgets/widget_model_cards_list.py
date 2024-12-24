@@ -36,6 +36,7 @@ class ModelCardsWidget(QWidget):
     global_publish_btn: QPushButton = None
     add_projects_search_signal = pyqtSignal()
     send_model_signal = pyqtSignal(ModelCard)
+    child_cards: List[ModelCardWidget]
 
     def __init__(
         self,
@@ -46,6 +47,8 @@ class ModelCardsWidget(QWidget):
         super(ModelCardsWidget, self).__init__(parent=parent)
         self.parentWidget: Any = parent
         self.ui_model_card_utils = UiModelCardsUtils()
+
+        self.child_cards: List[ModelCardWidget] = []
 
         # align with the parent widget size
         self.resize(
@@ -187,7 +190,9 @@ class ModelCardsWidget(QWidget):
 
         for project_card in all_widgets:
             cards_list_widget.layout().addWidget(project_card)
+
             if isinstance(project_card, ModelCardWidget):
+                self.child_cards.append(project_card)
                 project_card.send_model_signal.connect(self.emit_from_child_card)
 
         self.cards_list_widget = cards_list_widget
@@ -204,9 +209,14 @@ class ModelCardsWidget(QWidget):
         _ = QVBoxLayout(cards_list_widget)
 
         # in case the input argument was missing or None, don't create any cards
+        self.child_cards.clear()
         if isinstance(widgets_list, list):
             for widget in widgets_list:
                 cards_list_widget.layout().addWidget(widget)
+
+                if isinstance(widget, ModelCardWidget):
+                    self.child_cards.append(widget)
+                    widget.send_model_signal.connect(self.emit_from_child_card)
 
         self.cards_list_widget = cards_list_widget
         return self.cards_list_widget
