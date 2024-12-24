@@ -9,8 +9,6 @@ from PyQt5.QtWidgets import (
     QStackedLayout,
     QLabel,
     QPushButton,
-    QSpacerItem,
-    QSizePolicy,
 )
 
 from speckle.connectors.ui.models import ModelCard

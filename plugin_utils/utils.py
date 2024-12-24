@@ -1,6 +1,5 @@
 import sys
 import os
-import subprocess
 
 MESSAGE_CATEGORY = "Speckle"
 

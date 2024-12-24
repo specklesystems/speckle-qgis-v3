@@ -9,7 +9,7 @@ if path not in sys.path:
 
 try:
     from plugin_utils.installer import ensure_dependencies, startDebugger
-    from speckle.utils.panel_logging import logger
+    from plugin_utils.panel_logging import logger
 
     from qgis.core import Qgis
 

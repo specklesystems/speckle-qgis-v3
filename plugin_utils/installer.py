@@ -11,7 +11,7 @@ import pkg_resources
 from subprocess import run
 import shutil
 
-from speckle.utils.utils import get_qgis_python_path
+from plugin_utils.utils import get_qgis_python_path
 
 _user_data_env_var = "SPECKLE_USERDATA_PATH"
 _debug = False

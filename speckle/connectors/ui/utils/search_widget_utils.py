@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, List, Tuple
+from typing import Any, List
 from speckle.connectors.ui.models import SenderModelCard
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account

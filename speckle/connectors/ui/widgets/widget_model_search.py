@@ -1,7 +1,4 @@
-from typing import List, Tuple
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget
-
+from typing import List
 
 from speckle.connectors.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.connectors.ui.utils.search_widget_utils import UiSearchUtils

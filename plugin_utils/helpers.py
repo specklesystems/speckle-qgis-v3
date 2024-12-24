@@ -5,7 +5,11 @@ from textwrap import wrap
 import inspect
 from difflib import SequenceMatcher
 
-from specklepy.objects.models.units import get_units_from_string, get_scale_factor_to_meters
+from plugin_utils.panel_logging import logToUser
+from specklepy.objects.models.units import (
+    get_units_from_string,
+    get_scale_factor_to_meters,
+)
 from specklepy.core.api.client import SpeckleClient
 
 
@@ -40,20 +44,12 @@ def get_scale_factor_to_meter(units_src: str) -> float:
         units = get_units_from_string(units_src)
         return get_scale_factor_to_meters(units)
     except:
-        try:
-            from speckle.utils.panel_logging import logToUser
-
-            logToUser(
-                f"Units {units_src} are not supported. Meters will be applied by default.",
-                level=1,
-                func=inspect.stack()[0][3],
-            )
-            return 1.0
-        except:
-            print(
-                f"Units {units_src} are not supported. Meters will be applied by default."
-            )
-            return 1.0
+        logToUser(
+            f"Units {units_src} are not supported. Meters will be applied by default.",
+            level=1,
+            func=inspect.stack()[0][3],
+        )
+        return 1.0
 
 
 def jsonFromList(jsonObj: dict, levels: list):
