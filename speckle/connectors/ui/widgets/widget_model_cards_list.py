@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QStackedLayout, QLabel, QPushButton
 
 from speckle.connectors.ui.models import ModelCard
+from speckle.connectors.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.connectors.ui.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
@@ -16,10 +17,12 @@ from speckle.connectors.ui.widgets.background import BackgroundWidget
 from speckle.connectors.ui.utils.search_widget_utils import UiSearchUtils
 from speckle.connectors.ui.widgets.widget_card_from_list import CardInListWidget
 from speckle.connectors.ui.widgets.widget_model_card import ModelCardWidget
+from specklepy.core.api.models.current import Project
 
 
 class ModelCardsWidget(QWidget):
 
+    ui_model_card_utils: UiModelCardsUtils = None
     background: BackgroundWidget = None
     cards_list_widget: QWidget = None  # needed here to resize child elements
     load_more_btn: QPushButton = None
@@ -33,6 +36,7 @@ class ModelCardsWidget(QWidget):
     ):
         super(ModelCardsWidget, self).__init__(parent)
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
+        self.ui_model_card_utils = UiModelCardsUtils()
 
         # align with the parent widget size
         self.resize(
@@ -133,8 +137,11 @@ class ModelCardsWidget(QWidget):
         # in case the input argument was missing or None, don't create any cards
         if isinstance(cards_content_list, list):
             for content in cards_content_list:
-                label = self.create_widget_label(content.project_id)
-                project_card = ModelCardWidget(content)
+                project: Project = (
+                    self.ui_model_card_utils.get_project_by_id_from_client(content)
+                )
+                label = self.create_widget_label(project.name)
+                project_card = ModelCardWidget(self, content)
 
                 self.cards_list_widget.layout().addWidget(label)
                 self.cards_list_widget.layout().addWidget(project_card)

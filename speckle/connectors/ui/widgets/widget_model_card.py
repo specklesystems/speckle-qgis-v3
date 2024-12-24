@@ -20,15 +20,16 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT_GREY2,
     BACKGR_COLOR_GREY,
 )
+from specklepy.core.api.models.current import Model
 
 
 class ModelCardWidget(QWidget):
     card_content: ModelCard = None
     send_data = pyqtSignal(object)
 
-    def __init__(self, card_content: ModelCard):
+    def __init__(self, parent=None, card_content: ModelCard = None):
         super(ModelCardWidget, self).__init__(None)
-
+        self.parent = parent
         self.card_content = card_content
 
         self.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
@@ -51,7 +52,12 @@ class ModelCardWidget(QWidget):
 
         if isinstance(card_content, SenderModelCard):
             layout_top_line.addWidget(self.add_send_btn())
-        layout_top_line.addWidget(self.add_main_text(card_content.model_id))
+        model: Model = self.parent.ui_model_card_utils.get_model_by_id_from_client(
+            self.card_content
+        )
+        layout_top_line.addWidget(self.add_main_text(model.name))
+
+        # add to layout
         layout.addWidget(top_line)
 
     def add_send_btn(self):
@@ -60,7 +66,7 @@ class ModelCardWidget(QWidget):
         button_publish.clicked.connect(lambda: None)
         button_publish.setStyleSheet(
             "QWidget {"
-            + f"color:white;border-radius: 10px;margin-top:0px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
+            + f"color:white;border-radius: 5px;margin-top:0px;padding: 0px;height: 10px;text-align: center;{BACKGR_COLOR}"
             + "} QWidget:hover { "
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"

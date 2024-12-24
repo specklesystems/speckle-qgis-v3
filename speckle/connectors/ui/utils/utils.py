@@ -6,6 +6,7 @@ from specklepy.core.api.credentials import (
     get_local_accounts,
 )
 from specklepy.core.api.models.current import (
+    Model,
     Project,
     ProjectWithModels,
     ResourceCollection,
@@ -63,11 +64,6 @@ def get_projects_from_client(
     return results
 
 
-# def clear_projects_cursor():
-#    # TODO: clear cursor from ContextStack
-#    pass
-
-
 def get_models_from_client(
     speckle_client: SpeckleClient, project: Project, cursor=None
 ) -> ResourceCollection[Project]:
@@ -88,6 +84,48 @@ def get_models_from_client(
         pass
 
     return results
+
+
+def get_project_by_id_from_client(
+    speckle_client: SpeckleClient, project_id: str
+) -> Project:
+
+    result = None
+    if speckle_client is not None:
+        # possible GraphQLException
+        result: Project = speckle_client.project.get(project_id=project_id)
+
+        if not isinstance(result, Project):
+            # TODO: handle
+            pass
+
+    else:
+        # TODO add a warning
+        pass
+
+    return result
+
+
+def get_model_by_id_from_client(
+    speckle_client: SpeckleClient, project_id: str, model_id: str
+) -> Model:
+
+    result = None
+    if speckle_client is not None:
+        # possible GraphQLException
+        result: Model = speckle_client.model.get(
+            project_id=project_id, model_id=model_id
+        )
+
+        if not isinstance(result, Model):
+            # TODO: handle
+            pass
+
+    else:
+        # TODO add a warning
+        pass
+
+    return result
 
 
 # def clear_models_cursor():
