@@ -244,13 +244,16 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         elif self.widget_model_search == widget:
             self.kill_widget_model_search()
 
-    def create_model_cards_widget(self, first_model_card):
+    def create_model_cards_widget(self, model_card):
         self.kill_process_widgets()
-        self.widget_model_cards = ModelCardsWidget(
-            parent=self, cards_list=[first_model_card]
-        )
-        # add widgets to the layout
-        self.layout().addWidget(self.widget_model_cards)
+        if not self.widget_model_cards:
+            self.widget_model_cards = ModelCardsWidget(
+                parent=self, cards_list=[model_card]
+            )
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_model_cards)
+        else:
+            self.widget_model_cards.add_new_card(model_card)
 
     def open_select_projects_widget(self):
 

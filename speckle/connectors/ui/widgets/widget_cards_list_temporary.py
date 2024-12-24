@@ -178,9 +178,8 @@ class CardsListTemporaryWidget(QWidget):
         existing_content = []
         for i in range(self.cards_list_widget.layout().count()):
             widget = self.cards_list_widget.layout().itemAt(i).widget()
-            if not isinstance(widget, CardInListWidget):
-                continue
-            existing_content.append(widget.card_content)
+            if isinstance(widget, CardInListWidget):
+                existing_content.append(widget.card_content)
 
         existing_content.extend(new_cards_content_list)
         assigned_cards_list_widget = self.create_area_with_cards(existing_content)

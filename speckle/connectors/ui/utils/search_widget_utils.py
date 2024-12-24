@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Any, List, Tuple
 from speckle.connectors.ui.models import SenderModelCard
 from specklepy.core.api.client import SpeckleClient
@@ -84,7 +85,7 @@ class UiSearchUtils(QObject):
 
             # if a receive workflow: get_version_search_widget_content(...)
             model_content = [
-                lambda: self.add_send_model_card(project, model),
+                partial(self.add_send_model_card, project, model),
                 model.name,
                 f"updated {time_ago(model.updatedAt)}",
                 project,

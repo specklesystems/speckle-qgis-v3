@@ -16,8 +16,6 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT_GREY2,
 )
 from speckle.connectors.ui.widgets.background import BackgroundWidget
-from speckle.connectors.ui.utils.search_widget_utils import UiSearchUtils
-from speckle.connectors.ui.widgets.widget_card_from_list import CardInListWidget
 from speckle.connectors.ui.widgets.widget_model_card import ModelCardWidget
 from specklepy.core.api.models.current import Project
 
@@ -171,14 +169,24 @@ class ModelCardsWidget(QWidget):
 
         # in case the input argument was missing or None, don't create any cards
         if isinstance(cards_content_list, list):
-            for content in cards_content_list:
+            for i, content in enumerate(cards_content_list):
                 project: Project = (
                     self.ui_model_card_utils.get_project_by_id_from_client(content)
                 )
-                label = self.create_widget_label(project.name)
+
+                # check if it's the same project, if so - skip label
+                if (
+                    i > 0
+                    and content.server_url == cards_content_list[i - 1].server_url
+                    and content.project_id == cards_content_list[i - 1].project_id
+                ):
+                    pass
+                else:
+                    label = self.create_widget_label(project.name)
+                    self.cards_list_widget.layout().addWidget(label)
+
                 project_card = ModelCardWidget(self, content)
 
-                self.cards_list_widget.layout().addWidget(label)
                 self.cards_list_widget.layout().addWidget(project_card)
 
         self.create_search_button()
@@ -186,24 +194,34 @@ class ModelCardsWidget(QWidget):
 
         return self.cards_list_widget
 
-    def add_new_card(self, new_cards_content_list: list):
+    def add_new_card(self, new_card: ModelCard):
 
         self.cards_list_widget.setParent(None)
 
         existing_content = []
+        insert_index = -1
         for i in range(self.cards_list_widget.layout().count()):
             widget = self.cards_list_widget.layout().itemAt(i).widget()
-            if not isinstance(widget, CardInListWidget):
-                continue
-            existing_content.append(widget.card_content)
+            if isinstance(widget, ModelCardWidget):
+                existing_content.append(widget.card_content)
 
-        existing_content.extend(new_cards_content_list)
+                # check if it's the same project, to group together
+                if (
+                    widget.card_content.server_url == new_card.server_url
+                    and widget.card_content.project_id == new_card.project_id
+                ):
+                    insert_index = i
+        # add card to the end, or group with the same project cards
+        if insert_index == -1:
+            existing_content.append(new_card)
+        else:
+            existing_content.insert(insert_index + 1, new_card)
+        print(existing_content)
         assigned_cards_list_widget = self.create_area_with_cards(existing_content)
-
         self.scroll_area.setWidget(assigned_cards_list_widget)
-        # scroll down
-        vbar = self.scroll_area.verticalScrollBar()
-        vbar.setValue(vbar.maximum())
+
+        # adjust size of new widget:
+        self.resizeEvent()
 
     def resizeEvent(self, event=None):
         QtWidgets.QWidget.resizeEvent(self, event)
