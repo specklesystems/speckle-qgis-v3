@@ -250,6 +250,11 @@ class ModelCardsWidget(QWidget):
 
                 existing_content.append(widget.card_content)
 
+        # if no cards left, remove widget completely
+        if len(existing_content) == 0:
+            self.parentWidget.remove_widget_model_cards()
+            return
+
         assigned_cards_list_widget = self.create_area_with_cards(existing_content)
         self.scroll_area.setWidget(assigned_cards_list_widget)
 

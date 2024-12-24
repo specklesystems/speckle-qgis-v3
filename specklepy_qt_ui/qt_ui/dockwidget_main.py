@@ -224,7 +224,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.layout().addWidget(no_model_cards_widget)
             self.widget_no_model_cards = no_model_cards_widget
 
-    def kill_all_widgets(self):
+    def remove_all_widgets(self):
         if self.widget_no_document:
             self.widget_no_document.setParent(None)
             self.widget_no_document = None
@@ -237,25 +237,25 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.widget_project_search.setParent(None)
             self.widget_project_search = None
 
-    def kill_process_widgets(self):
+    def remove_process_widgets(self):
         if self.widget_project_search:
-            self.kill_widget_project_search()
+            self.remove_widget_project_search()
         if self.widget_model_search:
-            self.kill_widget_model_search()
+            self.remove_widget_model_search()
 
-    def kill_widget_project_search(self):
+    def remove_widget_project_search(self):
         self.widget_project_search.setParent(None)
         self.widget_project_search = None
 
-    def kill_widget_model_search(self):
+    def remove_widget_model_search(self):
         self.widget_model_search.setParent(None)
         self.widget_model_search = None
 
-    def kill_current_widget(self, widget):
+    def remove_current_widget(self, widget):
         if self.widget_project_search == widget:
-            self.kill_widget_project_search()
+            self.remove_widget_project_search()
         elif self.widget_model_search == widget:
-            self.kill_widget_model_search()
+            self.remove_widget_model_search()
 
     def overwrite_model_search_callback(self, card_function):
         # current function returns a content list for models

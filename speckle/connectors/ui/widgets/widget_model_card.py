@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
     QGraphicsDropShadowEffect,
+    QSpacerItem,
+    QSizePolicy,
 )
 
 from speckle.connectors.ui.models import ModelCard, SenderModelCard
@@ -18,6 +20,8 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_WHITE,
     BACKGR_COLOR_TRANSPARENT,
     SPECKLE_COLOR,
+    BACKGR_COLOR_LIGHT_GREY,
+    BACKGR_COLOR_LIGHT_GREY2,
 )
 from specklepy.core.api.models.current import Model
 
@@ -26,6 +30,7 @@ class ModelCardWidget(QWidget):
     card_content: ModelCard = None
     send_data = pyqtSignal(object)
     shadow_effect = None
+    close_btn: QPushButton = None
 
     def __init__(self, parent=None, card_content: ModelCard = None):
         super(ModelCardWidget, self).__init__(None)
@@ -114,7 +119,29 @@ class ModelCardWidget(QWidget):
             self.add_text(model.name, other_props="font-size: 14px;font-weight: bold;")
         )
 
+        # Add a spacer item to push the next button to the right
+        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        layout_top_line.addItem(spacer)
+
+        # Add the new button on the right side
+        layout_top_line.addWidget(self.add_close_button())
+
         return top_line
+
+    def add_close_button(self):
+        close_btn = QPushButton(" x ")
+        close_btn.clicked.connect(lambda: self.parent.remove_card(self.card_content))
+        close_btn.setStyleSheet(
+            "QPushButton {"
+            + f"color:rgba(130,130,130,1); border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 18px;"
+            + f"{BACKGR_COLOR_LIGHT_GREY} height:20px;text-align: center; "
+            + "} QPushButton:hover { "
+            + f"{BACKGR_COLOR_LIGHT_GREY2};"
+            + " }"
+        )
+        close_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        self.close_btn = close_btn
+        return close_btn
 
     def add_send_btn(self):
 

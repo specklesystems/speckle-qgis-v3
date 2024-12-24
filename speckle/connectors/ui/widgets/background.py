@@ -33,7 +33,7 @@ class BackgroundWidget(QWidget):
 
     def mouseReleaseEvent(self, event):
         self.setGeometry(0, 0, 0, 0)
-        self.parentWidget.parentWidget.kill_current_widget(self.parentWidget)
+        self.parentWidget.parentWidget.remove_current_widget(self.parentWidget)
 
     def show(self):
         self.setGeometry(
