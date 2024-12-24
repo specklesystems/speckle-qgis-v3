@@ -9,6 +9,8 @@ from PyQt5.QtWidgets import (
     QStackedLayout,
     QLabel,
     QPushButton,
+    QSpacerItem,
+    QSizePolicy,
 )
 
 from speckle.connectors.ui.models import ModelCard
@@ -55,6 +57,8 @@ class ModelCardsWidget(QWidget):
 
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
+
+        self.create_search_button()
 
         ##########################
         cards_selection_widget = self.create_cards_selection_widget(cards_list)
@@ -111,6 +115,8 @@ class ModelCardsWidget(QWidget):
 
         # add label and scroll area to the container
         scroll_container.layout().addWidget(scroll_area)
+
+        scroll_container.layout().addWidget(self.global_publish_btn)
 
         return scroll_container
 
@@ -186,9 +192,6 @@ class ModelCardsWidget(QWidget):
                 project_card = ModelCardWidget(self, content)
 
                 layout.addWidget(project_card)
-
-        self.create_search_button()
-        layout.addWidget(self.global_publish_btn)
 
         return self.cards_list_widget
 
