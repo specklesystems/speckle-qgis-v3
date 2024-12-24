@@ -328,7 +328,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             exitActIcon = QIcon(exitIcon)
 
             # create a label
-            text_label = QtWidgets.QPushButton(" for QGIS")
+            text_label = QtWidgets.QPushButton("Speckle (Beta) for QGIS")
             text_label.setStyleSheet(
                 "border: 0px;"
                 "color: white;"

@@ -1,8 +1,7 @@
 from PyQt5 import QtCore
-from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget
-from PyQt5.QtGui import QCursor
+from PyQt5.QtGui import QColor, QCursor
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
@@ -18,8 +17,7 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
     BACKGR_COLOR_TRANSPARENT,
-    BACKGR_COLOR_LIGHT_GREY2,
-    BACKGR_COLOR_GREY,
+    SPECKLE_COLOR,
 )
 from specklepy.core.api.models.current import Model
 
@@ -34,14 +32,21 @@ class ModelCardWidget(QWidget):
         self.parent = parent
         self.card_content = card_content
 
-        self.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        # self.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
 
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignTop)
+        layout.setContentsMargins(
+            10,
+            10,
+            10,
+            10,
+        )
         self.setStyleSheet(
             "QWidget {"
-            + f"border-radius:5px;{ZERO_MARGIN_PADDING} margin-bottom:3px; min-height:40px;"
+            + f"border-radius:5px;{ZERO_MARGIN_PADDING}"
+            + "margin-bottom:3px; max-height:80px;"
             + f"{BACKGR_COLOR_WHITE}"
             + "}"
         )
@@ -50,9 +55,11 @@ class ModelCardWidget(QWidget):
 
         # create areas in the card
         top_section = self.create_card_header(card_content)
+        bottom_section = self.create_send_filter_line(card_content)
 
         # add to layout
         layout.addWidget(top_section)
+        layout.addWidget(bottom_section)
 
     def add_drop_shadow(self, item=None):
         if not item:
@@ -65,14 +72,35 @@ class ModelCardWidget(QWidget):
 
         item.setGraphicsEffect(self.shadow_effect)
 
+    def create_send_filter_line(self, card_content: ModelCard):
+        line = QWidget()
+        layout_line = QHBoxLayout(line)
+        layout_line.setAlignment(Qt.AlignLeft)
+        layout_line.setContentsMargins(0, 0, 0, 0)
+        line.setStyleSheet(
+            "QWidget {"
+            + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
+            + f"text-align: left;{BACKGR_COLOR_TRANSPARENT}"
+            + "}"
+        )
+
+        clickable_text = self.add_text("Selection:  ", color=SPECKLE_COLOR)
+        clickable_text.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        layout_line.addWidget(clickable_text)
+
+        layout_line.addWidget(self.add_text("0 layers", color="rgba(130,130,130,1)"))
+
+        return line
+
     def create_card_header(self, card_content: ModelCard):
         top_line = QWidget()
         layout_top_line = QHBoxLayout(top_line)
         layout_top_line.setAlignment(Qt.AlignLeft)
+        layout_top_line.setContentsMargins(0, 0, 0, 0)
         top_line.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
-            + f"height: 20px;text-align: left;{BACKGR_COLOR_TRANSPARENT}"
+            + f"text-align: left;{BACKGR_COLOR_TRANSPARENT}"
             + "}"
         )
 
@@ -82,7 +110,7 @@ class ModelCardWidget(QWidget):
         model: Model = self.parent.ui_model_card_utils.get_model_by_id_from_client(
             self.card_content
         )
-        layout_top_line.addWidget(self.add_main_text(model.name))
+        layout_top_line.addWidget(self.add_text(model.name))
 
         return top_line
 
@@ -92,36 +120,25 @@ class ModelCardWidget(QWidget):
         button_publish.clicked.connect(lambda: None)
         button_publish.setStyleSheet(
             "QPushButton {"
-            + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
-            + f"max-height:20px;max-width: 50px;text-align: center;{BACKGR_COLOR}"
+            + f"color:white; border-radius: 5px;{ZERO_MARGIN_PADDING}"
+            + f"{BACKGR_COLOR} height:20px;text-align: center; padding: 0px 10px;"
             + "} QPushButton:hover { "
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"
         )
+        button_publish.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         return button_publish
 
-    def add_main_text(self, content: str):
+    def add_text(self, content: str, color: str = "black"):
 
         # add label text (in a shape of QPushButton for easier styling)
-        main_text = QPushButton(content)
+        text = QPushButton(content)
 
         # reiterating callback, because QPushButton clicks are not propageted to the parent widget
-        main_text.setStyleSheet(
-            "QPushButton {color:black;border-radius: 7px;"
-            + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_TRANSPARENT} min-height: 15px;text-align: left;"
+        text.setStyleSheet(
+            "QPushButton {"
+            + f"color:{color};border-radius: 7px;{ZERO_MARGIN_PADDING}"
+            + f" {BACKGR_COLOR_TRANSPARENT} height: 20px;text-align: left;"
             + "}"
         )
-        return main_text
-
-    def add_text_line(self, content: str):
-
-        # add text line (in a shape of QPushButton for easier styling)
-        text_line = QPushButton(content)
-
-        # reiterating callback, because QPushButton clicks are not propageted to the parent widget
-        text_line.setStyleSheet(
-            "QPushButton {color:grey;border-radius: 7px;"
-            + f"{ZERO_MARGIN_PADDING} {BACKGR_COLOR_TRANSPARENT} min-height: 10px;text-align: left;"
-            + " }"
-        )
-        return text_line
+        return text

@@ -1,5 +1,6 @@
 from typing import List
 from PyQt5 import QtCore
+from PyQt5.QtGui import QCursor
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
@@ -8,7 +9,6 @@ from PyQt5.QtWidgets import (
     QStackedLayout,
     QLabel,
     QPushButton,
-    QGraphicsDropShadowEffect,
 )
 
 from speckle.connectors.ui.models import ModelCard
@@ -87,7 +87,10 @@ class ModelCardsWidget(QWidget):
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"
         )
+
+        button_publish.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         self.global_publish_btn = button_publish
+
         return button_publish
 
     def add_background(self):

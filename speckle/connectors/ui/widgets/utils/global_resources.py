@@ -8,7 +8,7 @@ FULL_HEIGHT_WIDTH = "width:100%; height:100%"
 
 # colors
 COLOR_HIGHLIGHT = (210, 210, 210, 1)
-SPECKLE_COLOR = (59, 130, 246, 1)
+SPECKLE_COLOR = "rgba(59, 130, 246, 1)"
 SPECKLE_COLOR_LIGHT = (69, 140, 255, 1)
 ICON_LOGO = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "assets", "logo-slab-white@0.5x.png"
@@ -17,11 +17,11 @@ ICON_LOGO = os.path.join(
 ERROR_COLOR = (255, 150, 150, 1)
 ERROR_COLOR_LIGHT = (255, 210, 210, 1)
 
-COLOR = f"color: rgba{str(SPECKLE_COLOR)};"
+COLOR = f"color: {SPECKLE_COLOR};"
 BACKGR_COLOR_TRANSPARENT = f"background-color: rgba(0,0,0,0);"
 BACKGR_COLOR_SEMI_TRANSPARENT = "background-color: rgba(250,250,250,80);"
 BACKGR_COLOR_HIGHLIGHT = f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
-BACKGR_COLOR = f"background-color: rgba{str(SPECKLE_COLOR)};"
+BACKGR_COLOR = f"background-color: {SPECKLE_COLOR};"
 BACKGR_COLOR_LIGHT = f"background-color: rgba{str(SPECKLE_COLOR_LIGHT)};"
 BACKGR_COLOR_WHITE = f"background-color: rgba(250,250,250,1);"
 BACKGR_COLOR_GREY = f"background-color: rgba(220,220,220,1);"
