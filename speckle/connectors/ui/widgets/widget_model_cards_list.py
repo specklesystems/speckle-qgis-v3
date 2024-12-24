@@ -28,6 +28,7 @@ class ModelCardsWidget(QWidget):
     background: BackgroundWidget = None
     cards_list_widget: QWidget = None  # needed here to resize child elements
     scroll_area: QtWidgets.QScrollArea = None
+    global_publish_btn: QPushButton = None
 
     def __init__(
         self,
@@ -50,6 +51,7 @@ class ModelCardsWidget(QWidget):
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
 
+        ##########################
         cards_selection_widget = self.create_cards_selection_widget(cards_list)
 
         content = QWidget()
@@ -62,6 +64,7 @@ class ModelCardsWidget(QWidget):
         )
         content.layout.setAlignment(Qt.AlignCenter)
         content.layout.addWidget(cards_selection_widget)
+        ##########################
 
         # add Publish putton
         button_publish = self.create_search_button()
@@ -93,6 +96,7 @@ class ModelCardsWidget(QWidget):
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"
         )
+        self.global_publish_btn = button_publish
         return button_publish
 
     def add_background(self):
@@ -176,6 +180,9 @@ class ModelCardsWidget(QWidget):
 
                 self.cards_list_widget.layout().addWidget(label)
                 self.cards_list_widget.layout().addWidget(project_card)
+
+        self.create_search_button()
+        self.cards_list_widget.layout().addWidget(self.global_publish_btn)
 
         return self.cards_list_widget
 
