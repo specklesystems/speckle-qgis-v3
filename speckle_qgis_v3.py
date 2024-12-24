@@ -213,10 +213,17 @@ class SpeckleQGISv3:
                     parent=None, basic_binding=self.basic_binding
                 )
                 self.dockwidget.runSetup(self)
+                self.connect_dockwidget_signals()
 
             # show the dockwidget
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
             self.verify_dependencies()
+
+    def connect_dockwidget_signals(self):
+        self.dockwidget.send_model_signal.connect(self.send_model)
+
+    def send_model(self, model_card):
+        print(model_card.model_id)
 
     def verify_dependencies(self):
 

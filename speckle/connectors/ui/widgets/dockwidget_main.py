@@ -46,6 +46,8 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     widget_model_search: ModelSearchWidget = None
     widget_model_cards: ModelCardsWidget = None
 
+    send_model_signal = QtCore.pyqtSignal(object)
+
     def __init__(self, parent=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
         super(SpeckleQGISv3Dialog, self).__init__(parent)
@@ -276,6 +278,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.widget_model_cards = ModelCardsWidget(
                 parent=self, cards_list=[model_card]
             )
+            self.widget_model_cards.send_model_signal.connect(
+                self.send_model_signal_received
+            )
             # add widgets to the layout
             self.layout().addWidget(self.widget_model_cards)
 
@@ -284,6 +289,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             )
         else:
             self.widget_model_cards.add_new_card(model_card)
+
+    def send_model_signal_received(self, model_card):
+        self.send_model_signal.emit(model_card)
 
     def open_select_projects_widget(self):
 

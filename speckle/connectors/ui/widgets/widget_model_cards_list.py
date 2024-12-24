@@ -35,6 +35,7 @@ class ModelCardsWidget(QWidget):
     scroll_area: QtWidgets.QScrollArea = None
     global_publish_btn: QPushButton = None
     add_projects_search_signal = pyqtSignal()
+    send_model_signal = pyqtSignal(ModelCard)
 
     def __init__(
         self,
@@ -186,10 +187,15 @@ class ModelCardsWidget(QWidget):
 
         for project_card in all_widgets:
             cards_list_widget.layout().addWidget(project_card)
+            if isinstance(project_card, ModelCardWidget):
+                project_card.send_model_signal.connect(self.emit_from_child_card)
 
         self.cards_list_widget = cards_list_widget
 
         return self.cards_list_widget
+
+    def emit_from_child_card(self, model_card: ModelCard):
+        self.send_model_signal.emit(model_card)
 
     def modify_area_with_cards(self, widgets_list: List[Any]) -> QWidget:
 

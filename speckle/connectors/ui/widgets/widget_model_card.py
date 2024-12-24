@@ -28,7 +28,8 @@ from specklepy.core.api.models.current import Model
 
 class ModelCardWidget(QWidget):
     card_content: ModelCard = None
-    send_data = pyqtSignal(object)
+    send_model_btn = QPushButton = None
+    send_model_signal = pyqtSignal(ModelCard)
     shadow_effect = None
     close_btn: QPushButton = None
 
@@ -111,6 +112,9 @@ class ModelCardWidget(QWidget):
 
         if isinstance(card_content, SenderModelCard):
             layout_top_line.addWidget(self.add_send_btn())
+            self.send_model_btn.clicked.connect(
+                lambda: self.send_model_signal.emit(card_content)
+            )
 
         model: Model = self.parent.ui_model_card_utils.get_model_by_id_from_client(
             self.card_content
@@ -146,7 +150,6 @@ class ModelCardWidget(QWidget):
     def add_send_btn(self):
 
         button_publish = QPushButton("↑")
-        button_publish.clicked.connect(lambda: None)
         button_publish.setStyleSheet(
             "QPushButton {"
             + f"color:white; border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 24px;font-weight: bold;"
@@ -156,6 +159,8 @@ class ModelCardWidget(QWidget):
             + " }"
         )
         button_publish.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        self.send_model_btn = button_publish
+
         return button_publish
 
     def add_text(self, content: str, color: str = "black", other_props=""):
