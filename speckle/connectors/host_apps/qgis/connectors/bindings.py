@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from speckle.connectors.common.operations import SendOperation
 from speckle.connectors.host_apps.qgis.converters.utils import QgisConversionSettings
 from speckle.connectors.ui.bindings import (
     BasicConnectorBindingCommands,
@@ -12,6 +13,7 @@ from speckle.connectors.ui.models import (
     DocumentModelStore,
     ISendFilter,
     ModelCard,
+    SenderModelCard,
 )
 
 
@@ -118,3 +120,36 @@ class QgisSendBinding(ISendBinding):
     def subscribe_to_qgis_events(self):
         # TODO
         return
+
+    def get_send_filters(self):
+        return self._send_filters
+
+    def get_send_settings(self):
+        return []
+
+    def send(self, model_card_id: str, send_operation: SendOperation) -> None:
+
+        # send_operation in C# was resolved with scope.ServiceProvider,
+        # and here I don't see another way to get it
+        print(self.store.models)
+        model_card: SenderModelCard = self.store.get_model_by_id(model_card_id)
+        if not isinstance(model_card, SenderModelCard):
+            raise Exception("Model card is not a sender model card")
+
+        # TODO initialise cancellation token
+
+        result = send_operation.execute(
+            objects=["some_native_qgis_object"],
+            send_info=model_card.get_send_info("QGIS"),
+            on_operation_progressed=None,
+            ct=None,
+        )
+
+        return result
+
+        # self.commads.set_model_send_result(
+        #    model_card_id=model_card_id, version_id="", send_conversion_results=[]
+        # )
+
+    def cancel_send(self, model_card_id):
+        return super().cancel_send(model_card_id)

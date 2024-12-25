@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, Generic, TypeVar
 
-from speckle.v3_utils.exceptions import UnitNotFoundException
 from specklepy.objects.geometry import Point
 from specklepy.objects.models.units import Units, get_scale_factor
 
@@ -59,7 +58,8 @@ class QgisToSpeckleUnitConverter(IHostToSpeckleUnitConverter[Qgis.DistanceUnit])
         try:
             return self.s_unit_mapping()[host_unit]
         except KeyError:
-            raise UnitNotFoundException(f"The unit system {host_unit} is not supported")
+            # TODO define exception type
+            raise Exception(f"The unit system {host_unit} is not supported")
 
 
 class QgisConversionSettings:

@@ -2,6 +2,7 @@
 
 import os
 from speckle.connectors.ui.bindings import IBasicConnectorBinding
+from speckle.connectors.ui.models import ModelCard
 from speckle.connectors.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
@@ -30,6 +31,8 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap, QCursor
 from PyQt5.QtWidgets import QHBoxLayout, QWidget
 from PyQt5 import QtCore
+from PyQt5.QtCore import pyqtSignal
+from speckle.connectors.ui.widgets.widget_selection_filter import SelectionFilterWidget
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -45,6 +48,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
     widget_project_search: ProjectSearchWidget = None
     widget_model_search: ModelSearchWidget = None
     widget_model_cards: ModelCardsWidget = None
+    widget_selection_filter: SelectionFilterWidget = None
+
+    send_model_signal = pyqtSignal(object)
+    add_model_signal = pyqtSignal(ModelCard)
+    remove_model_signal = pyqtSignal(ModelCard)
 
     def __init__(self, parent=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
@@ -227,6 +235,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.layout().addWidget(no_model_cards_widget)
             self.widget_no_model_cards = no_model_cards_widget
 
+            self.widget_no_model_cards.add_projects_search_signal.connect(
+                self.open_select_projects_widget
+            )
+
     def remove_all_widgets(self):
         if self.widget_no_document:
             self.widget_no_document.setParent(None)
@@ -245,6 +257,12 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.remove_widget_project_search()
         if self.widget_model_search:
             self.remove_widget_model_search()
+        if self.widget_selection_filter:
+            self.remove_widget_selection_filter()
+
+    def remove_widget_selection_filter(self):
+        self.widget_selection_filter.setParent(None)
+        self.widget_selection_filter = None
 
     def remove_widget_project_search(self):
         self.widget_project_search.setParent(None)
@@ -265,27 +283,64 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             self.remove_widget_model_search()
         elif self.widget_model_cards == widget:
             self.remove_widget_model_cards()
+        elif self.widget_selection_filter == widget:
+            self.remove_widget_selection_filter()
 
-    def create_model_cards_widget(self, model_card):
+    def create_or_add_model_cards_widget(self, model_card):
         self.remove_process_widgets()
         if not self.widget_model_cards:
-            self.widget_model_cards = ModelCardsWidget(
-                parent=self, cards_list=[model_card]
+
+            self.widget_model_cards = ModelCardsWidget(parent=self, cards_list=[])
+
+            # TODO
+            # right now the cards are emitting too many signals on single click
+
+            # subscribe to all Remove Card events from all future ModelCards
+            self.widget_model_cards.remove_model_signal.connect(
+                lambda model_card=model_card: self.remove_model_signal.emit(model_card)
             )
+            # subscribe to all Send events from all future ModelCards
+            self.widget_model_cards.send_model_signal.connect(
+                lambda model_card=model_card: self.send_model_signal.emit(model_card)
+            )
+            # subscribe to PUBLISH button to open project search
+            self.widget_model_cards.add_projects_search_signal.connect(
+                self.open_select_projects_widget
+            )
+
+            # emit signal, for the card that was just added (because we subscribed after creating a widget)
+            self.widget_model_cards.add_new_card(model_card)
+            self.add_model_signal.emit(model_card)
+
             # add widgets to the layout
             self.layout().addWidget(self.widget_model_cards)
+
         else:
             self.widget_model_cards.add_new_card(model_card)
+            self.add_model_signal.emit(model_card)
 
     def open_select_projects_widget(self):
 
         self.widget_project_search = ProjectSearchWidget(parent=self)
-        self.widget_project_search.ui_search_content.add_send_card_signal.connect(
-            self.create_model_cards_widget
+        # add widgets to the layout
+        self.layout().addWidget(self.widget_project_search)
+
+        self.widget_project_search.ui_search_content.add_selection_filter.connect(
+            self.create_selection_filter_widget
+        )
+
+    def create_selection_filter_widget(self, model_card: ModelCard):
+
+        self.widget_selection_filter = SelectionFilterWidget(
+            parent=self, model_card=model_card, label_text="3/3 Select objects"
         )
 
         # add widgets to the layout
-        self.layout().addWidget(self.widget_project_search)
+        self.layout().addWidget(self.widget_selection_filter)
+
+        self.widget_selection_filter.add_model_card_signal.connect(
+            self.create_or_add_model_cards_widget
+        )
 
     def resizeEvent(self, event):
         QtWidgets.QDockWidget.resizeEvent(self, event)
@@ -306,9 +361,20 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
                 self.frameSize().width(),
                 self.frameSize().height(),
             )
+        if self.widget_model_search:
+            self.widget_model_search.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
 
         if self.widget_model_cards:
             self.widget_model_cards.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
+
+        if self.widget_selection_filter:
+            self.widget_selection_filter.resize(
                 self.frameSize().width(),
                 self.frameSize().height(),
             )

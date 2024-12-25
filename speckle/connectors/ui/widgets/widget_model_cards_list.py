@@ -2,7 +2,7 @@ from typing import Any, List
 from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
@@ -35,6 +35,13 @@ class ModelCardsWidget(QWidget):
     scroll_area: QtWidgets.QScrollArea = None
     global_publish_btn: QPushButton = None
 
+    add_projects_search_signal = pyqtSignal()
+
+    remove_model_signal = pyqtSignal(ModelCard)
+    send_model_signal = pyqtSignal(ModelCard)
+
+    child_cards: List[ModelCardWidget]
+
     def __init__(
         self,
         *,
@@ -42,8 +49,10 @@ class ModelCardsWidget(QWidget):
         cards_list: List[ModelCard] = None,
     ):
         super(ModelCardsWidget, self).__init__(parent=parent)
-        self.parentWidget: "SpeckleQGISv3Dialog" = parent
+        self.parentWidget: Any = parent
         self.ui_model_card_utils = UiModelCardsUtils()
+
+        self.child_cards: List[ModelCardWidget] = []
 
         # align with the parent widget size
         self.resize(
@@ -75,9 +84,7 @@ class ModelCardsWidget(QWidget):
     def create_search_button(self) -> QPushButton:
 
         button_publish = QPushButton("Publish")
-        button_publish.clicked.connect(
-            lambda: self.parentWidget.open_select_projects_widget()
-        )
+        button_publish.clicked.connect(lambda: self.add_projects_search_signal.emit())
         button_publish.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 7px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
@@ -188,6 +195,10 @@ class ModelCardsWidget(QWidget):
         for project_card in all_widgets:
             cards_list_widget.layout().addWidget(project_card)
 
+            if isinstance(project_card, ModelCardWidget):
+                self.child_cards.append(project_card)
+                project_card.send_model_signal.connect(self.emit_from_child_card)
+
         self.cards_list_widget = cards_list_widget
 
         return self.cards_list_widget
@@ -199,12 +210,21 @@ class ModelCardsWidget(QWidget):
         _ = QVBoxLayout(cards_list_widget)
 
         # in case the input argument was missing or None, don't create any cards
+        self.child_cards.clear()
         if isinstance(widgets_list, list):
             for widget in widgets_list:
                 cards_list_widget.layout().addWidget(widget)
 
+                if isinstance(widget, ModelCardWidget):
+                    self.child_cards.append(widget)
+                    widget.send_model_signal.connect(self.emit_from_child_card)
+
         self.cards_list_widget = cards_list_widget
         return self.cards_list_widget
+
+    def emit_from_child_card(self, model_card: ModelCard):
+        # declared as a separate function, because it's used several times
+        self.send_model_signal.emit(model_card)
 
     def add_new_card(self, new_card: ModelCard):
 
@@ -289,11 +309,14 @@ class ModelCardsWidget(QWidget):
 
         # if no cards left, remove widget completely
         if len(existing_content) == 0:
+            self.remove_model_signal.emit(new_card)
             self.parentWidget.remove_widget_model_cards()
             return
 
         assigned_cards_list_widget = self.modify_area_with_cards(all_widgets)
         self.scroll_area.setWidget(assigned_cards_list_widget)
+
+        self.remove_model_signal.emit(new_card)
 
         # adjust size of new widget:
         self.resizeEvent()
@@ -321,7 +344,6 @@ class ModelCardsWidget(QWidget):
         return
 
     def mouseReleaseEvent(self, event):
-        # print("Mouse Release Event")
         return
 
     def destroy(self):

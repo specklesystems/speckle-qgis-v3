@@ -24,13 +24,16 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT_GREY2,
 )
 from specklepy.core.api.models.current import Model
+import webbrowser
 
 
 class ModelCardWidget(QWidget):
     card_content: ModelCard = None
-    send_data = pyqtSignal(object)
+    send_model_btn: QPushButton = None
+    send_model_signal = pyqtSignal(ModelCard)
     shadow_effect = None
     close_btn: QPushButton = None
+    open_web_btn: QPushButton = None
 
     def __init__(self, parent=None, card_content: ModelCard = None):
         super(ModelCardWidget, self).__init__(None)
@@ -111,6 +114,9 @@ class ModelCardWidget(QWidget):
 
         if isinstance(card_content, SenderModelCard):
             layout_top_line.addWidget(self.add_send_btn())
+            self.send_model_btn.clicked.connect(
+                lambda: self.send_model_signal.emit(card_content)
+            )
 
         model: Model = self.parent.ui_model_card_utils.get_model_by_id_from_client(
             self.card_content
@@ -124,9 +130,29 @@ class ModelCardWidget(QWidget):
         layout_top_line.addItem(spacer)
 
         # Add the new button on the right side
+        layout_top_line.addWidget(self.add_open_web_button())
         layout_top_line.addWidget(self.add_close_button())
 
         return top_line
+
+    def open_in_web(self, model_card: ModelCard):
+        url = f"{model_card.server_url}/projects/{model_card.project_id}/models/{model_card.model_id}"
+        webbrowser.open(url, new=0, autoraise=True)
+
+    def add_open_web_button(self):
+        open_web_btn = QPushButton(" ↗ ")
+        open_web_btn.clicked.connect(lambda: self.open_in_web(self.card_content))
+        open_web_btn.setStyleSheet(
+            "QPushButton {"
+            + f"color:rgba(130,130,130,1); border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 24px;max-width:20px;"
+            + f"{BACKGR_COLOR_LIGHT_GREY} height:20px;text-align: center; "
+            + "} QPushButton:hover { "
+            + f"{BACKGR_COLOR_LIGHT_GREY2};"
+            + " }"
+        )
+        open_web_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        self.open_web_btn = open_web_btn
+        return open_web_btn
 
     def add_close_button(self):
         close_btn = QPushButton(" x ")
@@ -146,7 +172,6 @@ class ModelCardWidget(QWidget):
     def add_send_btn(self):
 
         button_publish = QPushButton("↑")
-        button_publish.clicked.connect(lambda: None)
         button_publish.setStyleSheet(
             "QPushButton {"
             + f"color:white; border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 24px;font-weight: bold;"
@@ -156,6 +181,8 @@ class ModelCardWidget(QWidget):
             + " }"
         )
         button_publish.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        self.send_model_btn = button_publish
+
         return button_publish
 
     def add_text(self, content: str, color: str = "black", other_props=""):

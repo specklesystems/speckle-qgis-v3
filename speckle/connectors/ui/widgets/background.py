@@ -12,7 +12,6 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
 class BackgroundWidget(QWidget):
     context_stack = None
     message_card: QWidget
-    send_data = pyqtSignal(object)
 
     def __init__(self, parent=None, transparent=False, background_color=None):
         super(BackgroundWidget, self).__init__(parent)
