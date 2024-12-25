@@ -27,7 +27,7 @@ class UiSearchUtils(QObject):
     cursor_projects: Any = None
     cursor_models: Any = None
     speckle_client: SpeckleClient = None
-    add_send_card_signal = pyqtSignal(SenderModelCard)
+    add_selection_filter = pyqtSignal(SenderModelCard)
 
     def __init__(self):
         super().__init__()
@@ -100,7 +100,7 @@ class UiSearchUtils(QObject):
         # dockwidget will kill the search widgets and display a modelCards widget
         server_url = self.speckle_client.account.serverInfo.url
 
-        self.add_send_card_signal.emit(
+        self.add_selection_filter.emit(
             SenderModelCard(
                 model_card_id=f"Send_{server_url}_{project.id}_{model.id}",
                 model_id=model.id,
