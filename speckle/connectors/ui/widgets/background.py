@@ -10,12 +10,18 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
 
 
 class BackgroundWidget(QWidget):
-    context_stack = None
-    message_card: QWidget
+    ignore_close_on_click = False
 
-    def __init__(self, parent=None, transparent=False, background_color=None):
+    def __init__(
+        self,
+        parent=None,
+        transparent=False,
+        background_color=None,
+        ignore_close_on_click=False,
+    ):
         super(BackgroundWidget, self).__init__(parent)
         self.parentWidget = parent
+        self.ignore_close_on_click = ignore_close_on_click
 
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
 
@@ -31,6 +37,10 @@ class BackgroundWidget(QWidget):
             self.setStyleSheet(f"margin-top:{LABEL_HEIGHT};{background_color}")
 
     def mouseReleaseEvent(self, event):
+        if self.ignore_close_on_click:
+            # overwrite closing the widget on MouseClick outside the background
+            return
+
         self.setGeometry(0, 0, 0, 0)
         self.parentWidget.parentWidget.remove_current_widget(self.parentWidget)
 

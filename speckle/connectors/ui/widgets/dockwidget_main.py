@@ -10,20 +10,8 @@ from speckle.connectors.ui.widgets.widget_project_search import ProjectSearchWid
 
 from plugin_utils.panel_logging import logToUser
 from speckle.connectors.ui.widgets.utils.global_resources import (
-    COLOR_HIGHLIGHT,
-    SPECKLE_COLOR,
-    ICON_OPEN_WEB,
-    ICON_REPORT,
     ICON_LOGO,
-    ICON_SEARCH,
-    ICON_DELETE,
-    ICON_DELETE_BLUE,
-    ICON_SEND,
-    ICON_RECEIVE_BLACK,
-    ICON_SEND_BLUE,
-    COLOR,
     BACKGR_COLOR,
-    BACKGR_COLOR_LIGHT,
 )
 
 from PyQt5 import QtWidgets
