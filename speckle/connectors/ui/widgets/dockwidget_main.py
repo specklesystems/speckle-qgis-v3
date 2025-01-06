@@ -99,7 +99,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             boxLayout.addWidget(text_label)  # , alignment=Qt.AlignCenter)
             boxLayout.addWidget(version_label)
             boxLayout.setContentsMargins(0, 0, 0, 0)
-            self.setWindowTitle("SpeckleQGISv3")
+            self.setWindowTitle("SpeckleQGIS")
             self.setTitleBarWidget(widget)
             self.labelWidget = text_label
             self.labelWidget.setCursor(QCursor(QtCore.Qt.PointingHandCursor))

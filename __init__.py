@@ -15,7 +15,7 @@ try:
 
     # noinspection PyPep8Naming
     def classFactory(iface):  # pylint: disable=invalid-name
-        """Load SpeckleQGISv3 class from file SpeckleQGISv3.
+        """Load SpeckleQGIS class from file SpeckleQGIS.
 
         :param iface: A QGIS interface instance.
         :type iface: QgsInterface
@@ -29,7 +29,7 @@ try:
         startDebugger()
         ensure_dependencies("QGIS")
 
-        from speckle_qgis_v3 import SpeckleQGISv3
+        from speckle_qgis_v3 import SpeckleQGIS
         from specklepy.logging import metrics
 
         version = (
@@ -38,7 +38,7 @@ try:
             .split(".")[0]
         )
         metrics.set_host_app("QGIS", f"QGIS{version}")
-        return SpeckleQGISv3(iface)
+        return SpeckleQGIS(iface)
 
     class EmptyClass:
         # https://docs.qgis.org/3.28/en/docs/pyqgis_developer_cookbook/plugins/plugins.html#mainplugin-py

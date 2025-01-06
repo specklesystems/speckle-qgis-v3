@@ -2,27 +2,12 @@
 
 import os.path
 from typing import Optional
-
-from plugin_utils.panel_logging import logToUser
-from speckle.connectors.common.api import ClientFactory
-from speckle.connectors.common.credentials import AccountManager
-from speckle.connectors.common.operations import AccountService, SendOperation
-from speckle.connectors.host_apps.qgis.connectors.bindings import (
-    QgisBasicConnectorBinding,
-    QgisSendBinding,
-)
-from speckle.connectors.host_apps.qgis.connectors.operations import (
-    QgisRootObjectBuilder,
-)
-from speckle.connectors.ui.models import ModelCard
-from speckle.connectors.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
-from speckle.connectors.host_apps.qgis.connectors.host_app import QgisDocumentStore
+from speckle.connectors.host_apps.qgis.qgis_connector_module import SpeckleQGISv3
 
 # Initialize Qt resources from file resources.py
 from resources import *
 
-import webbrowser
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis
 from qgis.PyQt.QtCore import QCoreApplication, QSettings, Qt, QTranslator
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QDockWidget
@@ -31,19 +16,11 @@ SPECKLE_COLOR = (59, 130, 246)
 SPECKLE_COLOR_LIGHT = (69, 140, 255)
 
 
-class SpeckleQGISv3:
+class SpeckleQGIS(SpeckleQGISv3):
     """Speckle Connector Plugin for QGIS"""
 
-    basic_binding: QgisBasicConnectorBinding
-    send_binding: QgisSendBinding
-    document_store: QgisDocumentStore
-    root_obj_builder: QgisRootObjectBuilder
-    account_service: AccountService
-
     dockwidget: Optional["QDockWidget"]
-    version: str
     gis_version: str
-    theads_total: int
 
     def __init__(self, iface):
         """Constructor.
@@ -53,12 +30,14 @@ class SpeckleQGISv3:
             application at run time.
         :type iface: QgsInterface
         """
+        super(SpeckleQGIS, self).__init__()
+
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
         locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(
-            self.plugin_dir, "i18n", "SpeckleQGISv3_{}.qm".format(locale)
+            self.plugin_dir, "i18n", "SpeckleQGIS_{}.qm".format(locale)
         )
 
         if os.path.exists(locale_path):
@@ -68,22 +47,17 @@ class SpeckleQGISv3:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr("&SpeckleQGISv3")
+        self.menu = self.tr("&SpeckleQGIS")
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.pluginIsActive = False
 
-        # self.lock = threading.Lock()
         self.dockwidget = None
-        self.version = "3.0.0"
         self.gis_version = Qgis.QGIS_VERSION.encode(
             "iso-8859-1", errors="ignore"
         ).decode("utf-8")
         self.iface = iface
-        self.theads_total = 0
-
-    # noinspection PyMethodMayBeStatic
 
     def tr(self, message: str):
         """Get the translation for a string using Qt translation API.
@@ -97,7 +71,7 @@ class SpeckleQGISv3:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate("SpeckleQGISv3", message)
+        return QCoreApplication.translate("SpeckleQGIS", message)
 
     def add_action(
         self,
@@ -178,7 +152,7 @@ class SpeckleQGISv3:
         icon_path = ":/plugins/speckle-qgis-v3/icon.png"
         self.add_action(
             icon_path,
-            text=self.tr("SpeckleQGISv3"),
+            text=self.tr("SpeckleQGIS"),
             callback=self.run,
             parent=self.iface.mainWindow(),
         )
@@ -196,7 +170,7 @@ class SpeckleQGISv3:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginWebMenu(self.tr("&SpeckleQGISv3"), action)
+            self.iface.removePluginWebMenu(self.tr("&SpeckleQGIS"), action)
             self.iface.removeToolBarIcon(action)
 
     def run(self):
@@ -205,105 +179,20 @@ class SpeckleQGISv3:
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
 
-        self.instantiate_module_dependencies()
-
         if self.pluginIsActive:
             self.reloadUI()
         else:
             print("Plugin inactive, launch")
             self.pluginIsActive = True
             if self.dockwidget is None:
-                self.dockwidget = SpeckleQGISv3Dialog(
-                    parent=None, basic_binding=self.basic_binding
-                )
-                self.dockwidget.runSetup(self)
-                self.connect_dockwidget_signals()
+                self.create_dockwidget()
 
             # show the dockwidget
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
-            self.verify_dependencies()
 
-    def instantiate_module_dependencies(self):
-
-        bridge = None
-        self.document_store = QgisDocumentStore()
-        self.basic_binding = QgisBasicConnectorBinding(self.document_store, bridge)
-        self.send_binding = QgisSendBinding(
-            parent=bridge,
-            store=self.document_store,
-            _service_provider=None,
-            _send_filters=[],
-            _cancellation_manager=None,
-            send_conversion_cache=None,
-            _operation_progress_manager=None,
-            _logger=None,
-            _top_level_exception_handler=None,
-            _qgis_conversion_settings=None,
-        )
-        self.root_obj_builder = QgisRootObjectBuilder(
-            root_to_speckle_converter=None,
-            send_conversion_cache=None,
-            layer_unpacker=None,
-            color_unpacker=None,
-            converter_settings=None,
-            logger=None,
-            activity_factory=None,
-        )
-
-        account_manager = AccountManager()
-        self.account_service = AccountService(account_manager)
-        self.client_factory = ClientFactory()
-
-    def connect_dockwidget_signals(self):
-        self.dockwidget.send_model_signal.connect(self.send_model)
-        self.dockwidget.add_model_signal.connect(self.add_model_card_to_store)
-        self.dockwidget.remove_model_signal.connect(self.remove_model_card_from_store)
-
-    def add_model_card_to_store(self, model_card: ModelCard):
-        print("dockwidget: to add card to Store")
-        self.document_store.add_model(model_card=model_card)
-
-    def remove_model_card_from_store(self, model_card: ModelCard):
-        self.document_store.remove_model(model_card=model_card)
-
-    def send_model(self, model_card: ModelCard):
-        print(model_card.model_card_id)
-
-        send_operation = SendOperation(
-            root_object_builder=self.root_obj_builder,
-            send_conversion_cache=None,
-            account_service=self.account_service,
-            send_progress=None,
-            operations=None,
-            client_factory=self.client_factory,
-            activity_factory=None,
-        )
-
-        self.send_binding.send(
-            model_card_id=model_card.model_card_id, send_operation=send_operation
-        )
-
-    def verify_dependencies(self):
-
-        import urllib3
-        import requests
-
-        # if the standard QGIS libraries are used
-        if (urllib3.__version__ == "1.25.11" and requests.__version__ == "2.24.0") or (
-            urllib3.__version__.startswith("1.24.")
-            and requests.__version__.startswith("2.23.")
-        ):
-            logToUser(
-                "Dependencies versioning error.\nClick here for details.",
-                url="dependencies_error",
-                level=2,
-                plugin=self.dockwidget,
-            )
+        # show the dockwidget
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
+        self.verify_dependencies()
 
     def reloadUI(self):
         return
-
-    def openUrl(self, url: str = ""):
-
-        if url is not None and url != "":
-            webbrowser.open(url, new=0, autoraise=True)
