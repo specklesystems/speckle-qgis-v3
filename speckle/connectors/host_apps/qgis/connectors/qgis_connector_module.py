@@ -13,6 +13,7 @@ from speckle.connectors.host_apps.qgis.connectors.host_app import (
 from speckle.connectors.host_apps.qgis.connectors.operations import (
     QgisRootObjectBuilder,
 )
+from speckle.connectors.host_apps.qgis.connectors.utils import QgisLayerUtils
 from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
 
 
@@ -46,6 +47,7 @@ class QgisConnectorModule:
         )
         self.layer_unpacker = QgisLayerUnpacker()
         self.color_unpacker = QgisColorUnpacker()
+        self.layer_utils = QgisLayerUtils()
 
         self.root_obj_builder = QgisRootObjectBuilder(
             root_to_speckle_converter=None,
@@ -53,6 +55,7 @@ class QgisConnectorModule:
             layer_unpacker=self.layer_unpacker,
             color_unpacker=self.color_unpacker,
             converter_settings=None,
+            layer_utils=self.layer_utils,
             logger=None,
             activity_factory=None,
         )

@@ -20,12 +20,9 @@ class QgisConverterModule:
 
         qgis_project = QgsProject.instance()
         crs_offset_rotation = CRSoffsetRotation(qgis_project.crs(), 0, 0, 0)
-        unit_converter = QgisToSpeckleUnitConverter().convert_or_throw(
-            qgis_project.distanceUnits()
-        )
 
         self.conversion_settings = QgisConversionSettings(
             project=qgis_project,
             activeCrsOffsetRotation=crs_offset_rotation,
-            unit_converter=unit_converter,
+            unit_converter=QgisToSpeckleUnitConverter(),
         )

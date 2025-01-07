@@ -8,7 +8,6 @@ from speckle.connectors.host_apps.qgis.connectors.qgis_connector_module import (
 from speckle.connectors.host_apps.qgis.converters.qgis_converter_module import (
     QgisConverterModule,
 )
-from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.connectors.ui.models import ModelCard
 from speckle.connectors.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 

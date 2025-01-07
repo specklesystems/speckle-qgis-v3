@@ -12,6 +12,7 @@ class QgisConversionSettings:
     project: QgsProject
     activeCrsOffsetRotation: CRSoffsetRotation
     unit_converter: IHostToSpeckleUnitConverter[str]
+    speckle_units: str
 
     def __init__(
         self,
@@ -22,3 +23,6 @@ class QgisConversionSettings:
         self.project = project
         self.activeCrsOffsetRotation = activeCrsOffsetRotation
         self.unit_converter = unit_converter
+        self.speckle_units = unit_converter.convert_or_throw(
+            self.project.distanceUnits()
+        )
