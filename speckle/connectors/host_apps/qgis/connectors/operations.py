@@ -3,6 +3,10 @@ from speckle.connectors.common.builders import (
     IRootObjectBuilder,
     RootObjectBuilderResult,
 )
+from speckle.connectors.host_apps.qgis.connectors.host_app import (
+    QgisColorUnpacker,
+    QgisLayerUnpacker,
+)
 from speckle.connectors.ui.models import SendInfo
 from specklepy.objects.models.collections.collection import Collection
 
@@ -10,8 +14,8 @@ from specklepy.objects.models.collections.collection import Collection
 class QgisRootObjectBuilder(IRootObjectBuilder):
     root_to_speckle_converter: "IRootToSpeckleConverter"
     send_conversion_cache: "ISendConversionCache"
-    layer_unpacker: "QgisLayerUnpacker"
-    color_unpacker: "QgisColorUnpacker"
+    layer_unpacker: QgisLayerUnpacker
+    color_unpacker: QgisColorUnpacker
     converter_settings: "IConverterSettingsStore"
     logger: "ILogger[QgisRootObjectBuilder]"
     activity_factory: "ISdkActivityFactory"
@@ -20,8 +24,8 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         self,
         root_to_speckle_converter: "IRootToSpeckleConverter",
         send_conversion_cache: "ISendConversionCache",
-        layer_unpacker: "QgisLayerUnpacker",
-        color_unpacker: "QgisColorUnpacker",
+        layer_unpacker: QgisLayerUnpacker,
+        color_unpacker: QgisColorUnpacker,
         converter_settings: "IConverterSettingsStore",
         logger: "ILogger[QgisRootObjectBuilder]",
         activity_factory: "ISdkActivityFactory",

@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
@@ -89,7 +89,7 @@ class DocumentInfo:
     id: str
 
 
-class DocumentModelStore:
+class DocumentModelStore(ABC):
     models: List[ModelCard]
     is_document_init: bool
 
@@ -162,9 +162,11 @@ class DocumentModelStore:
         self.host_app_save_state(state)
         return
 
+    @abstractmethod
     def host_app_save_state(self, state: str) -> None:
         return
 
+    @abstractmethod
     def load_state(self) -> None:
         return
 

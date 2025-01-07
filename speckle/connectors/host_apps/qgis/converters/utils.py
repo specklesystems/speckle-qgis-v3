@@ -62,6 +62,7 @@ class QgisToSpeckleUnitConverter(IHostToSpeckleUnitConverter[Qgis.DistanceUnit])
             raise Exception(f"The unit system {host_unit} is not supported")
 
 
+@dataclass
 class QgisConversionSettings:
     project: QgsProject
     activeCrsOffsetRotation: CRSoffsetRotation

@@ -2,7 +2,7 @@
 
 import os.path
 from typing import Optional
-from speckle.connectors.host_apps.qgis.qgis_connector_module import SpeckleQGISv3
+from speckle.connectors.host_apps.qgis.qgis_module import SpeckleQGISv3Module
 
 # Initialize Qt resources from file resources.py
 from resources import *
@@ -16,7 +16,7 @@ SPECKLE_COLOR = (59, 130, 246)
 SPECKLE_COLOR_LIGHT = (69, 140, 255)
 
 
-class SpeckleQGIS(SpeckleQGISv3):
+class SpeckleQGIS(SpeckleQGISv3Module):
     """Speckle Connector Plugin for QGIS"""
 
     dockwidget: Optional["QDockWidget"]
