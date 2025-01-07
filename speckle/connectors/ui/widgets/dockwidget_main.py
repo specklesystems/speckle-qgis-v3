@@ -197,6 +197,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_model_cards.send_model_signal.connect(
                 lambda model_card=model_card: self.send_model_signal.emit(model_card)
             )
+            # subscribe to calling SelectionWidget from existing ModelCard
+            self.widget_model_cards.add_selection_filter_signal.connect(
+                self.create_selection_filter_widget
+            )
             # subscribe to PUBLISH button to open project search
             self.widget_model_cards.add_projects_search_signal.connect(
                 self.open_select_projects_widget
@@ -225,24 +229,26 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
     def create_selection_filter_widget(self, model_card: SenderModelCard):
 
-        # get current user selection
-        # TODO should be updated on change, without a call
-        selection_info: SelectionInfo = (
-            self.parent.connector_module.selection_binding.get_selection()
-        )
-        self.widget_selection_filter = SelectionFilterWidget(
-            parent=self,
-            model_card=model_card,
-            label_text="3/3 Select objects",
-            selection_info=selection_info,
-        )
+        # prevent repeated widget initialization
+        if not self.widget_selection_filter:
+            # get current user selection
+            # TODO should be updated on change, without a call
+            selection_info: SelectionInfo = (
+                self.parent.connector_module.selection_binding.get_selection()
+            )
+            self.widget_selection_filter = SelectionFilterWidget(
+                parent=self,
+                model_card=model_card,
+                label_text="3/3 Select objects",
+                selection_info=selection_info,
+            )
 
-        # add widgets to the layout
-        self.layout().addWidget(self.widget_selection_filter)
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_selection_filter)
 
-        self.widget_selection_filter.add_model_card_signal.connect(
-            self.create_or_add_model_cards_widget
-        )
+            self.widget_selection_filter.add_model_card_signal.connect(
+                self.create_or_add_model_cards_widget
+            )
 
     def handle_change_selection_info(self, *args):
         if self.widget_selection_filter:

@@ -33,10 +33,12 @@ import webbrowser
 class ModelCardWidget(QWidget):
     card_content: ModelCard = None
     send_model_btn: QPushButton = None
-    send_model_signal = pyqtSignal(ModelCard)
+    send_model_signal = pyqtSignal(SenderModelCard)
     shadow_effect = None
     close_btn: QPushButton = None
     open_web_btn: QPushButton = None
+
+    add_selection_filter_signal = pyqtSignal(SenderModelCard)
 
     def __init__(self, parent=None, card_content: ModelCard = None):
         super(ModelCardWidget, self).__init__(None)
@@ -83,7 +85,7 @@ class ModelCardWidget(QWidget):
 
         item.setGraphicsEffect(self.shadow_effect)
 
-    def create_send_filter_line(self, card_content: ModelCard):
+    def create_send_filter_line(self, card_content: SenderModelCard):
         line = QWidget()
         layout_line = QHBoxLayout(line)
         layout_line.setAlignment(Qt.AlignLeft)
@@ -97,6 +99,9 @@ class ModelCardWidget(QWidget):
 
         clickable_text = self.add_text("Selection:  ", color=SPECKLE_COLOR)
         clickable_text.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        clickable_text.clicked.connect(
+            lambda: self.add_selection_filter_signal.emit(card_content)
+        )
         layout_line.addWidget(clickable_text)
 
         summary_text = get_selection_filter_summary_from_ids(
