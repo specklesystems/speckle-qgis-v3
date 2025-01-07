@@ -1,4 +1,4 @@
-from speckle.connectors.host_apps.qgis.converters.utils import QgisConversionSettings
+from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
 
 
 class QgisConverterModule:

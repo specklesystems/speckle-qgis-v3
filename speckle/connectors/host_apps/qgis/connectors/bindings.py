@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from speckle.connectors.common.operations import SendOperation
-from speckle.connectors.host_apps.qgis.converters.utils import QgisConversionSettings
+from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.connectors.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
