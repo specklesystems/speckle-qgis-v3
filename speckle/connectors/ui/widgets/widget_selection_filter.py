@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from speckle.connectors.host_apps.qgis.connectors.filters import QgisSelectionFilter
+from speckle.connectors.ui.bindings import SelectionInfo
 from speckle.connectors.ui.models import ModelCard, SenderModelCard
 from speckle.connectors.ui.widgets.background import BackgroundWidget
 from speckle.connectors.ui.widgets.utils.global_resources import (
@@ -17,7 +18,6 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
     BACKGR_COLOR_WHITE,
-    LABEL_HEIGHT,
     ZERO_MARGIN_PADDING,
 )
 
@@ -28,15 +28,22 @@ class SelectionFilterWidget(QWidget):
     add_model_card_signal = pyqtSignal(ModelCard)
     shadow_effect = None
     model_card: SenderModelCard = None
+    selection_info: SelectionInfo
 
     def __init__(
         self,
         parent=None,
-        model_card=None,
+        model_card: SenderModelCard = None,
         label_text: str = "3/3 Select objects",
+        selection_info: SelectionInfo = None,
     ):
         super(SelectionFilterWidget, self).__init__(parent)
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
+        self.selection_info = selection_info
+
+        # update model card selection filter
+        selection_filter = QgisSelectionFilter(selection_info.selected_object_ids)
+        model_card.send_filter = selection_filter
         self.model_card = model_card
 
         # align with the parent widget size
@@ -120,7 +127,12 @@ class SelectionFilterWidget(QWidget):
 
         # TODO: replace later with responsive item (to SelectionFilter)
         label2 = self.create_text_widget(
-            "No layers selected, go ahead and select some!", "color: blue;"
+            (
+                "No layers selected, go ahead and select some!"
+                if not self.selection_info
+                else self.selection_info.summary
+            ),
+            "color: blue;",
         )
 
         boxLayout.addWidget(label2)

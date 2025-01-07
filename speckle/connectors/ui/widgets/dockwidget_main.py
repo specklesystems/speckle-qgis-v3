@@ -2,7 +2,7 @@
 
 from typing import List
 from speckle.connectors.host_apps.qgis.connectors.filters import QgisSelectionFilter
-from speckle.connectors.ui.bindings import IBasicConnectorBinding
+from speckle.connectors.ui.bindings import IBasicConnectorBinding, SelectionInfo
 from speckle.connectors.ui.models import ModelCard, SenderModelCard
 from speckle.connectors.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
@@ -25,6 +25,10 @@ from speckle.connectors.ui.widgets.widget_selection_filter import SelectionFilte
 
 
 class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
+    """Dockwidget handles all Speckle UI events, including
+    receiving and responding to the signals from child widgets.
+    Speckle Module is set as .parent, so we have access to all Speckle modules."""
+
     parent: "QgisConnectorModule"
     basic_binding: IBasicConnectorBinding
     widget_no_document: NoDocumentWidget = None
@@ -223,14 +227,14 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
         # get current user selection
         # TODO should be updated on change, without a call
-        selected_layers_ids: List[str] = (
-            self.parent.connector_module.selection_binding.get_selection().selected_object_ids
+        selection_info: SelectionInfo = (
+            self.parent.connector_module.selection_binding.get_selection()
         )
-        selection_filter = QgisSelectionFilter(selected_layers_ids)
-        model_card.send_filter = selection_filter
-
         self.widget_selection_filter = SelectionFilterWidget(
-            parent=self, model_card=model_card, label_text="3/3 Select objects"
+            parent=self,
+            model_card=model_card,
+            label_text="3/3 Select objects",
+            selection_info=selection_info,
         )
 
         # add widgets to the layout

@@ -163,8 +163,6 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         layer_ids: List[str] = model_card.send_filter.refresh_object_ids()
         root = qgis_project.layerTreeRoot()
         layers: List[Any] = [root.findLayer(l_id) for l_id in layer_ids]
-        print("__Layers to send: ")
-        print(layers)
 
         self.send_operation_execute_signal.emit(
             layers, model_card.get_send_info("QGIS"), None, None
@@ -206,7 +204,12 @@ class QgisSelectionBinding(ISelectionBinding):
         all_nested_layers = selected_layers.copy()
 
         object_types = list(
-            set([str(type(layer)).split(".")[-1] for layer in all_nested_layers])
+            set(
+                [
+                    str(type(layer)).split(".")[-1].split("'")[0].split(">")[0]
+                    for layer in all_nested_layers
+                ]
+            )
         )
         return SelectionInfo(
             selected_object_ids=[m.id() for m in all_nested_layers],
