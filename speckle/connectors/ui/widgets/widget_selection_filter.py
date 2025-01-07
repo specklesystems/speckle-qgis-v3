@@ -9,7 +9,8 @@ from PyQt5.QtWidgets import (
     QGraphicsDropShadowEffect,
 )
 
-from speckle.connectors.ui.models import ModelCard
+from speckle.connectors.host_apps.qgis.connectors.filters import QgisSelectionFilter
+from speckle.connectors.ui.models import ModelCard, SenderModelCard
 from speckle.connectors.ui.widgets.background import BackgroundWidget
 from speckle.connectors.ui.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
@@ -26,7 +27,7 @@ class SelectionFilterWidget(QWidget):
     message_card: QWidget
     add_model_card_signal = pyqtSignal(ModelCard)
     shadow_effect = None
-    model_card: ModelCard = None
+    model_card: SenderModelCard = None
 
     def __init__(
         self,

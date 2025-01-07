@@ -9,16 +9,11 @@ from speckle.connectors.host_apps.qgis.connectors.qgis_connector_module import (
 from speckle.connectors.host_apps.qgis.converters.qgis_converter_module import (
     QgisConverterModule,
 )
-from speckle.connectors.host_apps.qgis.converters.utils import (
-    CRSoffsetRotation,
-    IHostToSpeckleUnitConverter,
-)
+
 from speckle.connectors.ui.models import ModelCard, SendInfo
 from speckle.connectors.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
 import webbrowser
-
-from qgis.core import QgsProject
 
 SPECKLE_COLOR = (59, 130, 246)
 SPECKLE_COLOR_LIGHT = (69, 140, 255)
@@ -32,23 +27,23 @@ class SpeckleQGISv3Module:
     speckle_version: str
     theads_total: int
 
-    def __init__(self):
+    def __init__(self, iface):
 
         self.speckle_version = "3.0.0"
         self.theads_total = 0
-        self.instantiate_module_dependencies()
+        self.instantiate_module_dependencies(iface)
 
     def create_dockwidget(self):
         self.dockwidget = SpeckleQGISv3Dialog(
-            parent=None, basic_binding=self.connector_module.basic_binding
+            parent=self, basic_binding=self.connector_module.basic_binding
         )
         self.dockwidget.runSetup(self)
         self.connect_dockwidget_signals()
 
-    def instantiate_module_dependencies(self):
+    def instantiate_module_dependencies(self, iface):
 
         self.converter_module = QgisConverterModule()
-        self.connector_module = QgisConnectorModule()
+        self.connector_module = QgisConnectorModule(iface)
 
         self.connect_connector_module_signals()
         self.connect_converter_module_signals()

@@ -8,6 +8,7 @@ from speckle.connectors.common.operations import (
 )
 from speckle.connectors.host_apps.qgis.connectors.bindings import (
     QgisBasicConnectorBinding,
+    QgisSelectionBinding,
     QgisSendBinding,
 )
 from speckle.connectors.host_apps.qgis.connectors.host_app import (
@@ -35,17 +36,21 @@ class QgisConnectorModule(QObject):
     document_store: QgisDocumentStore
     basic_binding: QgisBasicConnectorBinding
     send_binding: QgisSendBinding
+    selection_binding: QgisSelectionBinding
     root_obj_builder: QgisRootObjectBuilder
     account_service: AccountService
     send_operation: SendOperation
     layer_unpacker: QgisLayerUnpacker
     color_unpacker: QgisColorUnpacker
 
+    iface = None  # will be assigned on plugin init
+
     create_conversion_settings_signal = pyqtSignal(QgsProject, CRSoffsetRotation)
     send_operation_execute_signal = pyqtSignal(list, object, object, object)
 
-    def __init__(self):
+    def __init__(self, iface):
         super().__init__()
+        self.iface = iface
         bridge = None
         self.document_store = QgisDocumentStore()
         self.basic_binding = QgisBasicConnectorBinding(self.document_store, bridge)
@@ -61,9 +66,12 @@ class QgisConnectorModule(QObject):
             _top_level_exception_handler=None,
             _qgis_conversion_settings=None,
         )
+        self.layer_utils = QgisLayerUtils()
+        self.selection_binding = QgisSelectionBinding(
+            iface=self.iface, parent=None, layer_utils=self.layer_utils
+        )
         self.layer_unpacker = QgisLayerUnpacker()
         self.color_unpacker = QgisColorUnpacker()
-        self.layer_utils = QgisLayerUtils()
 
         self.root_obj_builder = None
         account_manager = AccountManager()

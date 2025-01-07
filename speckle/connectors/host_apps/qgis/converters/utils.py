@@ -31,7 +31,7 @@ class IHostToSpeckleUnitConverter(ABC, Generic[T]):
 
     @abstractmethod
     def convert_or_throw(self, host_unit: T) -> Units:
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class QgisToSpeckleUnitConverter(IHostToSpeckleUnitConverter[Qgis.DistanceUnit]):

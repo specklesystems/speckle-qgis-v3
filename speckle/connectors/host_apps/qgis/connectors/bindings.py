@@ -1,12 +1,15 @@
 from typing import Any, Dict, List, Optional
 from speckle.connectors.common.operations import SendOperation, SendOperationResult
+from speckle.connectors.host_apps.qgis.connectors.utils import QgisLayerUtils
 from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.connectors.host_apps.qgis.converters.utils import CRSoffsetRotation
 from speckle.connectors.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
     IBrowserBridge,
+    ISelectionBinding,
     ISendBinding,
+    SelectionInfo,
     SendBindingUICommands,
 )
 from speckle.connectors.ui.models import (
@@ -70,6 +73,8 @@ class QgisBasicConnectorBinding(IBasicConnectorBinding):
 
 
 class MetaQObject(type(QObject), type(ISendBinding)):
+    # avoiding TypeError: metaclass conflict: the metaclass of a derived class
+    # must be a (non-strict) subclass of the metaclasses of all its bases
     pass
 
 
@@ -151,8 +156,15 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         if not isinstance(model_card, SenderModelCard):
             raise Exception("Model card is not a sender model card")
 
-        layers: List[Any] = []
-        # TODO: get layers from project using model card
+        if model_card.send_filter is None:
+            raise ValueError("SendFilter is None")
+
+        # get layers ids and the layers themselves
+        layer_ids: List[str] = model_card.send_filter.refresh_object_ids()
+        root = qgis_project.layerTreeRoot()
+        layers: List[Any] = [root.findLayer(l_id) for l_id in layer_ids]
+        print("__Layers to send: ")
+        print(layers)
 
         self.send_operation_execute_signal.emit(
             layers, model_card.get_send_info("QGIS"), None, None
@@ -166,3 +178,37 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
 
     def cancel_send(self, model_card_id):
         return super().cancel_send(model_card_id)
+
+
+class QgisSelectionBinding(ISelectionBinding):
+    layer_utils: QgisLayerUtils
+    name: str
+    parent: IBrowserBridge
+    iface: Any
+
+    def __init__(self, iface, parent=None, layer_utils=None):
+        self.iface = iface
+        self.name = "selectionBinding"
+        self.parent = parent
+        self.layer_utils = layer_utils
+        # TODO: subscribe to selection change
+
+    def on_selection_changed(self) -> None:
+        selection_info: SelectionInfo = self.get_selection()
+        # TODO parent.send(set_selection event)
+
+    def get_selection(self):
+        # qgis_project = QgsProject.instance()
+
+        selected_layers = self.iface.layerTreeView().selectedLayers()
+
+        # TODO: unpack nested layers
+        all_nested_layers = selected_layers.copy()
+
+        object_types = list(
+            set([str(type(layer)).split(".")[-1] for layer in all_nested_layers])
+        )
+        return SelectionInfo(
+            selected_object_ids=[m.id() for m in all_nested_layers],
+            summary=f"{len(all_nested_layers)} layers ({", ".join(object_types)})",
+        )
