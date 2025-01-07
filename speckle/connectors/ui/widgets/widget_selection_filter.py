@@ -29,6 +29,7 @@ class SelectionFilterWidget(QWidget):
     shadow_effect = None
     model_card: SenderModelCard = None
     selection_info: SelectionInfo
+    selection_info_label: QLabel
 
     def __init__(
         self,
@@ -126,7 +127,7 @@ class SelectionFilterWidget(QWidget):
         boxLayout.addWidget(label)
 
         # TODO: replace later with responsive item (to SelectionFilter)
-        label2 = self.create_text_widget(
+        self.selection_info_label: QLabel = self.create_text_widget(
             (
                 "No layers selected, go ahead and select some!"
                 if not self.selection_info
@@ -135,7 +136,7 @@ class SelectionFilterWidget(QWidget):
             "color: blue;",
         )
 
-        boxLayout.addWidget(label2)
+        boxLayout.addWidget(self.selection_info_label)
 
         # add publish / load buttons
         button_publish = self.create_publish_button()
@@ -157,6 +158,14 @@ class SelectionFilterWidget(QWidget):
             + " }"
         )
         return button_publish
+
+    def change_selection_info(self, selection_info: SelectionInfo):
+        # change text on the widget
+        self.selection_info_label.setText(selection_info.summary)
+
+        # change selection info that will be passed to ModelCard
+        selection_filter = QgisSelectionFilter(selection_info.selected_object_ids)
+        self.model_card.send_filter = selection_filter
 
     def resizeEvent(self, event=None):
         QWidget.resizeEvent(self, event)

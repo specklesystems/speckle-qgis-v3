@@ -21,7 +21,7 @@ from speckle.connectors.ui.models import (
 )
 
 from qgis.core import QgsProject
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtCore import pyqtSignal, QObject, QTimer
 
 
 class QgisBasicConnectorBinding(IBasicConnectorBinding):
@@ -178,25 +178,35 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         return super().cancel_send(model_card_id)
 
 
-class QgisSelectionBinding(ISelectionBinding):
+class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
     layer_utils: QgisLayerUtils
     name: str
     parent: IBrowserBridge
     iface: Any
 
+    selection_changed_signal = pyqtSignal(SelectionInfo)
+
     def __init__(self, iface, parent=None, layer_utils=None):
+        QObject.__init__(self)
         self.iface = iface
         self.name = "selectionBinding"
         self.parent = parent
         self.layer_utils = layer_utils
-        # TODO: subscribe to selection change
+
+        # subscribe to selection change
+        # use QTimer to handle the event AFTER the user UI selection event is fully processed
+        # otherwise, on event trigger, the UI still has the pre-event layer selection active
+        iface.layerTreeView().currentLayerChanged.connect(
+            lambda: QTimer.singleShot(0, self.on_selection_changed)
+        )
 
     def on_selection_changed(self) -> None:
+
         selection_info: SelectionInfo = self.get_selection()
-        # TODO parent.send(set_selection event)
+        # instead of parent.send(set_selection event)
+        self.selection_changed_signal.emit(selection_info)
 
     def get_selection(self):
-        # qgis_project = QgsProject.instance()
 
         selected_layers = self.iface.layerTreeView().selectedLayers()
 

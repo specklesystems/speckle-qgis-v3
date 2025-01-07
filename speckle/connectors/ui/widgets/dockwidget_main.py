@@ -25,9 +25,9 @@ from speckle.connectors.ui.widgets.widget_selection_filter import SelectionFilte
 
 
 class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
-    """Dockwidget handles all Speckle UI events, including
+    """Dockwidget (UI module) handles all Speckle UI events, including
     receiving and responding to the signals from child widgets.
-    Speckle Module is set as .parent, so we have access to all Speckle modules."""
+    SpeckleModule is set as .parent, so we have access to all other Speckle modules."""
 
     parent: "QgisConnectorModule"
     basic_binding: IBasicConnectorBinding
@@ -243,6 +243,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         self.widget_selection_filter.add_model_card_signal.connect(
             self.create_or_add_model_cards_widget
         )
+
+    def handle_change_selection_info(self, *args):
+        if self.widget_selection_filter:
+            self.widget_selection_filter.change_selection_info(*args)
 
     def resizeEvent(self, event):
         QtWidgets.QDockWidget.resizeEvent(self, event)

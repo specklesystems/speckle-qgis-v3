@@ -53,11 +53,17 @@ class SpeckleQGISv3Module:
         self.dockwidget.add_model_signal.connect(self.add_model_card_to_store)
         self.dockwidget.remove_model_signal.connect(self.remove_model_card_from_store)
 
+        # moved here frpm "connect_connector_module_signals", because it's
+        # calling dockwidget and should only be accessed after dockwidget is created
+        self.connector_module.selection_binding.selection_changed_signal.connect(
+            self.dockwidget.handle_change_selection_info
+        )
+
     def connect_connector_module_signals(self):
-        self.connector_module.create_conversion_settings_signal.connect(
+        self.connector_module.send_binding.create_conversion_settings_signal.connect(
             self.converter_module.create_and_save_conversion_settings
         )
-        self.connector_module.send_operation_execute_signal.connect(
+        self.connector_module.send_binding.send_operation_execute_signal.connect(
             self.send_operation_execute
         )
 

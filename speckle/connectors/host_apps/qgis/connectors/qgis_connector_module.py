@@ -45,9 +45,6 @@ class QgisConnectorModule(QObject):
 
     iface = None  # will be assigned on plugin init
 
-    create_conversion_settings_signal = pyqtSignal(QgsProject, CRSoffsetRotation)
-    send_operation_execute_signal = pyqtSignal(list, object, object, object)
-
     def __init__(self, iface):
         super().__init__()
         self.iface = iface
@@ -77,14 +74,6 @@ class QgisConnectorModule(QObject):
         account_manager = AccountManager()
         self.account_service = AccountService(account_manager)
         self.send_operation = None
-
-        # connect to signals from child modules
-        self.send_binding.create_conversion_settings_signal.connect(
-            self.rethrow_create_conversion_signal
-        )
-        self.send_binding.send_operation_execute_signal.connect(
-            self.rethrow_send_operation_execute_signal
-        )
 
     def execute_send_operation(
         self,
@@ -124,20 +113,3 @@ class QgisConnectorModule(QObject):
             ct=ct,
         )
         self.send_binding.send_operation_result = send_operation_result
-
-    def rethrow_create_conversion_signal(
-        self, project: QgsProject, crs_offsets: CRSoffsetRotation
-    ):
-        self.create_conversion_settings_signal.emit(project, crs_offsets)
-
-    def rethrow_send_operation_execute_signal(
-        self,
-        layers: List[Any],
-        send_info: SendInfo,
-        progress_event_handler: Any,
-        ct: Any,
-    ):
-
-        self.send_operation_execute_signal.emit(
-            layers, send_info, progress_event_handler, ct
-        )
