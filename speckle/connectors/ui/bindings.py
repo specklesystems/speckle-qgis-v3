@@ -170,7 +170,7 @@ class SendBindingUICommands(BasicConnectorBindingCommands):
         return
 
 
-class ISendBinding(IBinding):
+class ISendBinding(IBinding, ABC):
     commads: SendBindingUICommands
 
     @abstractmethod

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import Any
 from plugin_utils.panel_logging import logToUser
 
 from speckle.connectors.host_apps.qgis.connectors.qgis_connector_module import (
@@ -8,10 +9,16 @@ from speckle.connectors.host_apps.qgis.connectors.qgis_connector_module import (
 from speckle.connectors.host_apps.qgis.converters.qgis_converter_module import (
     QgisConverterModule,
 )
-from speckle.connectors.ui.models import ModelCard
+from speckle.connectors.host_apps.qgis.converters.utils import (
+    CRSoffsetRotation,
+    IHostToSpeckleUnitConverter,
+)
+from speckle.connectors.ui.models import ModelCard, SendInfo
 from speckle.connectors.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
 import webbrowser
+
+from qgis.core import QgsProject
 
 SPECKLE_COLOR = (59, 130, 246)
 SPECKLE_COLOR_LIGHT = (69, 140, 255)
@@ -43,10 +50,24 @@ class SpeckleQGISv3Module:
         self.converter_module = QgisConverterModule()
         self.connector_module = QgisConnectorModule()
 
+        self.connect_connector_module_signals()
+        self.connect_converter_module_signals()
+
     def connect_dockwidget_signals(self):
         self.dockwidget.send_model_signal.connect(self.send_model)
         self.dockwidget.add_model_signal.connect(self.add_model_card_to_store)
         self.dockwidget.remove_model_signal.connect(self.remove_model_card_from_store)
+
+    def connect_connector_module_signals(self):
+        self.connector_module.create_conversion_settings_signal.connect(
+            self.converter_module.create_and_save_conversion_settings
+        )
+        self.connector_module.send_operation_execute_signal.connect(
+            self.send_operation_execute
+        )
+
+    def connect_converter_module_signals(self):
+        return
 
     def add_model_card_to_store(self, model_card: ModelCard):
         print("dockwidget: to add card to Store")
@@ -57,15 +78,13 @@ class SpeckleQGISv3Module:
 
     def send_model(self, model_card: ModelCard):
         print(model_card.model_card_id)
+        self.connector_module.send_binding.send(model_card_id=model_card.model_card_id)
 
-        self.converter_module = QgisConverterModule()
-        self.connector_module.add_conversion_settings(
-            self.converter_module.conversion_settings
-        )
-
-        self.connector_module.send_binding.send(
-            model_card_id=model_card.model_card_id,
-            send_operation=self.connector_module.send_operation,
+    def send_operation_execute(
+        self, layers: list, send_info: SendInfo, progress: Any, ct: Any
+    ):
+        self.connector_module.execute_send_operation(
+            self.converter_module.conversion_settings, layers, send_info, progress, ct
         )
 
     def verify_dependencies(self):

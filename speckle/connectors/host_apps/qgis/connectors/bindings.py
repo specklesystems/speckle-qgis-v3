@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
-from speckle.connectors.common.operations import SendOperation
+from speckle.connectors.common.operations import SendOperation, SendOperationResult
 from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
+from speckle.connectors.host_apps.qgis.converters.utils import CRSoffsetRotation
 from speckle.connectors.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
@@ -15,6 +16,9 @@ from speckle.connectors.ui.models import (
     ModelCard,
     SenderModelCard,
 )
+
+from qgis.core import QgsProject
+from PyQt5.QtCore import pyqtSignal, QObject
 
 
 class QgisBasicConnectorBinding(IBasicConnectorBinding):
@@ -65,7 +69,11 @@ class QgisBasicConnectorBinding(IBasicConnectorBinding):
         return
 
 
-class QgisSendBinding(ISendBinding):
+class MetaQObject(type(QObject), type(ISendBinding)):
+    pass
+
+
+class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
     name: str = "sendBinding"
     commands: SendBindingUICommands
     parent: IBrowserBridge
@@ -82,6 +90,10 @@ class QgisSendBinding(ISendBinding):
     changed_objects_ids: Dict[str, bytes]
     subscribed_layers: List[Any]
 
+    create_conversion_settings_signal = pyqtSignal(QgsProject, CRSoffsetRotation)
+    send_operation_execute_signal = pyqtSignal(list, object, object, object)
+    send_operation_result: SendOperationResult = None
+
     def __init__(
         self,
         parent: IBrowserBridge,
@@ -95,7 +107,7 @@ class QgisSendBinding(ISendBinding):
         _top_level_exception_handler: "ITopLevelExceptionHandler",
         _qgis_conversion_settings: QgisConversionSettings,
     ):
-
+        QObject.__init__(self)
         self.store = store
         self._service_provider = _service_provider
         self._send_filters = _send_filters
@@ -127,31 +139,32 @@ class QgisSendBinding(ISendBinding):
     def get_send_settings(self):
         return []
 
-    def send(self, model_card_id: str, send_operation: SendOperation) -> None:
+    def send(self, model_card_id: str) -> None:
 
-        # send_operation in C# was resolved with scope.ServiceProvider,
-        # and here I don't see another way to get it
+        # get conversion settings by sending signal to the main module
+        qgis_project = QgsProject.instance()
+        crs_offset_rotation = CRSoffsetRotation(qgis_project.crs(), 0, 0, 0)
+        self.create_conversion_settings_signal.emit(qgis_project, crs_offset_rotation)
+
         print(self.store.models)
         model_card: SenderModelCard = self.store.get_model_by_id(model_card_id)
         if not isinstance(model_card, SenderModelCard):
             raise Exception("Model card is not a sender model card")
 
-        # TODO initialise cancellation token
-        layers = []
+        layers: List[Any] = []
         # TODO: get layers from project using model card
 
-        result = send_operation.execute(
-            objects=[layers],
-            send_info=model_card.get_send_info("QGIS"),
-            on_operation_progressed=None,
-            ct=None,
+        self.send_operation_execute_signal.emit(
+            layers, model_card.get_send_info("QGIS"), None, None
         )
+        # should assign self.send_operation_result
 
-        return result
-
-        # self.commads.set_model_send_result(
-        #    model_card_id=model_card_id, version_id="", send_conversion_results=[]
-        # )
+        # TODO:
+        self.commads.set_model_send_result(
+            model_card_id=model_card_id,
+            version_id=self.send_operation_result.root_obj_id,
+            send_conversion_results=self.send_operation_result.converted_references,
+        )
 
     def cancel_send(self, model_card_id):
         return super().cancel_send(model_card_id)
