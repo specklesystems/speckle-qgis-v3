@@ -156,10 +156,8 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
 
         self.send_operation_execute_signal.emit(
             layers, model_card.get_send_info("QGIS"), None, None
-        )
-        # should assign self.send_operation_result
+        )  # should assign self.send_operation_result
 
-        # TODO:
         self.commads.set_model_send_result(
             model_card_id=model_card_id,
             version_id=self.send_operation_result.root_obj_id,

@@ -77,6 +77,7 @@ class SpeckleQGISv3Module:
         self.connector_module.document_store.remove_model(model_card=model_card)
 
     def send_model(self, model_card: ModelCard):
+        # receiving signal from UI and passing it to SendBinding
         print(model_card.model_card_id)
         self.connector_module.send_binding.send(model_card_id=model_card.model_card_id)
 
