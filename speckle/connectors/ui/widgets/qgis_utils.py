@@ -8,21 +8,26 @@ from qgis.core import QgsProject
 def get_selection_filter_summary_from_ids(card_content: ModelCard):
 
     if isinstance(card_content, SenderModelCard):
-        layer_ids: List[str] = card_content.send_filter.refresh_object_ids()
-
-        root = QgsProject.instance().layerTreeRoot()
-
-        # also extract actual .layer() from the found QgsLayerTreeLayer
-        layers: List[Any] = [root.findLayer(l_id).layer() for l_id in layer_ids]
-
-        selection_info: SelectionInfo = get_selection_info_from_selected_layers(layers)
+        layers = get_layers_from_model_card_content(card_content)
+        selection_info: SelectionInfo = get_selection_info_from_layers(layers)
         return selection_info.summary
 
     else:
         return "0 layers"
 
 
-def get_selection_info_from_selected_layers(selected_layers):
+def get_layers_from_model_card_content(card_content: ModelCard):
+
+    layer_ids: List[str] = card_content.send_filter.refresh_object_ids()
+    root = QgsProject.instance().layerTreeRoot()
+
+    # also extract actual .layer() from the found QgsLayerTreeLayer
+    layers: List[Any] = [root.findLayer(l_id).layer() for l_id in layer_ids]
+
+    return layers
+
+
+def get_selection_info_from_layers(selected_layers):
 
     # TODO: unpack nested layers
     all_nested_layers = selected_layers.copy()

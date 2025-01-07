@@ -61,10 +61,15 @@ class SpeckleQGISv3Module:
 
     def connect_connector_module_signals(self):
         self.connector_module.send_binding.create_conversion_settings_signal.connect(
-            self.converter_module.create_and_save_conversion_settings
+            self.share_conversion_settings
         )
         self.connector_module.send_binding.send_operation_execute_signal.connect(
-            self.send_operation_execute
+            self.connector_module.execute_send_operation
+        )
+
+    def share_conversion_settings(self, *args):
+        self.connector_module.root_obj_builder.converter_settings = (
+            self.converter_module.create_and_save_conversion_settings(*args)
         )
 
     def connect_converter_module_signals(self):
@@ -81,13 +86,6 @@ class SpeckleQGISv3Module:
         # receiving signal from UI and passing it to SendBinding
         print(model_card.model_card_id)
         self.connector_module.send_binding.send(model_card_id=model_card.model_card_id)
-
-    def send_operation_execute(
-        self, layers: list, send_info: SendInfo, progress: Any, ct: Any
-    ):
-        self.connector_module.execute_send_operation(
-            self.converter_module.conversion_settings, layers, send_info, progress, ct
-        )
 
     def verify_dependencies(self):
 

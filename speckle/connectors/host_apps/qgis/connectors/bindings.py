@@ -23,7 +23,8 @@ from speckle.connectors.ui.models import (
 from qgis.core import QgsProject
 from PyQt5.QtCore import pyqtSignal, QObject, QTimer
 from speckle.connectors.ui.widgets.qgis_utils import (
-    get_selection_info_from_selected_layers,
+    get_layers_from_model_card_content,
+    get_selection_info_from_layers,
 )
 
 
@@ -154,7 +155,6 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         crs_offset_rotation = CRSoffsetRotation(qgis_project.crs(), 0, 0, 0)
         self.create_conversion_settings_signal.emit(qgis_project, crs_offset_rotation)
 
-        print(self.store.models)
         model_card: SenderModelCard = self.store.get_model_by_id(model_card_id)
         if not isinstance(model_card, SenderModelCard):
             raise Exception("Model card is not a sender model card")
@@ -162,10 +162,8 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         if model_card.send_filter is None:
             raise ValueError("SendFilter is None")
 
-        # get layers ids and the layers themselves
-        layer_ids: List[str] = model_card.send_filter.refresh_object_ids()
-        root = qgis_project.layerTreeRoot()
-        layers: List[Any] = [root.findLayer(l_id) for l_id in layer_ids]
+        # get layers
+        layers = get_layers_from_model_card_content(model_card)
 
         self.send_operation_execute_signal.emit(
             layers, model_card.get_send_info("QGIS"), None, None
@@ -212,4 +210,4 @@ class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
     def get_selection(self) -> SelectionInfo:
 
         selected_layers = self.iface.layerTreeView().selectedLayers()
-        return get_selection_info_from_selected_layers(selected_layers)
+        return get_selection_info_from_layers(selected_layers)

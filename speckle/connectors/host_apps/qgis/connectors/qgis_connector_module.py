@@ -69,29 +69,18 @@ class QgisConnectorModule(QObject):
         account_manager = AccountManager()
         self.account_service = AccountService(account_manager)
         self.send_operation = None
-
-    def execute_send_operation(
-        self,
-        conversion_settings: QgisConversionSettings,
-        layers: list,
-        send_info: SendInfo,
-        progress: Any,
-        ct: Any,
-    ):
-
         self.root_obj_builder = QgisRootObjectBuilder(
             root_to_speckle_converter=None,
             send_conversion_cache=None,
             layer_unpacker=self.layer_unpacker,
             color_unpacker=self.color_unpacker,
-            converter_settings=conversion_settings,
+            converter_settings=None,
             layer_utils=self.layer_utils,
             logger=None,
             activity_factory=None,
         )
-
         client_factory = ClientFactory()
-        send_operation: SendOperation = SendOperation(
+        self.send_operation: SendOperation = SendOperation(
             root_object_builder=self.root_obj_builder,
             send_conversion_cache=None,
             account_service=self.account_service,
@@ -101,10 +90,6 @@ class QgisConnectorModule(QObject):
             activity_factory=None,
         )
 
-        send_operation_result: SendOperationResult = send_operation.execute(
-            objects=layers,
-            send_info=send_info,
-            on_operation_progressed=progress,
-            ct=ct,
-        )
+    def execute_send_operation(self, *args):
+        send_operation_result: SendOperationResult = self.send_operation.execute(*args)
         self.send_binding.send_operation_result = send_operation_result

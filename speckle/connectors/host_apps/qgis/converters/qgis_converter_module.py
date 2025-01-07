@@ -25,3 +25,4 @@ class QgisConverterModule:
         self.conversion_settings = QgisConversionSettings(
             project=qgis_project, activeCrsOffsetRotation=crs_offset_rotation
         )
+        return self.conversion_settings
