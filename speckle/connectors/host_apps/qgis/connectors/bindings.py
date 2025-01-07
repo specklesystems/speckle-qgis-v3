@@ -22,6 +22,9 @@ from speckle.connectors.ui.models import (
 
 from qgis.core import QgsProject
 from PyQt5.QtCore import pyqtSignal, QObject, QTimer
+from speckle.connectors.ui.widgets.qgis_utils import (
+    get_selection_info_from_selected_layers,
+)
 
 
 class QgisBasicConnectorBinding(IBasicConnectorBinding):
@@ -206,22 +209,7 @@ class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
         # instead of parent.send(set_selection event)
         self.selection_changed_signal.emit(selection_info)
 
-    def get_selection(self):
+    def get_selection(self) -> SelectionInfo:
 
         selected_layers = self.iface.layerTreeView().selectedLayers()
-
-        # TODO: unpack nested layers
-        all_nested_layers = selected_layers.copy()
-
-        object_types = list(
-            set(
-                [
-                    str(type(layer)).split(".")[-1].split("'")[0].split(">")[0]
-                    for layer in all_nested_layers
-                ]
-            )
-        )
-        return SelectionInfo(
-            selected_object_ids=[m.id() for m in all_nested_layers],
-            summary=f"{len(all_nested_layers)} layers ({", ".join(object_types)})",
-        )
+        return get_selection_info_from_selected_layers(selected_layers)

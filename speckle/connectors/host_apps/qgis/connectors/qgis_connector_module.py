@@ -20,15 +20,10 @@ from speckle.connectors.host_apps.qgis.connectors.operations import (
     QgisRootObjectBuilder,
 )
 from speckle.connectors.host_apps.qgis.connectors.utils import QgisLayerUtils
-from speckle.connectors.host_apps.qgis.converters.qgis_converter_module import (
-    QgisConverterModule,
-)
 from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
-
-from PyQt5.QtCore import pyqtSignal, QObject
-from qgis.core import QgsProject
-from speckle.connectors.host_apps.qgis.converters.utils import CRSoffsetRotation
 from speckle.connectors.ui.models import SendInfo
+
+from PyQt5.QtCore import QObject
 
 
 class QgisConnectorModule(QObject):
