@@ -5,10 +5,15 @@ from speckle.connectors.host_apps.qgis.connectors.bindings import (
     QgisBasicConnectorBinding,
     QgisSendBinding,
 )
-from speckle.connectors.host_apps.qgis.connectors.host_app import QgisDocumentStore
+from speckle.connectors.host_apps.qgis.connectors.host_app import (
+    QgisColorUnpacker,
+    QgisDocumentStore,
+    QgisLayerUnpacker,
+)
 from speckle.connectors.host_apps.qgis.connectors.operations import (
     QgisRootObjectBuilder,
 )
+from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
 
 
 class QgisConnectorModule:
@@ -19,6 +24,8 @@ class QgisConnectorModule:
     root_obj_builder: QgisRootObjectBuilder
     account_service: AccountService
     send_operation: SendOperation
+    layer_unpacker: QgisLayerUnpacker
+    color_unpacker: QgisColorUnpacker
 
     def __init__(self):
 
@@ -37,11 +44,14 @@ class QgisConnectorModule:
             _top_level_exception_handler=None,
             _qgis_conversion_settings=None,
         )
+        self.layer_unpacker = QgisLayerUnpacker()
+        self.color_unpacker = QgisColorUnpacker()
+
         self.root_obj_builder = QgisRootObjectBuilder(
             root_to_speckle_converter=None,
             send_conversion_cache=None,
-            layer_unpacker=None,
-            color_unpacker=None,
+            layer_unpacker=self.layer_unpacker,
+            color_unpacker=self.color_unpacker,
             converter_settings=None,
             logger=None,
             activity_factory=None,
@@ -61,3 +71,7 @@ class QgisConnectorModule:
             client_factory=client_factory,
             activity_factory=None,
         )
+
+    def add_conversion_settings(self, conversion_settings: QgisConversionSettings):
+
+        self.root_obj_builder.converter_settings = conversion_settings

@@ -1,28 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import os.path
-from typing import Optional
-
 from plugin_utils.panel_logging import logToUser
 
-from speckle.connectors.common.api import ClientFactory
-from speckle.connectors.common.credentials import AccountManager
-from speckle.connectors.common.operations import AccountService, SendOperation
-
-from speckle.connectors.host_apps.qgis.connectors.bindings import (
-    QgisBasicConnectorBinding,
-    QgisSendBinding,
-)
-from speckle.connectors.host_apps.qgis.connectors.host_app import QgisDocumentStore
-from speckle.connectors.host_apps.qgis.connectors.operations import (
-    QgisRootObjectBuilder,
-)
 from speckle.connectors.host_apps.qgis.connectors.qgis_connector_module import (
     QgisConnectorModule,
 )
 from speckle.connectors.host_apps.qgis.converters.qgis_converter_module import (
     QgisConverterModule,
 )
+from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.connectors.ui.models import ModelCard
 from speckle.connectors.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
@@ -35,6 +21,8 @@ SPECKLE_COLOR_LIGHT = (69, 140, 255)
 class SpeckleQGISv3Module:
     """Speckle Connector Plugin for QGIS"""
 
+    connector_module: QgisConnectorModule
+    converter_module: QgisConverterModule
     speckle_version: str
     theads_total: int
 
@@ -53,8 +41,8 @@ class SpeckleQGISv3Module:
 
     def instantiate_module_dependencies(self):
 
+        self.converter_module = QgisConverterModule()
         self.connector_module = QgisConnectorModule()
-        # self.converter_module = QgisConverterModule()
 
     def connect_dockwidget_signals(self):
         self.dockwidget.send_model_signal.connect(self.send_model)
@@ -70,6 +58,11 @@ class SpeckleQGISv3Module:
 
     def send_model(self, model_card: ModelCard):
         print(model_card.model_card_id)
+
+        self.converter_module = QgisConverterModule()
+        self.connector_module.add_conversion_settings(
+            self.converter_module.conversion_settings
+        )
 
         self.connector_module.send_binding.send(
             model_card_id=model_card.model_card_id,
