@@ -5,7 +5,7 @@ from typing import Dict, Generic, TypeVar
 from specklepy.objects.geometry import Point
 from specklepy.objects.models.units import Units, get_scale_factor
 
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis
 
 T = TypeVar("T")
 
@@ -60,19 +60,3 @@ class QgisToSpeckleUnitConverter(IHostToSpeckleUnitConverter[Qgis.DistanceUnit])
         except KeyError:
             # TODO define exception type
             raise Exception(f"The unit system {host_unit} is not supported")
-
-
-class QgisConversionSettings:
-    project: QgsProject
-    activeCrsOffsetRotation: CRSoffsetRotation
-    unit_converter: IHostToSpeckleUnitConverter[str]
-
-    def __init__(
-        self,
-        project: QgsProject,
-        activeCrsOffsetRotation: CRSoffsetRotation,
-        unit_converter: IHostToSpeckleUnitConverter[Qgis.DistanceUnit],
-    ):
-        self.project = project
-        self.activeCrsOffsetRotation = activeCrsOffsetRotation
-        self.unit_converter = unit_converter

@@ -100,7 +100,10 @@ class ModelCardsWidget(QWidget):
 
     def add_background(self):
         self.background = BackgroundWidget(
-            parent=self, transparent=False, background_color=BACKGR_COLOR_LIGHT_GREY2
+            parent=self,
+            transparent=False,
+            background_color=BACKGR_COLOR_LIGHT_GREY2,
+            ignore_close_on_click=True,
         )
         self.background.show()
 

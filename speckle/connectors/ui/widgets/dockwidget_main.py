@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 from speckle.connectors.ui.bindings import IBasicConnectorBinding
 from speckle.connectors.ui.models import ModelCard
 from speckle.connectors.ui.widgets.widget_model_cards_list import ModelCardsWidget
@@ -11,23 +10,11 @@ from speckle.connectors.ui.widgets.widget_project_search import ProjectSearchWid
 
 from plugin_utils.panel_logging import logToUser
 from speckle.connectors.ui.widgets.utils.global_resources import (
-    COLOR_HIGHLIGHT,
-    SPECKLE_COLOR,
-    ICON_OPEN_WEB,
-    ICON_REPORT,
     ICON_LOGO,
-    ICON_SEARCH,
-    ICON_DELETE,
-    ICON_DELETE_BLUE,
-    ICON_SEND,
-    ICON_RECEIVE_BLACK,
-    ICON_SEND_BLUE,
-    COLOR,
     BACKGR_COLOR,
-    BACKGR_COLOR_LIGHT,
 )
 
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon, QPixmap, QCursor
 from PyQt5.QtWidgets import QHBoxLayout, QWidget
 from PyQt5 import QtCore
@@ -35,13 +22,7 @@ from PyQt5.QtCore import pyqtSignal
 from speckle.connectors.ui.widgets.widget_selection_filter import SelectionFilterWidget
 
 
-# This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
-FORM_CLASS, _ = uic.loadUiType(
-    os.path.join(os.path.dirname(__file__), os.path.join("ui", "dockwidget_main.ui"))
-)
-
-
-class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
+class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     basic_binding: IBasicConnectorBinding
     widget_no_document: NoDocumentWidget = None
     widget_no_model_cards: NoModelCardsWidget = None
@@ -62,103 +43,8 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
-        self.setupUi(self)
+        # self.setupUi(self)
         self.basic_binding = basic_binding
-        self.runAllSetup()
-
-    def runAllSetup(self):
-        self.streamBranchDropdown.setMaxCount(100)
-        self.commitDropdown.setMaxCount(100)
-
-        self.streams_add_button.setFlat(True)
-        self.streams_remove_button.setFlat(True)
-        self.commit_web_view.setFlat(True)
-        self.reportBtn.setFlat(True)
-        # self.saveSurveyPoint.setFlat(True)
-        self.saveLayerSelection.setFlat(True)
-        self.reloadButton.setFlat(True)
-        self.closeButton.setFlat(True)
-        self.commit_web_view.setEnabled(False)
-
-        # https://stackoverflow.com/questions/67585501/pyqt-how-to-use-hover-in-button-stylesheet
-        backgr_image_del = f"border-image: url({ICON_DELETE_BLUE});"
-        self.streams_add_button.setIcon(QIcon(ICON_SEARCH))
-        self.streams_add_button.setMaximumWidth(25)
-        self.streams_add_button.setStyleSheet(
-            "QPushButton {padding:3px;padding-left:5px;border: none; text-align: left;} QPushButton:hover { "
-            + f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
-            + f"{COLOR}"
-            + " }"
-        )
-
-        self.commit_web_view.setIcon(QIcon(ICON_OPEN_WEB))
-        self.commit_web_view.setMaximumWidth(25)
-        self.commit_web_view.setStyleSheet(
-            "QPushButton {padding:3px;padding-left:5px;border: none; text-align: left;} QPushButton:hover { "
-            + f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
-            + f"{COLOR}"
-            + " }"
-        )
-
-        self.reportBtn.setIcon(QIcon(ICON_REPORT))
-        self.reportBtn.setMaximumWidth(25)
-        self.reportBtn.setStyleSheet(
-            "QPushButton {padding:3px;padding-left:5px;border: none; text-align: left;} QPushButton:hover { "
-            + f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
-            + f"{COLOR}"
-            + " }"
-        )
-
-        self.streams_remove_button.setIcon(QIcon(ICON_DELETE))
-        self.streams_remove_button.setMaximumWidth(25)
-        self.streams_remove_button.setStyleSheet(
-            "QPushButton {padding:3px;padding-left:5px;border: none; text-align: left; image-position:right} QPushButton:hover { "
-            + f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
-            + f"{COLOR}"
-            + " }"
-        )  # + f"{backgr_image_del}"
-
-        self.saveLayerSelection.setStyleSheet(
-            "QPushButton {text-align: right;} QPushButton:hover { " + f"{COLOR}" + " }"
-        )
-        # self.saveSurveyPoint.setStyleSheet("QPushButton {text-align: right;} QPushButton:hover { " + f"{COLOR}" + " }")
-        self.reloadButton.setStyleSheet(
-            "QPushButton {text-align: left;} QPushButton:hover { " + f"{COLOR}" + " }"
-        )
-        self.closeButton.setStyleSheet(
-            "QPushButton {text-align: right;} QPushButton:hover { " + f"{COLOR}" + " }"
-        )
-
-        self.sendModeButton.setStyleSheet(
-            "QPushButton {padding: 10px; border: 0px; "
-            + f"color: rgba{str(SPECKLE_COLOR)};"
-            + "} QPushButton:hover { "
-            + "}"
-        )
-        self.sendModeButton.setIcon(QIcon(ICON_SEND_BLUE))
-
-        self.receiveModeButton.setFlat(True)
-        self.receiveModeButton.setStyleSheet(
-            "QPushButton {padding: 10px; border: 0px;}"
-            + "QPushButton:hover { "
-            + f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
-            + "}"
-        )
-        self.receiveModeButton.setIcon(QIcon(ICON_RECEIVE_BLACK))
-
-        self.runButton.setStyleSheet(
-            "QPushButton {color: white;border: 0px;border-radius: 17px;padding: 10px;"
-            + f"{BACKGR_COLOR}"
-            + "} QPushButton:hover { "
-            + f"{BACKGR_COLOR_LIGHT}"
-            + " }"
-        )
-        # self.runButton.setGeometry(0, 0, 150, 30)
-        self.runButton.setMaximumWidth(200)
-        self.runButton.setIcon(QIcon(ICON_SEND))
-
-        # insert checkbox
-        l = self.verticalLayout
 
     def runSetup(self, plugin):
         self.addLabel(plugin)
@@ -213,7 +99,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget, FORM_CLASS):
             boxLayout.addWidget(text_label)  # , alignment=Qt.AlignCenter)
             boxLayout.addWidget(version_label)
             boxLayout.setContentsMargins(0, 0, 0, 0)
-            self.setWindowTitle("SpeckleQGISv3")
+            self.setWindowTitle("SpeckleQGIS")
             self.setTitleBarWidget(widget)
             self.labelWidget = text_label
             self.labelWidget.setCursor(QCursor(QtCore.Qt.PointingHandCursor))

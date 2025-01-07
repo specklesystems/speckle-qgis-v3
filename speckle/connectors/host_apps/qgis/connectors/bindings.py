@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from speckle.connectors.common.operations import SendOperation
-from speckle.connectors.host_apps.qgis.converters.utils import QgisConversionSettings
+from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.connectors.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
@@ -137,9 +137,11 @@ class QgisSendBinding(ISendBinding):
             raise Exception("Model card is not a sender model card")
 
         # TODO initialise cancellation token
+        layers = []
+        # TODO: get layers from project using model card
 
         result = send_operation.execute(
-            objects=["some_native_qgis_object"],
+            objects=[layers],
             send_info=model_card.get_send_info("QGIS"),
             on_operation_progressed=None,
             ct=None,
