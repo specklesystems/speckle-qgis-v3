@@ -22,27 +22,27 @@ class IBrowserBridge(ABC):
 
     @abstractmethod
     def associate_with_bindings(self, bindings: IBinding) -> None:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def get_bindings_method_names(self) -> List[str]:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def run_methods(self, method_name: str, request_id: str, args: str) -> None:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def run_on_main_thread_async(self, action: Callable) -> None:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def send(event_name: str, cancellation_token: Any, **kwargs) -> None:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def top_level_exception_handler(self) -> "ITopLevelExceptionHandler":
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class BasicConnectorBindingCommands:
@@ -77,23 +77,23 @@ class IBasicConnectorBinding(IBinding):
 
     @abstractmethod
     def get_source_app_name() -> str:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def get_source_app_version() -> str:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def get_connector_version() -> str:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def get_document_info() -> Optional[DocumentInfo]:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def get_document_state() -> DocumentModelStore:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def add_model(model_card: ModelCard) -> None:
@@ -141,12 +141,12 @@ class SendBindingUICommands(BasicConnectorBindingCommands):
     def refresh_send_filter(self) -> None:
         # TODO
         # bridge.send(REFRESH_SEND_FILTERS_UI_COMMAND_NAME)
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def set_models_expired(self, expired_models_ids: List[str]) -> None:
         # TODO
         # bridge.send(SET_MODELS_EXPIRED_UI_COMMAND_NAME, expired_models_ids)
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def set_filter_object_ids(
         self,
@@ -156,7 +156,7 @@ class SendBindingUICommands(BasicConnectorBindingCommands):
     ):
         # TODO
         # bridge.send(SET_ID_MAP_COMMAND_NAME, model_card_id, id_map, new_selected_object_ids)
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def set_model_send_result(
         self,
@@ -170,24 +170,24 @@ class SendBindingUICommands(BasicConnectorBindingCommands):
         return
 
 
-class ISendBinding(IBinding):
+class ISendBinding(IBinding, ABC):
     commads: SendBindingUICommands
 
     @abstractmethod
     def get_send_filters(self) -> List[ISendFilter]:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def get_send_settings() -> List[ICardSetting]:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def send(self, model_card_id: str) -> None:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def cancel_send(self, model_card_id: str) -> None:
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 @dataclass
@@ -199,7 +199,7 @@ class SelectionInfo:
 class ISelectionBinding(IBinding):
     @abstractmethod
     def get_selection(self) -> SelectionInfo:
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class SelectionBindingEvents:

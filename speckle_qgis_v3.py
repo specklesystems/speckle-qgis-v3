@@ -30,7 +30,7 @@ class SpeckleQGIS(SpeckleQGISv3Module):
             application at run time.
         :type iface: QgsInterface
         """
-        super(SpeckleQGIS, self).__init__()
+        super(SpeckleQGIS, self).__init__(iface)
 
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)

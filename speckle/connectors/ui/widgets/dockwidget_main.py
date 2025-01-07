@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from speckle.connectors.ui.bindings import IBasicConnectorBinding
-from speckle.connectors.ui.models import ModelCard
+from typing import List
+from speckle.connectors.host_apps.qgis.connectors.filters import QgisSelectionFilter
+from speckle.connectors.ui.bindings import IBasicConnectorBinding, SelectionInfo
+from speckle.connectors.ui.models import ModelCard, SenderModelCard
 from speckle.connectors.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.connectors.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.connectors.ui.widgets.widget_no_document import NoDocumentWidget
@@ -23,6 +25,11 @@ from speckle.connectors.ui.widgets.widget_selection_filter import SelectionFilte
 
 
 class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
+    """Dockwidget (UI module) handles all Speckle UI events, including
+    receiving and responding to the signals from child widgets.
+    SpeckleModule is set as .parent, so we have access to all other Speckle modules."""
+
+    parent: "QgisConnectorModule"
     basic_binding: IBasicConnectorBinding
     widget_no_document: NoDocumentWidget = None
     widget_no_model_cards: NoModelCardsWidget = None
@@ -37,7 +44,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
     def __init__(self, parent=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
-        super(SpeckleQGISv3Dialog, self).__init__(parent)
+        super(SpeckleQGISv3Dialog, self).__init__()
         # Set up the user interface from Designer through FORM_CLASS.
         # After self.setupUi() you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
@@ -45,6 +52,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         # #widgets-and-dialogs-with-auto-connect
         # self.setupUi(self)
         self.basic_binding = basic_binding
+        self.parent = parent
 
     def runSetup(self, plugin):
         self.addLabel(plugin)
@@ -215,10 +223,18 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.create_selection_filter_widget
         )
 
-    def create_selection_filter_widget(self, model_card: ModelCard):
+    def create_selection_filter_widget(self, model_card: SenderModelCard):
 
+        # get current user selection
+        # TODO should be updated on change, without a call
+        selection_info: SelectionInfo = (
+            self.parent.connector_module.selection_binding.get_selection()
+        )
         self.widget_selection_filter = SelectionFilterWidget(
-            parent=self, model_card=model_card, label_text="3/3 Select objects"
+            parent=self,
+            model_card=model_card,
+            label_text="3/3 Select objects",
+            selection_info=selection_info,
         )
 
         # add widgets to the layout
@@ -227,6 +243,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         self.widget_selection_filter.add_model_card_signal.connect(
             self.create_or_add_model_cards_widget
         )
+
+    def handle_change_selection_info(self, *args):
+        if self.widget_selection_filter:
+            self.widget_selection_filter.change_selection_info(*args)
 
     def resizeEvent(self, event):
         QtWidgets.QDockWidget.resizeEvent(self, event)

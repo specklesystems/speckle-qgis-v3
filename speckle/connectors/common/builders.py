@@ -20,4 +20,4 @@ class IRootObjectBuilder(ABC):
         ct: "CancellationToken",
     ) -> RootObjectBuilderResult:
         """Placeholder for connector to define."""
-        raise NotImplementedError
+        raise NotImplementedError()

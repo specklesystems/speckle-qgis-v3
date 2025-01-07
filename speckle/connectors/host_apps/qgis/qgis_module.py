@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import Any
 from plugin_utils.panel_logging import logToUser
 
 from speckle.connectors.host_apps.qgis.connectors.qgis_connector_module import (
@@ -8,7 +9,8 @@ from speckle.connectors.host_apps.qgis.connectors.qgis_connector_module import (
 from speckle.connectors.host_apps.qgis.converters.qgis_converter_module import (
     QgisConverterModule,
 )
-from speckle.connectors.ui.models import ModelCard
+
+from speckle.connectors.ui.models import ModelCard, SendInfo
 from speckle.connectors.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
 import webbrowser
@@ -25,28 +27,53 @@ class SpeckleQGISv3Module:
     speckle_version: str
     theads_total: int
 
-    def __init__(self):
+    def __init__(self, iface):
 
         self.speckle_version = "3.0.0"
         self.theads_total = 0
-        self.instantiate_module_dependencies()
+        self.instantiate_module_dependencies(iface)
 
     def create_dockwidget(self):
         self.dockwidget = SpeckleQGISv3Dialog(
-            parent=None, basic_binding=self.connector_module.basic_binding
+            parent=self, basic_binding=self.connector_module.basic_binding
         )
         self.dockwidget.runSetup(self)
         self.connect_dockwidget_signals()
 
-    def instantiate_module_dependencies(self):
+    def instantiate_module_dependencies(self, iface):
 
         self.converter_module = QgisConverterModule()
-        self.connector_module = QgisConnectorModule()
+        self.connector_module = QgisConnectorModule(iface)
+
+        self.connect_connector_module_signals()
+        self.connect_converter_module_signals()
 
     def connect_dockwidget_signals(self):
         self.dockwidget.send_model_signal.connect(self.send_model)
         self.dockwidget.add_model_signal.connect(self.add_model_card_to_store)
         self.dockwidget.remove_model_signal.connect(self.remove_model_card_from_store)
+
+        # moved here frpm "connect_connector_module_signals", because it's
+        # calling dockwidget and should only be accessed after dockwidget is created
+        self.connector_module.selection_binding.selection_changed_signal.connect(
+            self.dockwidget.handle_change_selection_info
+        )
+
+    def connect_connector_module_signals(self):
+        self.connector_module.send_binding.create_conversion_settings_signal.connect(
+            self.share_conversion_settings
+        )
+        self.connector_module.send_binding.send_operation_execute_signal.connect(
+            self.connector_module.execute_send_operation
+        )
+
+    def share_conversion_settings(self, *args):
+        self.connector_module.root_obj_builder.converter_settings = (
+            self.converter_module.create_and_save_conversion_settings(*args)
+        )
+
+    def connect_converter_module_signals(self):
+        return
 
     def add_model_card_to_store(self, model_card: ModelCard):
         print("dockwidget: to add card to Store")
@@ -56,17 +83,9 @@ class SpeckleQGISv3Module:
         self.connector_module.document_store.remove_model(model_card=model_card)
 
     def send_model(self, model_card: ModelCard):
+        # receiving signal from UI and passing it to SendBinding
         print(model_card.model_card_id)
-
-        self.converter_module = QgisConverterModule()
-        self.connector_module.add_conversion_settings(
-            self.converter_module.conversion_settings
-        )
-
-        self.connector_module.send_binding.send(
-            model_card_id=model_card.model_card_id,
-            send_operation=self.connector_module.send_operation,
-        )
+        self.connector_module.send_binding.send(model_card_id=model_card.model_card_id)
 
     def verify_dependencies(self):
 

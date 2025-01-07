@@ -1,11 +1,15 @@
 from typing import Any, Dict, List, Optional
-from speckle.connectors.common.operations import SendOperation
+from speckle.connectors.common.operations import SendOperation, SendOperationResult
+from speckle.connectors.host_apps.qgis.connectors.utils import QgisLayerUtils
 from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
+from speckle.connectors.host_apps.qgis.converters.utils import CRSoffsetRotation
 from speckle.connectors.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
     IBrowserBridge,
+    ISelectionBinding,
     ISendBinding,
+    SelectionInfo,
     SendBindingUICommands,
 )
 from speckle.connectors.ui.models import (
@@ -14,6 +18,13 @@ from speckle.connectors.ui.models import (
     ISendFilter,
     ModelCard,
     SenderModelCard,
+)
+
+from qgis.core import QgsProject
+from PyQt5.QtCore import pyqtSignal, QObject, QTimer
+from speckle.connectors.ui.widgets.qgis_utils import (
+    get_layers_from_model_card_content,
+    get_selection_info_from_layers,
 )
 
 
@@ -65,7 +76,13 @@ class QgisBasicConnectorBinding(IBasicConnectorBinding):
         return
 
 
-class QgisSendBinding(ISendBinding):
+class MetaQObject(type(QObject), type(ISendBinding)):
+    # avoiding TypeError: metaclass conflict: the metaclass of a derived class
+    # must be a (non-strict) subclass of the metaclasses of all its bases
+    pass
+
+
+class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
     name: str = "sendBinding"
     commands: SendBindingUICommands
     parent: IBrowserBridge
@@ -82,6 +99,10 @@ class QgisSendBinding(ISendBinding):
     changed_objects_ids: Dict[str, bytes]
     subscribed_layers: List[Any]
 
+    create_conversion_settings_signal = pyqtSignal(QgsProject, CRSoffsetRotation)
+    send_operation_execute_signal = pyqtSignal(list, object, object, object)
+    send_operation_result: SendOperationResult = None
+
     def __init__(
         self,
         parent: IBrowserBridge,
@@ -95,7 +116,7 @@ class QgisSendBinding(ISendBinding):
         _top_level_exception_handler: "ITopLevelExceptionHandler",
         _qgis_conversion_settings: QgisConversionSettings,
     ):
-
+        QObject.__init__(self)
         self.store = store
         self._service_provider = _service_provider
         self._send_filters = _send_filters
@@ -127,31 +148,66 @@ class QgisSendBinding(ISendBinding):
     def get_send_settings(self):
         return []
 
-    def send(self, model_card_id: str, send_operation: SendOperation) -> None:
+    def send(self, model_card_id: str) -> None:
 
-        # send_operation in C# was resolved with scope.ServiceProvider,
-        # and here I don't see another way to get it
-        print(self.store.models)
+        # get conversion settings by sending signal to the main module
+        qgis_project = QgsProject.instance()
+        crs_offset_rotation = CRSoffsetRotation(qgis_project.crs(), 0, 0, 0)
+        self.create_conversion_settings_signal.emit(qgis_project, crs_offset_rotation)
+
         model_card: SenderModelCard = self.store.get_model_by_id(model_card_id)
         if not isinstance(model_card, SenderModelCard):
             raise Exception("Model card is not a sender model card")
 
-        # TODO initialise cancellation token
-        layers = []
-        # TODO: get layers from project using model card
+        if model_card.send_filter is None:
+            raise ValueError("SendFilter is None")
 
-        result = send_operation.execute(
-            objects=[layers],
-            send_info=model_card.get_send_info("QGIS"),
-            on_operation_progressed=None,
-            ct=None,
+        # get layers
+        layers = get_layers_from_model_card_content(model_card)
+
+        self.send_operation_execute_signal.emit(
+            layers, model_card.get_send_info("QGIS"), None, None
+        )  # should assign self.send_operation_result
+
+        self.commads.set_model_send_result(
+            model_card_id=model_card_id,
+            version_id=self.send_operation_result.root_obj_id,
+            send_conversion_results=self.send_operation_result.converted_references,
         )
-
-        return result
-
-        # self.commads.set_model_send_result(
-        #    model_card_id=model_card_id, version_id="", send_conversion_results=[]
-        # )
 
     def cancel_send(self, model_card_id):
         return super().cancel_send(model_card_id)
+
+
+class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
+    layer_utils: QgisLayerUtils
+    name: str
+    parent: IBrowserBridge
+    iface: Any
+
+    selection_changed_signal = pyqtSignal(SelectionInfo)
+
+    def __init__(self, iface, parent=None, layer_utils=None):
+        QObject.__init__(self)
+        self.iface = iface
+        self.name = "selectionBinding"
+        self.parent = parent
+        self.layer_utils = layer_utils
+
+        # subscribe to selection change
+        # use QTimer to handle the event AFTER the user UI selection event is fully processed
+        # otherwise, on event trigger, the UI still has the pre-event layer selection active
+        iface.layerTreeView().currentLayerChanged.connect(
+            lambda: QTimer.singleShot(0, self.on_selection_changed)
+        )
+
+    def on_selection_changed(self) -> None:
+
+        selection_info: SelectionInfo = self.get_selection()
+        # instead of parent.send(set_selection event)
+        self.selection_changed_signal.emit(selection_info)
+
+    def get_selection(self) -> SelectionInfo:
+
+        selected_layers = self.iface.layerTreeView().selectedLayers()
+        return get_selection_info_from_layers(selected_layers)

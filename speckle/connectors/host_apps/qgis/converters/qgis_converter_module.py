@@ -3,7 +3,6 @@ from speckle.connectors.host_apps.qgis.converters.settings import QgisConversion
 from qgis.core import QgsProject
 from speckle.connectors.host_apps.qgis.converters.utils import (
     CRSoffsetRotation,
-    QgisToSpeckleUnitConverter,
 )
 
 
@@ -17,12 +16,13 @@ class QgisConverterModule:
     ):
         self.display_value_extractor = None
         self.properties_extractor = None
+        self.conversion_settings = None
 
-        qgis_project = QgsProject.instance()
-        crs_offset_rotation = CRSoffsetRotation(qgis_project.crs(), 0, 0, 0)
+    def create_and_save_conversion_settings(
+        self, qgis_project: QgsProject, crs_offset_rotation: CRSoffsetRotation
+    ):
 
         self.conversion_settings = QgisConversionSettings(
-            project=qgis_project,
-            activeCrsOffsetRotation=crs_offset_rotation,
-            unit_converter=QgisToSpeckleUnitConverter(),
+            project=qgis_project, activeCrsOffsetRotation=crs_offset_rotation
         )
+        return self.conversion_settings

@@ -11,7 +11,7 @@ from specklepy.transports.server.server import ServerTransport
 class IClientFactory(ABC):
     @abstractmethod
     def create(self, account: Account) -> SpeckleClient:
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class IOperations(ABC):
@@ -25,7 +25,7 @@ class IOperations(ABC):
         on_progress_action: Any = None,
         cancellation_token: Any = None,
     ):
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 # not in C#

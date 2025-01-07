@@ -21,8 +21,9 @@ class ISendFilter(ABC):
     selected_object_ids: List[str]
     id_map: Optional[Dict[str, str]]
 
+    @abstractmethod
     def refresh_object_ids(self) -> List[str]:
-        return []
+        raise NotImplementedError()
 
 
 class ICardSetting(ABC):

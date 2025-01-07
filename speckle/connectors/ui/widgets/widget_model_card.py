@@ -13,6 +13,9 @@ from PyQt5.QtWidgets import (
 )
 
 from speckle.connectors.ui.models import ModelCard, SenderModelCard
+from speckle.connectors.ui.widgets.qgis_utils import (
+    get_selection_filter_summary_from_ids,
+)
 from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
@@ -96,7 +99,10 @@ class ModelCardWidget(QWidget):
         clickable_text.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         layout_line.addWidget(clickable_text)
 
-        layout_line.addWidget(self.add_text("0 layers", color="rgba(130,130,130,1)"))
+        summary_text = get_selection_filter_summary_from_ids(
+            card_content
+        )  # or, "0 layers"
+        layout_line.addWidget(self.add_text(summary_text, color="rgba(130,130,130,1)"))
 
         return line
 

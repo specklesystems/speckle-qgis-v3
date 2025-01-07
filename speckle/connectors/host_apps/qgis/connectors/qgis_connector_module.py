@@ -1,8 +1,14 @@
+from typing import Any, List
 from speckle.connectors.common.api import ClientFactory
 from speckle.connectors.common.credentials import AccountManager
-from speckle.connectors.common.operations import AccountService, SendOperation
+from speckle.connectors.common.operations import (
+    AccountService,
+    SendOperation,
+    SendOperationResult,
+)
 from speckle.connectors.host_apps.qgis.connectors.bindings import (
     QgisBasicConnectorBinding,
+    QgisSelectionBinding,
     QgisSendBinding,
 )
 from speckle.connectors.host_apps.qgis.connectors.host_app import (
@@ -15,21 +21,28 @@ from speckle.connectors.host_apps.qgis.connectors.operations import (
 )
 from speckle.connectors.host_apps.qgis.connectors.utils import QgisLayerUtils
 from speckle.connectors.host_apps.qgis.converters.settings import QgisConversionSettings
+from speckle.connectors.ui.models import SendInfo
+
+from PyQt5.QtCore import QObject
 
 
-class QgisConnectorModule:
+class QgisConnectorModule(QObject):
 
     document_store: QgisDocumentStore
     basic_binding: QgisBasicConnectorBinding
     send_binding: QgisSendBinding
+    selection_binding: QgisSelectionBinding
     root_obj_builder: QgisRootObjectBuilder
     account_service: AccountService
     send_operation: SendOperation
     layer_unpacker: QgisLayerUnpacker
     color_unpacker: QgisColorUnpacker
 
-    def __init__(self):
+    iface = None  # will be assigned on plugin init
 
+    def __init__(self, iface):
+        super().__init__()
+        self.iface = iface
         bridge = None
         self.document_store = QgisDocumentStore()
         self.basic_binding = QgisBasicConnectorBinding(self.document_store, bridge)
@@ -45,10 +58,17 @@ class QgisConnectorModule:
             _top_level_exception_handler=None,
             _qgis_conversion_settings=None,
         )
+        self.layer_utils = QgisLayerUtils()
+        self.selection_binding = QgisSelectionBinding(
+            iface=self.iface, parent=None, layer_utils=self.layer_utils
+        )
         self.layer_unpacker = QgisLayerUnpacker()
         self.color_unpacker = QgisColorUnpacker()
-        self.layer_utils = QgisLayerUtils()
 
+        self.root_obj_builder = None
+        account_manager = AccountManager()
+        self.account_service = AccountService(account_manager)
+        self.send_operation = None
         self.root_obj_builder = QgisRootObjectBuilder(
             root_to_speckle_converter=None,
             send_conversion_cache=None,
@@ -59,13 +79,8 @@ class QgisConnectorModule:
             logger=None,
             activity_factory=None,
         )
-
-        account_manager = AccountManager()
-        self.account_service = AccountService(account_manager)
-
         client_factory = ClientFactory()
-
-        self.send_operation = SendOperation(
+        self.send_operation: SendOperation = SendOperation(
             root_object_builder=self.root_obj_builder,
             send_conversion_cache=None,
             account_service=self.account_service,
@@ -75,6 +90,6 @@ class QgisConnectorModule:
             activity_factory=None,
         )
 
-    def add_conversion_settings(self, conversion_settings: QgisConversionSettings):
-
-        self.root_obj_builder.converter_settings = conversion_settings
+    def execute_send_operation(self, *args):
+        send_operation_result: SendOperationResult = self.send_operation.execute(*args)
+        self.send_binding.send_operation_result = send_operation_result

@@ -1,5 +1,6 @@
 from functools import partial
 from typing import Any, List
+from speckle.connectors.host_apps.qgis.connectors.filters import QgisSelectionFilter
 from speckle.connectors.ui.models import SenderModelCard
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
@@ -109,6 +110,7 @@ class UiSearchUtils(QObject):
                 account_id=self.speckle_client.account.id,
                 server_url=server_url,
                 settings=None,
+                send_filter=None,
             )
         )
 
