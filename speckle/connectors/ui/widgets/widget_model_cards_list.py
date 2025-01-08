@@ -36,6 +36,7 @@ class ModelCardsWidget(QWidget):
     global_publish_btn: QPushButton = None
 
     add_projects_search_signal = pyqtSignal()
+    remove_model_cards_widget_signal = pyqtSignal()
 
     remove_model_signal = pyqtSignal(ModelCard)
     send_model_signal = pyqtSignal(SenderModelCard)
@@ -322,7 +323,7 @@ class ModelCardsWidget(QWidget):
         # if no cards left, remove widget completely
         if len(existing_content) == 0:
             self.remove_model_signal.emit(new_card)
-            self.parentWidget.remove_widget_model_cards()
+            self.remove_model_cards_widget_signal.emit()
             return
 
         assigned_cards_list_widget = self.modify_area_with_cards(all_widgets)
