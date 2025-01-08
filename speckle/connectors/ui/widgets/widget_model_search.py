@@ -10,7 +10,7 @@ from specklepy.core.api.models.current import Project
 
 class ModelSearchWidget(CardsListTemporaryWidget):
 
-    project: Project = None
+    _project: Project = None
 
     def __init__(
         self,
@@ -30,21 +30,21 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         # extract project from the first card
         for item in cards_content_list:
             if isinstance(item[-1], Project):
-                self.project = cards_content_list[0][-1]
+                self._project = cards_content_list[0][-1]
                 break
 
-        self.load_more = lambda: self.add_models()
+        self._load_more = lambda: self._add_models()
 
-    def add_background(self):
+    def _add_background(self):
         # overwrite function to make background transparent
         self.background = BackgroundWidget(parent=self, transparent=True)
         self.background.show()
 
-    def add_models(self):
-        new_models_cards = self.ui_search_content.get_new_models_content(self.project)
+    def _add_models(self):
+        new_models_cards = self.ui_search_content.get_new_models_content(self._project)
 
         if len(new_models_cards) == 0:
-            self.style_load_btn(active=False, text="No more models found")
+            self._style_load_btn(active=False, text="No more models found")
             return
 
         self._add_more_cards(new_models_cards)

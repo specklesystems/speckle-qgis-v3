@@ -20,10 +20,10 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
 
 
 class NoModelCardsWidget(QWidget):
-    context_stack = None
-    message_card: QWidget
+
     add_projects_search_signal = pyqtSignal()
-    shadow_effect = None
+    _message_card: QWidget
+    _shadow_effect = None
 
     def __init__(self, parent=None):
         super(NoModelCardsWidget, self).__init__(parent)
@@ -42,30 +42,30 @@ class NoModelCardsWidget(QWidget):
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
 
-        self.message_card = QWidget()
-        self.message_card.setStyleSheet(
+        self._message_card = QWidget()
+        self._message_card.setStyleSheet(
             "QWidget {"
             + f"border-radius: 10px;padding: 20px;margin:{int(0.5 * WIDGET_SIDE_BUFFER)};height: 100px;{BACKGR_COLOR_WHITE}"
             + "}"
         )
-        self.fill_message_card()
-        self.add_drop_shadow(self.message_card)
+        self._fill_message_card()
+        self._add_drop_shadow(self._message_card)
 
-        self.layout.addWidget(self.message_card)
+        self.layout.addWidget(self._message_card)
 
-    def add_drop_shadow(self, item=None):
+    def _add_drop_shadow(self, item=None):
         if not item:
             item = self
         # create drop shadow effect
-        self.shadow_effect = QGraphicsDropShadowEffect()
-        self.shadow_effect.setOffset(2, 2)
-        self.shadow_effect.setBlurRadius(8)
-        self.shadow_effect.setColor(QColor.fromRgb(100, 100, 100, 150))
+        self._shadow_effect = QGraphicsDropShadowEffect()
+        self._shadow_effect.setOffset(2, 2)
+        self._shadow_effect.setBlurRadius(8)
+        self._shadow_effect.setColor(QColor.fromRgb(100, 100, 100, 150))
 
-        item.setGraphicsEffect(self.shadow_effect)
+        item.setGraphicsEffect(self._shadow_effect)
 
-    def fill_message_card(self):
-        boxLayout = QVBoxLayout(self.message_card)
+    def _fill_message_card(self):
+        boxLayout = QVBoxLayout(self._message_card)
 
         # add text
         label = QLabel(
@@ -77,10 +77,10 @@ class NoModelCardsWidget(QWidget):
         boxLayout.addWidget(label)
 
         # add publish / load buttons
-        button_publish = self.create_search_button()
+        button_publish = self._create_search_button()
         boxLayout.addWidget(button_publish)
 
-    def create_search_button(self) -> QPushButton:
+    def _create_search_button(self) -> QPushButton:
 
         button_publish = QPushButton("Publish")
         button_publish.clicked.connect(lambda: self.add_projects_search_signal.emit())

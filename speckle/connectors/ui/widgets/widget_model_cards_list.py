@@ -61,15 +61,15 @@ class ModelCardsWidget(QWidget):
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
 
-        self.add_background()
+        self._add_background()
 
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
 
-        self.create_search_button()  # will be added later to the child widget
+        self._create_search_button()  # will be added later to the child widget
 
         ##########################
-        cards_selection_widget = self.create_cards_selection_widget()
+        cards_selection_widget = self._create_cards_selection_widget()
 
         content = QWidget()
         content.layout = QVBoxLayout(self)
@@ -82,7 +82,7 @@ class ModelCardsWidget(QWidget):
         # add both overlapping elements to widget
         self.layout.addWidget(content)
 
-    def create_search_button(self) -> QPushButton:
+    def _create_search_button(self) -> QPushButton:
 
         button_publish = QPushButton("Publish")
         button_publish.clicked.connect(lambda: self.add_projects_search_signal.emit())
@@ -99,7 +99,8 @@ class ModelCardsWidget(QWidget):
 
         return button_publish
 
-    def add_background(self):
+    def _add_background(self):
+        # overwrite function for custom style
         self.background = BackgroundWidget(
             parent=self,
             transparent=False,
@@ -108,13 +109,13 @@ class ModelCardsWidget(QWidget):
         )
         self.background.show()
 
-    def create_cards_selection_widget(self) -> QWidget:
+    def _create_cards_selection_widget(self) -> QWidget:
 
         # create a container
-        scroll_container = self.create_container()
+        scroll_container = self._create_container()
 
         # create scroll area with this widget
-        scroll_area = self.create_scroll_area()
+        scroll_area = self._create_scroll_area()
 
         # add label and scroll area to the container
         scroll_container.layout().addWidget(scroll_area)
@@ -122,7 +123,7 @@ class ModelCardsWidget(QWidget):
 
         return scroll_container
 
-    def create_container(self):
+    def _create_container(self):
 
         scroll_container = QWidget()
         scroll_container.setAttribute(QtCore.Qt.WA_StyledBackground, True)
@@ -137,7 +138,7 @@ class ModelCardsWidget(QWidget):
 
         return scroll_container
 
-    def create_widget_label(self, label_text: str):
+    def _create_widget_label(self, label_text: str):
 
         label = QLabel(label_text)
 
@@ -149,7 +150,7 @@ class ModelCardsWidget(QWidget):
         )
         return label
 
-    def create_scroll_area(self):
+    def _create_scroll_area(self):
 
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setStyleSheet(
@@ -160,12 +161,12 @@ class ModelCardsWidget(QWidget):
         self.scroll_area.setAlignment(Qt.AlignHCenter)
 
         # create a widget inside scroll area
-        self.create_area_with_cards()
+        self._create_area_with_cards()
         self.scroll_area.setWidget(self.cards_list_widget)
 
         return self.scroll_area
 
-    def create_area_with_cards(self) -> QWidget:
+    def _create_area_with_cards(self) -> QWidget:
 
         cards_list_widget = QWidget()
         cards_list_widget.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
@@ -173,7 +174,7 @@ class ModelCardsWidget(QWidget):
 
         self.cards_list_widget = cards_list_widget
 
-    def modify_area_with_cards(self, widgets_list: List[Any]) -> QWidget:
+    def _modify_area_with_cards(self, widgets_list: List[Any]) -> QWidget:
 
         cards_list_widget = QWidget()
         cards_list_widget.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
@@ -218,7 +219,7 @@ class ModelCardsWidget(QWidget):
                         all_widgets.append(widget)
 
                     if new_card_widget is None:
-                        new_card_widget = self.create_model_card_widget(new_card)
+                        new_card_widget = self._create_model_card_widget(new_card)
                         all_widgets.append(new_card_widget)
                 else:
                     all_widgets.append(widget)
@@ -232,24 +233,24 @@ class ModelCardsWidget(QWidget):
             project: Project = self.ui_model_card_utils.get_project_by_id_from_client(
                 new_card
             )
-            label = self.create_widget_label(project.name)
+            label = self._create_widget_label(project.name)
             all_widgets.append(label)
-            new_card_widget = self.create_model_card_widget(new_card)
+            new_card_widget = self._create_model_card_widget(new_card)
             all_widgets.append(new_card_widget)
 
-        assigned_cards_list_widget = self.modify_area_with_cards(all_widgets)
+        assigned_cards_list_widget = self._modify_area_with_cards(all_widgets)
         self.scroll_area.setWidget(assigned_cards_list_widget)
 
         # adjust size of new widget:
         self.resizeEvent()
 
-    def create_model_card_widget(self, new_card: ModelCard) -> ModelCardWidget:
+    def _create_model_card_widget(self, new_card: ModelCard) -> ModelCardWidget:
 
         new_card_widget = ModelCardWidget(self, self.ui_model_card_utils, new_card)
-        new_card_widget.remove_self_card_signal.connect(self.remove_card)
+        new_card_widget.remove_self_card_signal.connect(self._remove_card)
         return new_card_widget
 
-    def remove_card(self, new_card: ModelCard):
+    def _remove_card(self, new_card: ModelCard):
 
         all_widgets = []
         existing_content = []
@@ -292,7 +293,7 @@ class ModelCardsWidget(QWidget):
             self.remove_model_cards_widget_signal.emit()
             return
 
-        assigned_cards_list_widget = self.modify_area_with_cards(all_widgets)
+        assigned_cards_list_widget = self._modify_area_with_cards(all_widgets)
         self.scroll_area.setWidget(assigned_cards_list_widget)
 
         self.remove_model_signal.emit(new_card)
@@ -323,7 +324,4 @@ class ModelCardsWidget(QWidget):
         return
 
     def mouseReleaseEvent(self, event):
-        return
-
-    def destroy(self):
         return

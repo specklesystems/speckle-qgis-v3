@@ -23,13 +23,14 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
 
 
 class SelectionFilterWidget(QWidget):
-    background: BackgroundWidget = None
-    message_card: QWidget
+
     add_model_card_signal = pyqtSignal(ModelCard)
-    shadow_effect = None
-    model_card: SenderModelCard = None
-    selection_info: SelectionInfo
-    selection_info_label: QLabel
+    background: BackgroundWidget = None
+    _message_card: QWidget
+    _model_card: SenderModelCard = None
+    _selection_info: SelectionInfo
+    _selection_info_label: QLabel
+    _shadow_effect = None
 
     def __init__(
         self,
@@ -39,13 +40,13 @@ class SelectionFilterWidget(QWidget):
         selection_info: SelectionInfo = None,
     ):
         super(SelectionFilterWidget, self).__init__(parent)
-        self.parentWidget: "SpeckleQGISv3Dialog" = parent
-        self.selection_info = selection_info
+        self.parentWidget = parent
+        self._selection_info = selection_info
 
         # update model card selection filter
         selection_filter = QgisSelectionFilter(selection_info.selected_object_ids)
         model_card.send_filter = selection_filter
-        self.model_card = model_card
+        self._model_card = model_card
 
         # align with the parent widget size
         self.resize(
@@ -53,22 +54,22 @@ class SelectionFilterWidget(QWidget):
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
 
-        self.add_background()
+        self._add_background()
 
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
 
-        self.create_fill_message_card(label_text)
+        self._create_fill_message_card(label_text)
 
         content = QWidget()
         content.layout = QVBoxLayout(self)
         content.layout.setContentsMargins(0, 0, 0, 0)
         content.layout.setAlignment(Qt.AlignCenter)
-        content.layout.addWidget(self.message_card)
+        content.layout.addWidget(self._message_card)
 
         self.layout.addWidget(content)
 
-    def create_widget_label(self, label_text: str, props: str = ""):
+    def _create_widget_label(self, label_text: str, props: str = ""):
 
         label = QLabel(label_text)
 
@@ -82,7 +83,7 @@ class SelectionFilterWidget(QWidget):
         )
         return label
 
-    def create_text_widget(self, label_text: str, props: str = ""):
+    def _create_text_widget(self, label_text: str, props: str = ""):
 
         label = QLabel(label_text)
 
@@ -95,60 +96,60 @@ class SelectionFilterWidget(QWidget):
         )
         return label
 
-    def add_background(self):
+    def _add_background(self):
         self.background = BackgroundWidget(parent=self, transparent=False)
         self.background.show()
 
-    def add_drop_shadow(self, item=None):
+    def _add_drop_shadow(self, item=None):
         if not item:
             item = self
         # create drop shadow effect
-        self.shadow_effect = QGraphicsDropShadowEffect()
-        self.shadow_effect.setOffset(2, 2)
-        self.shadow_effect.setBlurRadius(8)
-        self.shadow_effect.setColor(QColor.fromRgb(100, 100, 100, 150))
+        self._shadow_effect = QGraphicsDropShadowEffect()
+        self._shadow_effect.setOffset(2, 2)
+        self._shadow_effect.setBlurRadius(8)
+        self._shadow_effect.setColor(QColor.fromRgb(100, 100, 100, 150))
 
-        item.setGraphicsEffect(self.shadow_effect)
+        item.setGraphicsEffect(self._shadow_effect)
 
-    def create_fill_message_card(self, label_text: str):
+    def _create_fill_message_card(self, label_text: str):
 
-        self.message_card = QWidget()
-        self.message_card.setAttribute(Qt.WA_StyledBackground, True)
-        self.message_card.setStyleSheet(
+        self._message_card = QWidget()
+        self._message_card.setAttribute(Qt.WA_StyledBackground, True)
+        self._message_card.setStyleSheet(
             "QWidget {" + "border-radius: 10px;" + f"{BACKGR_COLOR_WHITE}" + "}"
         )
-        boxLayout = QVBoxLayout(self.message_card)
+        boxLayout = QVBoxLayout(self._message_card)
 
-        label_main = self.create_widget_label(label_text)
+        label_main = self._create_widget_label(label_text)
         boxLayout.addWidget(label_main)
 
         # add text
-        label = self.create_text_widget("Selection:")
+        label = self._create_text_widget("Selection:")
         boxLayout.addWidget(label)
 
         # TODO: replace later with responsive item (to SelectionFilter)
-        self.selection_info_label: QLabel = self.create_text_widget(
+        self._selection_info_label: QLabel = self._create_text_widget(
             (
                 "No layers selected, go ahead and select some!"
-                if not self.selection_info
-                else self.selection_info.summary
+                if not self._selection_info
+                else self._selection_info.summary
             ),
             "color: blue;",
         )
 
-        boxLayout.addWidget(self.selection_info_label)
+        boxLayout.addWidget(self._selection_info_label)
 
         # add publish / load buttons
-        button_publish = self.create_publish_button()
+        button_publish = self._create_publish_button()
         boxLayout.addWidget(button_publish)
 
-        self.add_drop_shadow(self.message_card)
+        self._add_drop_shadow(self._message_card)
 
-    def create_publish_button(self) -> QPushButton:
+    def _create_publish_button(self) -> QPushButton:
 
         button_publish = QPushButton("Publish")
         button_publish.clicked.connect(
-            lambda: self.add_model_card_signal.emit(self.model_card)
+            lambda: self.add_model_card_signal.emit(self._model_card)
         )
         button_publish.setStyleSheet(
             "QPushButton {"
@@ -161,11 +162,11 @@ class SelectionFilterWidget(QWidget):
 
     def change_selection_info(self, selection_info: SelectionInfo):
         # change text on the widget
-        self.selection_info_label.setText(selection_info.summary)
+        self._selection_info_label.setText(selection_info.summary)
 
         # change selection info that will be passed to ModelCard
         selection_filter = QgisSelectionFilter(selection_info.selected_object_ids)
-        self.model_card.send_filter = selection_filter
+        self._model_card.send_filter = selection_filter
 
     def resizeEvent(self, event=None):
         QWidget.resizeEvent(self, event)
@@ -175,17 +176,17 @@ class SelectionFilterWidget(QWidget):
                 self.parentWidget.frameSize().height(),
             )
 
-            self.message_card.setGeometry(
+            self._message_card.setGeometry(
                 int(1.5 * WIDGET_SIDE_BUFFER),
                 int(
                     (
                         self.parentWidget.frameSize().height()
-                        - self.message_card.height()
+                        - self._message_card.height()
                     )
                     / 2
                 ),
                 self.parentWidget.frameSize().width() - 3 * WIDGET_SIDE_BUFFER,
-                self.message_card.height(),
+                self._message_card.height(),
             )
         except RuntimeError as e:
             # e.g. Widget was deleted
