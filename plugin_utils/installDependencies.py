@@ -1,7 +1,7 @@
 import os.path
 
 from plugin_utils.subprocess_call import subprocess_call
-from speckle.connectors.ui.widgets.utils import logger
+from speckle.ui.widgets.utils import logger
 from plugin_utils.utils import get_qgis_python_path
 
 

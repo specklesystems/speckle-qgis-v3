@@ -14,7 +14,7 @@ def logToUser(
     blue=False,
     report=False,
 ):
-    from speckle.connectors.ui.widgets.utils.logger import logToUser as logToUser_UI
+    from speckle.ui.widgets.utils.logger import logToUser as logToUser_UI
 
     msg = str(msg)
     logToUser_UI(msg, func, level, plugin, url, blue, report)
