@@ -12,7 +12,6 @@ from PyQt5.QtCore import pyqtSignal, QObject
 class ProjectSearchWidget(CardsListTemporaryWidget):
 
     ui_search_content: UiSearchUtils = None
-    projects_list: List[List]
     add_models_search_signal = pyqtSignal(object)
 
     def __init__(
@@ -27,34 +26,34 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
         # get content for project cards
         self.ui_search_content = UiSearchUtils()
-        self.projects_list = self.ui_search_content.get_project_search_widget_content()
+        projects_list = self.ui_search_content.get_project_search_widget_content()
 
         # modify the projects_list by sending signal to the parent Dockwidget
-        self.modify_card_callback(self.projects_list)
+        self._modify_card_callback(projects_list)
 
         super(ProjectSearchWidget, self).__init__(
             parent=parent,
             label_text=label_text,
-            cards_content_list=self.projects_list,
+            cards_content_list=projects_list,
         )
 
         self.load_more = lambda: self.add_projects()
 
-    def modify_card_callback(self, projects_contents_list: List[List]):
+    def _modify_card_callback(self, projects_contents_list: List[List]):
         # add a function for generating model card widget
         for i, content in enumerate(projects_contents_list):
             callback = content[0]
 
             projects_contents_list[i][0] = partial(
-                self.send_model_search_signal, callback
+                self._send_model_search_signal, callback
             )
 
-    def send_model_search_signal(self, callback):
+    def _send_model_search_signal(self, callback):
         # needs to be a separate function, because the signal is not properly sent
         # from "partial"
         self.add_models_search_signal.emit(callback)
 
-    def add_projects(self):
+    def _add_projects(self):
 
         new_project_cards = self.ui_search_content.get_new_projects_content()
 
@@ -62,8 +61,8 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             self.style_load_btn(active=False, text="No more projects found")
             return
 
-        self.modify_card_callback(new_project_cards)
-        self.add_more_cards(new_project_cards)
+        self._modify_card_callback(new_project_cards)
+        self._add_more_cards(new_project_cards)
 
         # adjust size of new widget:
         self.resizeEvent()

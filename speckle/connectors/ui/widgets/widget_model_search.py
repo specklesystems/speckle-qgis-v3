@@ -47,7 +47,7 @@ class ModelSearchWidget(CardsListTemporaryWidget):
             self.style_load_btn(active=False, text="No more models found")
             return
 
-        self.add_more_cards(new_models_cards)
+        self._add_more_cards(new_models_cards)
 
         # adjust size of new widget:
         self.resizeEvent()

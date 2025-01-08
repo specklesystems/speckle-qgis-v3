@@ -171,7 +171,7 @@ class CardsListTemporaryWidget(QWidget):
 
         return self.cards_list_widget
 
-    def add_more_cards(self, new_cards_content_list: list):
+    def _add_more_cards(self, new_cards_content_list: list):
 
         self.cards_list_widget.setParent(None)
 
