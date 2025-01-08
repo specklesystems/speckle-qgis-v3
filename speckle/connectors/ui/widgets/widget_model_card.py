@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
 )
 
 from speckle.connectors.ui.models import ModelCard, SenderModelCard
+from speckle.connectors.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.connectors.ui.widgets.qgis_utils import (
     get_selection_filter_summary_from_ids,
 )
@@ -34,18 +35,23 @@ class ModelCardWidget(QWidget):
     card_content: ModelCard = None
     send_model_btn: QPushButton = None
     send_model_signal = pyqtSignal(SenderModelCard)
+    remove_self_card_signal = pyqtSignal(ModelCard)
     shadow_effect = None
     close_btn: QPushButton = None
     open_web_btn: QPushButton = None
+    ui_model_card_utils: UiModelCardsUtils = None
 
     # for the use in parent widget - to keep track if signals are already connected and not connect to btns twice
     connected: bool = False
 
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
 
-    def __init__(self, parent=None, card_content: ModelCard = None):
+    def __init__(
+        self, parent=None, ui_model_card_utils=None, card_content: ModelCard = None
+    ):
         super(ModelCardWidget, self).__init__(None)
         self.parent = parent
+        self.ui_model_card_utils = ui_model_card_utils
         self.card_content = card_content
 
         # self.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
@@ -132,7 +138,7 @@ class ModelCardWidget(QWidget):
                 lambda: self.send_model_signal.emit(card_content)
             )
 
-        model: Model = self.parent.ui_model_card_utils.get_model_by_id_from_client(
+        model: Model = self.ui_model_card_utils.get_model_by_id_from_client(
             self.card_content
         )
         layout_top_line.addWidget(
@@ -170,7 +176,9 @@ class ModelCardWidget(QWidget):
 
     def add_close_button(self):
         close_btn = QPushButton(" x ")
-        close_btn.clicked.connect(lambda: self.parent.remove_card(self.card_content))
+        close_btn.clicked.connect(
+            lambda: self.remove_self_card_signal.emit(self.card_content)
+        )
         close_btn.setStyleSheet(
             "QPushButton {"
             + f"color:rgba(130,130,130,1); border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 18px;"
