@@ -146,6 +146,18 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_project_search.setParent(None)
             self.widget_project_search = None
 
+        if self.widget_model_search:
+            self.widget_model_search.setParent(None)
+            self.widget_model_search = None
+
+        if self.widget_selection_filter:
+            self.widget_selection_filter.setParent(None)
+            self.widget_selection_filter = None
+
+        if self.widget_model_cards:
+            self.widget_model_cards.setParent(None)
+            self.widget_model_cards = None
+
     def remove_process_widgets(self):
         if self.widget_project_search:
             self.remove_widget_project_search()
@@ -205,6 +217,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_model_cards.add_projects_search_signal.connect(
                 self.open_select_projects_widget
             )
+            # subscribe to signal to remove the entire widget
+            self.widget_model_cards.remove_model_cards_widget_signal.connect(
+                self.remove_widget_model_cards
+            )
 
             # emit signal, for the card that was just added (because we subscribed after creating a widget)
             self.widget_model_cards.add_new_card(model_card)
@@ -217,15 +233,25 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_model_cards.add_new_card(model_card)
             self.add_model_signal.emit(model_card)
 
+    def subscribe_to_close_on_background_click(self, widget):
+        """Receive signal from background click, calling to close the widget."""
+        widget.background.remove_current_widget_signal.connect(
+            self.remove_current_widget
+        )
+
     def open_select_projects_widget(self):
 
-        self.widget_project_search = ProjectSearchWidget(parent=self)
-        # add widgets to the layout
-        self.layout().addWidget(self.widget_project_search)
+        if not self.widget_project_search:
+            self.widget_project_search = ProjectSearchWidget(parent=self)
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_project_search)
 
-        self.widget_project_search.ui_search_content.add_selection_filter.connect(
-            self.create_selection_filter_widget
-        )
+            self.widget_project_search.ui_search_content.add_selection_filter.connect(
+                self.create_selection_filter_widget
+            )
+
+            # subscribe to close-on-background-click event
+            self.subscribe_to_close_on_background_click(self.widget_project_search)
 
     def create_selection_filter_widget(self, model_card: SenderModelCard):
 
@@ -249,6 +275,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_selection_filter.add_model_card_signal.connect(
                 self.create_or_add_model_cards_widget
             )
+
+            # subscribe to close-on-background-click event
+            self.subscribe_to_close_on_background_click(self.widget_selection_filter)
 
     def handle_change_selection_info(self, *args):
         if self.widget_selection_filter:

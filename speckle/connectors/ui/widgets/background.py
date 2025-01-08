@@ -11,6 +11,7 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
 
 class BackgroundWidget(QWidget):
     ignore_close_on_click = False
+    remove_current_widget_signal = pyqtSignal(QWidget)
 
     def __init__(
         self,
@@ -38,11 +39,11 @@ class BackgroundWidget(QWidget):
 
     def mouseReleaseEvent(self, event):
         if self.ignore_close_on_click:
-            # overwrite closing the widget on MouseClick outside the background
+            # don't clise the widget on MouseClick outside the background
             return
 
         self.setGeometry(0, 0, 0, 0)
-        self.parentWidget.parentWidget.remove_current_widget(self.parentWidget)
+        self.remove_current_widget_signal.emit(self.parentWidget)
 
     def show(self):
         self.setGeometry(

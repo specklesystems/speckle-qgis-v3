@@ -218,13 +218,3 @@ class CardsListTemporaryWidget(QWidget):
 
     def destroy(self):
         return
-        # remove all buttons
-        for i in reversed(range(self.layout.count())):
-            self.layout.itemAt(i).widget().setParent(None)
-
-        # delete reference from the parent widget
-        for i in reversed(range(self.parentWidget.layout().count())):
-            current_widget = self.parentWidget.layout().itemAt(i).widget()
-            if current_widget is type(self):
-                current_widget.setParent(None)
-        self.parentWidget.widget_project_search = None
