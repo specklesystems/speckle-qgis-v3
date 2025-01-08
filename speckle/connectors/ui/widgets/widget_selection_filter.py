@@ -161,6 +161,7 @@ class SelectionFilterWidget(QWidget):
         return button_publish
 
     def change_selection_info(self, selection_info: SelectionInfo):
+        # function accessed from the parent dockwidget
         # change text on the widget
         self._selection_info_label.setText(selection_info.summary)
 
