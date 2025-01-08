@@ -196,7 +196,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         self.remove_process_widgets()
         if not self.widget_model_cards:
 
-            self.widget_model_cards = ModelCardsWidget(parent=self, cards_list=[])
+            self.widget_model_cards = ModelCardsWidget(parent=self)
 
             # TODO
             # right now the cards are emitting too many signals on single click

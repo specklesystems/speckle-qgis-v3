@@ -1,6 +1,5 @@
 from typing import List
 
-from speckle.connectors.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.connectors.ui.utils.search_widget_utils import UiSearchUtils
 from speckle.connectors.ui.widgets.background import BackgroundWidget
 from speckle.connectors.ui.widgets.widget_cards_list_temporary import (
@@ -11,7 +10,6 @@ from specklepy.core.api.models.current import Project
 
 class ModelSearchWidget(CardsListTemporaryWidget):
 
-    ui_model_card_utils: UiModelCardsUtils = None
     project: Project = None
 
     def __init__(
