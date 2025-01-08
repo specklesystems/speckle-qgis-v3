@@ -253,6 +253,25 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             # subscribe to close-on-background-click event
             self.subscribe_to_close_on_background_click(self.widget_project_search)
 
+            # subscribe to add_models_search_widget signal
+            self.widget_project_search.add_models_search_signal.connect(
+                self.open_select_models_widget
+            )
+
+    def open_select_models_widget(self, card_function):
+
+        if not self.widget_model_search:
+            self.widget_model_search = ModelSearchWidget(
+                parent=self,
+                cards_content_list=card_function(),  # list
+                ui_search_content=self.widget_project_search.ui_search_content,
+            )
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_model_search)
+
+            # subscribe to close-on-background-click event
+            self.subscribe_to_close_on_background_click(self.widget_model_search)
+
     def create_selection_filter_widget(self, model_card: SenderModelCard):
 
         # prevent repeated widget initialization
