@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
 )
 
-from speckle.connectors.ui.models import ModelCard
+from speckle.connectors.ui.models import ModelCard, SenderModelCard
 from speckle.connectors.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.connectors.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
@@ -38,7 +38,8 @@ class ModelCardsWidget(QWidget):
     add_projects_search_signal = pyqtSignal()
 
     remove_model_signal = pyqtSignal(ModelCard)
-    send_model_signal = pyqtSignal(ModelCard)
+    send_model_signal = pyqtSignal(SenderModelCard)
+    add_selection_filter_signal = pyqtSignal(SenderModelCard)
 
     child_cards: List[ModelCardWidget]
 
@@ -173,7 +174,6 @@ class ModelCardsWidget(QWidget):
         _ = QVBoxLayout(cards_list_widget)
 
         all_widgets = []
-
         # in case the input argument was missing or None, don't create any cards
         if isinstance(cards_content_list, list):
             for i, content in enumerate(cards_content_list):
@@ -195,12 +195,17 @@ class ModelCardsWidget(QWidget):
                 project_card = ModelCardWidget(self, content)
                 all_widgets.append(project_card)
 
+        r"""
         for project_card in all_widgets:
             cards_list_widget.layout().addWidget(project_card)
 
             if isinstance(project_card, ModelCardWidget):
                 self.child_cards.append(project_card)
-                project_card.send_model_signal.connect(self.emit_from_child_card)
+                project_card.send_model_signal.connect(self.emit_send_from_child_card)
+                project_card.add_selection_filter_signal.connect(
+                    self.emit_add_selection_filter_from_child_card
+                )
+        """
 
         self.cards_list_widget = cards_list_widget
 
@@ -212,22 +217,26 @@ class ModelCardsWidget(QWidget):
         cards_list_widget.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
         _ = QVBoxLayout(cards_list_widget)
 
-        # in case the input argument was missing or None, don't create any cards
         self.child_cards.clear()
+
+        # in case the input argument was missing or None, don't create any cards
         if isinstance(widgets_list, list):
             for widget in widgets_list:
                 cards_list_widget.layout().addWidget(widget)
 
                 if isinstance(widget, ModelCardWidget):
                     self.child_cards.append(widget)
-                    widget.send_model_signal.connect(self.emit_from_child_card)
+
+                    # if widget is not connected yet
+                    if widget.connected is False:
+                        widget.send_model_signal.connect(self.send_model_signal.emit)
+                        widget.add_selection_filter_signal.connect(
+                            self.add_selection_filter_signal.emit
+                        )
+                        widget.connected = True
 
         self.cards_list_widget = cards_list_widget
         return self.cards_list_widget
-
-    def emit_from_child_card(self, model_card: ModelCard):
-        # declared as a separate function, because it's used several times
-        self.send_model_signal.emit(model_card)
 
     def add_new_card(self, new_card: ModelCard):
 
