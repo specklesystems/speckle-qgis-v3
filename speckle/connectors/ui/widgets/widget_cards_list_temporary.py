@@ -38,12 +38,12 @@ class CardsListTemporaryWidget(QWidget):
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
 
-        self.add_background()
+        self._add_background()
 
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
 
-        cards_selection_widget = self.create_cards_selection_widget(
+        cards_selection_widget = self._create_cards_selection_widget(
             label_text, cards_content_list
         )
 
@@ -60,20 +60,20 @@ class CardsListTemporaryWidget(QWidget):
 
         self.layout.addWidget(content)
 
-    def add_background(self):
+    def _add_background(self):
         self.background = BackgroundWidget(parent=self, transparent=False)
         self.background.show()
 
-    def create_cards_selection_widget(
+    def _create_cards_selection_widget(
         self, label_text: str, cards_content_list: List[List]
     ) -> QWidget:
 
         # create a container
-        scroll_container = self.create_container()
+        scroll_container = self._create_container()
 
         # create scroll area with this widget
-        label = self.create_widget_label(label_text)
-        scroll_area = self.create_scroll_area(cards_content_list)
+        label = self._create_widget_label(label_text)
+        scroll_area = self._create_scroll_area(cards_content_list)
 
         # add label and scroll area to the container
         scroll_container.layout().addWidget(label)
@@ -81,7 +81,7 @@ class CardsListTemporaryWidget(QWidget):
 
         return scroll_container
 
-    def create_container(self):
+    def _create_container(self):
 
         scroll_container = QWidget()
         scroll_container.setAttribute(QtCore.Qt.WA_StyledBackground, True)
@@ -94,7 +94,7 @@ class CardsListTemporaryWidget(QWidget):
 
         return scroll_container
 
-    def create_widget_label(self, label_text: str):
+    def _create_widget_label(self, label_text: str):
 
         label = QLabel(label_text)
 
@@ -106,30 +106,33 @@ class CardsListTemporaryWidget(QWidget):
         )
         return label
 
-    def create_scroll_area(self, cards_content_list: List[List]):
+    def _create_scroll_area(self, cards_content_list: List[List] = None):
+
+        if not cards_content_list:
+            cards_content_list = []
 
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")
         self.scroll_area.setAlignment(Qt.AlignHCenter)
 
         # create a widget inside scroll area
-        cards_list_widget = self.create_area_with_cards(cards_content_list)
+        cards_list_widget = self._create_area_with_cards(cards_content_list)
         self.scroll_area.setWidget(cards_list_widget)
 
         return self.scroll_area
 
-    def load_more(self):
+    def _load_more(self):
         """Overwride in the inheriting widgets."""
         return
 
-    def create_load_more_btn(self):
+    def _create_load_more_btn(self):
 
         load_more_btn = QPushButton()
-        load_more_btn.clicked.connect(lambda: self.load_more())
+        load_more_btn.clicked.connect(lambda: self._load_more())
         self.load_more_btn = load_more_btn
-        self.style_load_btn()
+        self._style_load_btn()
 
-    def style_load_btn(self, active: bool = True, text="Load more"):
+    def _style_load_btn(self, active: bool = True, text="Load more"):
 
         if active:
             self.load_more_btn.setStyleSheet(
@@ -152,7 +155,7 @@ class CardsListTemporaryWidget(QWidget):
             self.load_more_btn.setText(text)
             self.load_more_btn.setEnabled(False)
 
-    def create_area_with_cards(self, cards_content_list: List[List]) -> QWidget:
+    def _create_area_with_cards(self, cards_content_list: List[List]) -> QWidget:
 
         self.cards_list_widget = QWidget()
         self.cards_list_widget.setStyleSheet(
@@ -166,12 +169,12 @@ class CardsListTemporaryWidget(QWidget):
                 project_card = CardInListWidget(content)
                 self.cards_list_widget.layout().addWidget(project_card)
 
-        self.create_load_more_btn()
+        self._create_load_more_btn()
         self.cards_list_widget.layout().addWidget(self.load_more_btn)
 
         return self.cards_list_widget
 
-    def add_more_cards(self, new_cards_content_list: list):
+    def _add_more_cards(self, new_cards_content_list: list):
 
         self.cards_list_widget.setParent(None)
 
@@ -182,7 +185,7 @@ class CardsListTemporaryWidget(QWidget):
                 existing_content.append(widget.card_content)
 
         existing_content.extend(new_cards_content_list)
-        assigned_cards_list_widget = self.create_area_with_cards(existing_content)
+        assigned_cards_list_widget = self._create_area_with_cards(existing_content)
 
         self.scroll_area.setWidget(assigned_cards_list_widget)
         # scroll down
@@ -207,24 +210,10 @@ class CardsListTemporaryWidget(QWidget):
     def installEventFilter(self):
         """Overwriting native behavior of passing click (and other) events
         to parent widgets. This is needed, so that only click on background
-        itself would close the widget.
+        itself (and not widgets on top of it) would close the widget.
         """
         return
 
     def mouseReleaseEvent(self, event):
         # print("Mouse Release Event")
         return
-        self.destroy()
-
-    def destroy(self):
-        return
-        # remove all buttons
-        for i in reversed(range(self.layout.count())):
-            self.layout.itemAt(i).widget().setParent(None)
-
-        # delete reference from the parent widget
-        for i in reversed(range(self.parentWidget.layout().count())):
-            current_widget = self.parentWidget.layout().itemAt(i).widget()
-            if current_widget is type(self):
-                current_widget.setParent(None)
-        self.parentWidget.widget_project_search = None

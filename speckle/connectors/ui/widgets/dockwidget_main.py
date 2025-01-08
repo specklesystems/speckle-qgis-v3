@@ -55,10 +55,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         self.parent = parent
 
     def runSetup(self, plugin):
-        self.addLabel(plugin)
-        self.add_start_widget(plugin)
+        self._add_label(plugin)
+        self._add_start_widget(plugin)
 
-    def addLabel(self, plugin):
+    def _add_label(self, plugin):
         try:
             exitIcon = QPixmap(ICON_LOGO)
             exitActIcon = QIcon(exitIcon)
@@ -111,11 +111,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.setTitleBarWidget(widget)
             self.labelWidget = text_label
             self.labelWidget.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-            self.labelWidget.clicked.connect(self.onClickLogo)
+            self.labelWidget.clicked.connect(self._on_click_logo)
         except Exception as e:
             logToUser(e)
 
-    def add_start_widget(self, plugin):
+    def _add_start_widget(self, plugin):
 
         # document in QGIS is opened by default, we don't need as actually saved file to start working with data
         document_open = True
@@ -130,10 +130,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_no_model_cards = no_model_cards_widget
 
             self.widget_no_model_cards.add_projects_search_signal.connect(
-                self.open_select_projects_widget
+                self._open_select_projects_widget
             )
 
-    def remove_all_widgets(self):
+    def _remove_all_widgets(self):
         if self.widget_no_document:
             self.widget_no_document.setParent(None)
             self.widget_no_document = None
@@ -143,48 +143,62 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_no_model_cards = None
 
         if self.widget_project_search:
-            self.widget_project_search.setParent(None)
-            self.widget_project_search = None
+            self._remove_widget_project_search()
 
-    def remove_process_widgets(self):
-        if self.widget_project_search:
-            self.remove_widget_project_search()
         if self.widget_model_search:
-            self.remove_widget_model_search()
+            self._remove_widget_model_search()
+
         if self.widget_selection_filter:
             self.remove_widget_selection_filter()
+
+        if self.widget_model_cards:
+            self._remove_widget_model_cards()
+
+    def _remove_current_widget(self, widget):
+
+        if self.widget_project_search == widget:
+            self._remove_widget_project_search()
+
+        elif self.widget_model_search == widget:
+            self._remove_widget_model_search()
+
+        elif self.widget_model_cards == widget:
+            self._remove_widget_model_cards()
+
+        elif self.widget_selection_filter == widget:
+            self.remove_widget_selection_filter()
+
+    def _remove_process_widgets(self):
+        if self.widget_project_search:
+            self._remove_widget_project_search()
+
+        if self.widget_model_search:
+            self._remove_widget_model_search()
+
+        if self.widget_selection_filter:
+            self.remove_widget_selection_filter()
+
+    def _remove_widget_project_search(self):
+        self.widget_project_search.setParent(None)
+        self.widget_project_search = None
+
+    def _remove_widget_model_search(self):
+        self.widget_model_search.setParent(None)
+        self.widget_model_search = None
 
     def remove_widget_selection_filter(self):
         self.widget_selection_filter.setParent(None)
         self.widget_selection_filter = None
 
-    def remove_widget_project_search(self):
-        self.widget_project_search.setParent(None)
-        self.widget_project_search = None
-
-    def remove_widget_model_search(self):
-        self.widget_model_search.setParent(None)
-        self.widget_model_search = None
-
-    def remove_widget_model_cards(self):
+    def _remove_widget_model_cards(self):
         self.widget_model_cards.setParent(None)
         self.widget_model_cards = None
 
-    def remove_current_widget(self, widget):
-        if self.widget_project_search == widget:
-            self.remove_widget_project_search()
-        elif self.widget_model_search == widget:
-            self.remove_widget_model_search()
-        elif self.widget_model_cards == widget:
-            self.remove_widget_model_cards()
-        elif self.widget_selection_filter == widget:
-            self.remove_widget_selection_filter()
-
-    def create_or_add_model_cards_widget(self, model_card):
-        self.remove_process_widgets()
+    def _create_or_add_model_cards_widget(self, model_card):
+        self._remove_process_widgets()
         if not self.widget_model_cards:
 
-            self.widget_model_cards = ModelCardsWidget(parent=self, cards_list=[])
+            self.widget_model_cards = ModelCardsWidget(parent=self)
 
             # TODO
             # right now the cards are emitting too many signals on single click
@@ -199,11 +213,15 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             )
             # subscribe to calling SelectionWidget from existing ModelCard
             self.widget_model_cards.add_selection_filter_signal.connect(
-                self.create_selection_filter_widget
+                self._create_selection_filter_widget
             )
             # subscribe to PUBLISH button to open project search
             self.widget_model_cards.add_projects_search_signal.connect(
-                self.open_select_projects_widget
+                self._open_select_projects_widget
+            )
+            # subscribe to signal to remove the entire widget
+            self.widget_model_cards.remove_model_cards_widget_signal.connect(
+                self._remove_widget_model_cards
             )
 
             # emit signal, for the card that was just added (because we subscribed after creating a widget)
@@ -217,17 +235,46 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_model_cards.add_new_card(model_card)
             self.add_model_signal.emit(model_card)
 
-    def open_select_projects_widget(self):
-
-        self.widget_project_search = ProjectSearchWidget(parent=self)
-        # add widgets to the layout
-        self.layout().addWidget(self.widget_project_search)
-
-        self.widget_project_search.ui_search_content.add_selection_filter.connect(
-            self.create_selection_filter_widget
+    def _subscribe_to_close_on_background_click(self, widget):
+        """Receive signal from background click, calling to close the widget."""
+        widget.background.remove_current_widget_signal.connect(
+            self._remove_current_widget
         )
 
-    def create_selection_filter_widget(self, model_card: SenderModelCard):
+    def _open_select_projects_widget(self):
+
+        if not self.widget_project_search:
+            self.widget_project_search = ProjectSearchWidget(parent=self)
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_project_search)
+
+            self.widget_project_search.ui_search_content.add_selection_filter.connect(
+                self._create_selection_filter_widget
+            )
+
+            # subscribe to close-on-background-click event
+            self._subscribe_to_close_on_background_click(self.widget_project_search)
+
+            # subscribe to add_models_search_widget signal
+            self.widget_project_search.add_models_search_signal.connect(
+                self._open_select_models_widget
+            )
+
+    def _open_select_models_widget(self, card_function):
+
+        if not self.widget_model_search:
+            self.widget_model_search = ModelSearchWidget(
+                parent=self,
+                cards_content_list=card_function(),  # list
+                ui_search_content=self.widget_project_search.ui_search_content,
+            )
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_model_search)
+
+            # subscribe to close-on-background-click event
+            self._subscribe_to_close_on_background_click(self.widget_model_search)
+
+    def _create_selection_filter_widget(self, model_card: SenderModelCard):
 
         # prevent repeated widget initialization
         if not self.widget_selection_filter:
@@ -247,8 +294,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.layout().addWidget(self.widget_selection_filter)
 
             self.widget_selection_filter.add_model_card_signal.connect(
-                self.create_or_add_model_cards_widget
+                self._create_or_add_model_cards_widget
             )
+
+            # subscribe to close-on-background-click event
+            self._subscribe_to_close_on_background_click(self.widget_selection_filter)
 
     def handle_change_selection_info(self, *args):
         if self.widget_selection_filter:
@@ -295,7 +345,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         self.closingPlugin.emit()
         event.accept()
 
-    def onClickLogo(self):
+    def _on_click_logo(self):
         import webbrowser
 
         url = "https://speckle.systems/"

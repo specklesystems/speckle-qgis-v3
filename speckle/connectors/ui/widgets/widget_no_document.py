@@ -11,9 +11,8 @@ from speckle.connectors.ui.widgets.utils.global_resources import (
 
 
 class NoDocumentWidget(QWidget):
-    context_stack = None
-    message_card: QWidget
-    send_data = pyqtSignal(object)
+
+    _message_card: QWidget
 
     def __init__(self, parent=None):
         super(NoDocumentWidget, self).__init__(parent)
@@ -32,17 +31,17 @@ class NoDocumentWidget(QWidget):
             parent.frameSize().height(),
         )  # top left corner x, y, width, height
 
-        self.message_card = QWidget()
-        self.message_card.setStyleSheet(
+        self._message_card = QWidget()
+        self._message_card.setStyleSheet(
             "QWidget {"
             + f"border-radius: 10px;padding: 20px;margin:{int(0.5 * WIDGET_SIDE_BUFFER)};height: 40px;{BACKGR_COLOR_WHITE}"
             + "}"
         )
         self.fill_message_card()
-        self.layout.addWidget(self.message_card)
+        self.layout.addWidget(self._message_card)
 
     def fill_message_card(self):
-        boxLayout = QVBoxLayout(self.message_card)
+        boxLayout = QVBoxLayout(self._message_card)
 
         # add text
         label = QLabel("No active document")
