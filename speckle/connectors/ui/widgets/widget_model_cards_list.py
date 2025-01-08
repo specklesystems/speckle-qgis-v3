@@ -174,7 +174,6 @@ class ModelCardsWidget(QWidget):
         _ = QVBoxLayout(cards_list_widget)
 
         all_widgets = []
-
         # in case the input argument was missing or None, don't create any cards
         if isinstance(cards_content_list, list):
             for i, content in enumerate(cards_content_list):
@@ -196,6 +195,7 @@ class ModelCardsWidget(QWidget):
                 project_card = ModelCardWidget(self, content)
                 all_widgets.append(project_card)
 
+        r"""
         for project_card in all_widgets:
             cards_list_widget.layout().addWidget(project_card)
 
@@ -205,6 +205,7 @@ class ModelCardsWidget(QWidget):
                 project_card.add_selection_filter_signal.connect(
                     self.emit_add_selection_filter_from_child_card
                 )
+        """
 
         self.cards_list_widget = cards_list_widget
 
@@ -225,21 +226,17 @@ class ModelCardsWidget(QWidget):
 
                 if isinstance(widget, ModelCardWidget):
                     self.child_cards.append(widget)
-                    widget.send_model_signal.connect(self.emit_send_from_child_card)
-                    widget.add_selection_filter_signal.connect(
-                        self.emit_add_selection_filter_from_child_card
-                    )
+
+                    # if widget is not connected yet
+                    if widget.connected is False:
+                        widget.send_model_signal.connect(self.send_model_signal.emit)
+                        widget.add_selection_filter_signal.connect(
+                            self.add_selection_filter_signal.emit
+                        )
+                        widget.connected = True
 
         self.cards_list_widget = cards_list_widget
         return self.cards_list_widget
-
-    def emit_add_selection_filter_from_child_card(self, model_card: SenderModelCard):
-        # declared as a separate function, because it's used several times
-        self.add_selection_filter_signal.emit(model_card)
-
-    def emit_send_from_child_card(self, model_card: ModelCard):
-        # declared as a separate function, because it's used several times
-        self.send_model_signal.emit(model_card)
 
     def add_new_card(self, new_card: ModelCard):
 

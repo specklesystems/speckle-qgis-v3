@@ -38,6 +38,9 @@ class ModelCardWidget(QWidget):
     close_btn: QPushButton = None
     open_web_btn: QPushButton = None
 
+    # for the use in parent widget - to keep track if signals are already connected and not connect to btns twice
+    connected: bool = False
+
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
 
     def __init__(self, parent=None, card_content: ModelCard = None):
