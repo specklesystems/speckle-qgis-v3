@@ -171,7 +171,9 @@ class CardsListTemporaryWidget(QWidget):
 
         return self.cards_list_widget
 
-    def _add_more_cards(self, new_cards_content_list: list, keep_scroll_on_top=False):
+    def _add_more_cards(
+        self, new_cards_content_list: list, keep_scroll_on_top=False, batch_size=1
+    ):
 
         self.cards_list_widget.setParent(None)
 
@@ -190,6 +192,11 @@ class CardsListTemporaryWidget(QWidget):
         if not keep_scroll_on_top:
             vbar = self.scroll_area.verticalScrollBar()
             vbar.setValue(vbar.maximum())
+
+        # style LoadMore buttom
+        if len(new_cards_content_list) < batch_size:
+            self._style_load_btn(active=False, text="No more items found")
+            return
 
     def resizeEvent(self, event=None):
         QtWidgets.QWidget.resizeEvent(self, event)

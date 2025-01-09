@@ -51,11 +51,9 @@ class ModelSearchWidget(CardsListTemporaryWidget):
             self._project, clear_cursor=clear_cursor
         )
 
-        if len(new_models_cards) == 0:
-            self._style_load_btn(active=False, text="No more models found")
-            return
-
-        self._add_more_cards(new_models_cards, clear_cursor)
+        self._add_more_cards(
+            new_models_cards, clear_cursor, self.ui_search_content.batch_size
+        )
 
         # adjust size of new widget:
         self.resizeEvent()

@@ -1,6 +1,5 @@
 from functools import partial
 from typing import Any, List
-from speckle.host_apps.qgis.connectors.filters import QgisSelectionFilter
 from speckle.ui.models import SenderModelCard
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
@@ -11,13 +10,12 @@ from specklepy.core.api.models.current import (
 )
 from specklepy.core.api.resources.current.project_resource import ProjectResource
 from speckle.ui.utils.utils import (
-    # clear_models_cursor,
-    # clear_projects_cursor,
     get_accounts,
     get_authenticate_client_for_account,
     get_models_from_client,
     get_projects_from_client,
     time_ago,
+    QUERY_BATCH_SIZE,
 )
 from PyQt5.QtCore import QObject, pyqtSignal
 from specklepy.logging.exceptions import SpeckleException
@@ -28,6 +26,7 @@ class UiSearchUtils(QObject):
     cursor_projects: Any = None
     cursor_models: Any = None
     speckle_client: SpeckleClient = None
+    batch_size: int = None
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
     add_models_search_signal = pyqtSignal(object)
 
@@ -42,6 +41,7 @@ class UiSearchUtils(QObject):
         self.speckle_client: SpeckleClient = get_authenticate_client_for_account(
             accounts[0]
         )
+        self.batch_size = QUERY_BATCH_SIZE
 
     def get_new_projects_content(self, clear_cursor=False):
 
@@ -67,6 +67,7 @@ class UiSearchUtils(QObject):
         return content_list
 
     def _emit_function_add_models_signal(self, project: Project):
+
         # emitting the signal that will trigger creation of ModelSearch widget,
         # using the ModelCard content generated from the passed function
         self.add_models_search_signal.emit(

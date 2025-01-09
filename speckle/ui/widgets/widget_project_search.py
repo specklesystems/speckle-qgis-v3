@@ -1,6 +1,3 @@
-from functools import partial
-from typing import List
-
 from speckle.ui.widgets.widget_cards_list_temporary import (
     CardsListTemporaryWidget,
 )
@@ -30,11 +27,6 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         # customize load_more function
         self._load_more = lambda: self._add_projects(clear_cursor=False)
 
-        # projects_contents_list = [function, proj_name, proj_role, proj_updatedAt]
-        # projects_contents_list = self.ui_search_content.get_new_projects_content(
-        #    clear_cursor=True
-        # )
-
         # initialize the inherited widget, passing the card content
         super(ProjectSearchWidget, self).__init__(
             parent=parent,
@@ -44,8 +36,8 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         self._add_projects(clear_cursor=True)
 
     def _send_model_search_signal(self, callback):
-        # needs to be a separate function, because the signal is not properly sent
-        # from "partial"
+
+        # needs to be a separate function, because the signal is not properly sent from "partial"
         self.add_models_search_signal.emit(callback)
 
     def _add_projects(self, clear_cursor=False):
@@ -54,11 +46,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             clear_cursor=clear_cursor
         )
 
-        if len(new_project_cards) == 0:
-            self._style_load_btn(active=False, text="No more projects found")
-            return
-
-        self._add_more_cards(new_project_cards, clear_cursor)
+        self._add_more_cards(
+            new_project_cards, clear_cursor, self.ui_search_content.batch_size
+        )
 
         # adjust size of new widget:
         self.resizeEvent()
