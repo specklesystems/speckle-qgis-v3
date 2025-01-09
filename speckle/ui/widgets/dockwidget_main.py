@@ -248,7 +248,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             # add widgets to the layout
             self.layout().addWidget(self.widget_project_search)
 
-            self.widget_project_search.ui_search_content.add_selection_filter.connect(
+            self.widget_project_search.ui_search_content.add_selection_filter_signal.connect(
                 self._create_selection_filter_widget
             )
 
@@ -256,7 +256,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self._subscribe_to_close_on_background_click(self.widget_project_search)
 
             # subscribe to add_models_search_widget signal
-            self.widget_project_search.add_models_search_signal.connect(
+            self.widget_project_search.ui_search_content.add_models_search_signal.connect(
                 self._open_select_models_widget
             )
 

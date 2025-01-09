@@ -25,30 +25,19 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         self.parent = parent
 
         # get content for project cards
+        # projects_contents_list = [function, proj_name, proj_role, proj_updatedAt]
         self.ui_search_content = UiSearchUtils()
-        projects_list = self.ui_search_content.get_project_search_widget_content()
-
-        # modify the projects_list by sending signal to the parent Dockwidget
-        self._modify_card_callback(projects_list)
+        projects_contents_list = self.ui_search_content.get_new_projects_content()
 
         # initialize the inherited widget, passing the card content
         super(ProjectSearchWidget, self).__init__(
             parent=parent,
             label_text=label_text,
-            cards_content_list=projects_list,
+            cards_content_list=projects_contents_list,
         )
 
         # customize load_more function
         self._load_more = lambda: self._add_projects()
-
-    def _modify_card_callback(self, projects_contents_list: List[List]):
-        # add a function for generating model card widget
-        for i, content in enumerate(projects_contents_list):
-            callback = content[0]
-
-            projects_contents_list[i][0] = partial(
-                self._send_model_search_signal, callback
-            )
 
     def _send_model_search_signal(self, callback):
         # needs to be a separate function, because the signal is not properly sent
@@ -63,7 +52,6 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             self._style_load_btn(active=False, text="No more projects found")
             return
 
-        self._modify_card_callback(new_project_cards)
         self._add_more_cards(new_project_cards)
 
         # adjust size of new widget:
