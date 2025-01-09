@@ -260,12 +260,12 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
                 self._open_select_models_widget
             )
 
-    def _open_select_models_widget(self, card_function):
+    def _open_select_models_widget(self, project):
 
         if not self.widget_model_search:
             self.widget_model_search = ModelSearchWidget(
                 parent=self,
-                cards_content_list=card_function(),  # list
+                project=project,
                 ui_search_content=self.widget_project_search.ui_search_content,
             )
             # add widgets to the layout

@@ -35,11 +35,6 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         )
         self._add_projects(clear_cursor=True)
 
-    def _send_model_search_signal(self, callback):
-
-        # needs to be a separate function, because the signal is not properly sent from "partial"
-        self.add_models_search_signal.emit(callback)
-
     def _add_projects(self, clear_cursor=False):
 
         new_project_cards = self.ui_search_content.get_new_projects_content(

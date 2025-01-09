@@ -28,7 +28,7 @@ class UiSearchUtils(QObject):
     speckle_client: SpeckleClient = None
     batch_size: int = None
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
-    add_models_search_signal = pyqtSignal(object)
+    add_models_search_signal = pyqtSignal(Project)
 
     def __init__(self):
         super().__init__()
@@ -70,11 +70,7 @@ class UiSearchUtils(QObject):
 
         # emitting the signal that will trigger creation of ModelSearch widget,
         # using the ModelCard content generated from the passed function
-        self.add_models_search_signal.emit(
-            lambda project=project: self.get_new_models_content(
-                project=project, clear_cursor=True
-            )
-        )
+        self.add_models_search_signal.emit(project)
 
     def get_new_models_content(
         self, project: Project, clear_cursor=False
