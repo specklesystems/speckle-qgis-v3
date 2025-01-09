@@ -45,7 +45,9 @@ class ModelSearchWidget(CardsListTemporaryWidget):
 
     def _add_models(self):
 
-        new_models_cards = self.ui_search_content.get_new_models_content(self._project)
+        new_models_cards = self.ui_search_content.get_new_models_content(
+            self._project, clear_cursor=False
+        )
 
         if len(new_models_cards) == 0:
             self._style_load_btn(active=False, text="No more models found")

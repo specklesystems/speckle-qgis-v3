@@ -43,7 +43,10 @@ class UiSearchUtils(QObject):
             accounts[0]
         )
 
-    def get_new_projects_content(self):
+    def get_new_projects_content(self, clear_cursor=False):
+
+        if clear_cursor:
+            self.cursor_projects = None
 
         content_list: List[List] = []
         projects_resource_collection: ResourceCollection[Project] = (

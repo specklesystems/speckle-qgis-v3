@@ -27,7 +27,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         # get content for project cards
         # projects_contents_list = [function, proj_name, proj_role, proj_updatedAt]
         self.ui_search_content = UiSearchUtils()
-        projects_contents_list = self.ui_search_content.get_new_projects_content()
+        projects_contents_list = self.ui_search_content.get_new_projects_content(
+            clear_cursor=True
+        )
 
         # initialize the inherited widget, passing the card content
         super(ProjectSearchWidget, self).__init__(
@@ -46,7 +48,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
     def _add_projects(self):
 
-        new_project_cards = self.ui_search_content.get_new_projects_content()
+        new_project_cards = self.ui_search_content.get_new_projects_content(
+            clear_cursor=False
+        )
 
         if len(new_project_cards) == 0:
             self._style_load_btn(active=False, text="No more projects found")
