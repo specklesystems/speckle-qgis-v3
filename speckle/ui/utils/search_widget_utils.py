@@ -67,16 +67,17 @@ class UiSearchUtils(QObject):
         # emitting the signal that will trigger creation of ModelSearch widget,
         # using the ModelCard content generated from the passed function
         self.add_models_search_signal.emit(
-            lambda project=project: self.get_new_models_content(project)
+            lambda project=project: self.get_new_models_content(
+                project=project, clear_cursor=True
+            )
         )
 
     def get_new_models_content(
-        self,
-        project: Project,
+        self, project: Project, clear_cursor=False
     ) -> List[List]:
 
-        print("____Executing function. Project:")
-        print(project.name)
+        if clear_cursor:
+            self.cursor_models = None
 
         content_list: List[List] = []
         models_resource_collection: ResourceCollection[Model] = get_models_from_client(
@@ -85,7 +86,6 @@ class UiSearchUtils(QObject):
         models_first: List[Model] = models_resource_collection.items
         self.cursor_models = models_resource_collection.cursor
 
-        print(len(models_first))
         for model in models_first:
 
             # if a receive workflow: get_version_search_widget_content(...)
