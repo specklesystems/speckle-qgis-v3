@@ -25,31 +25,33 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         self.parent = parent
 
         # get content for project cards
-        # projects_contents_list = [function, proj_name, proj_role, proj_updatedAt]
         self.ui_search_content = UiSearchUtils()
-        projects_contents_list = self.ui_search_content.get_new_projects_content(
-            clear_cursor=True
-        )
+
+        # customize load_more function
+        self._load_more = lambda: self._add_projects(clear_cursor=False)
+
+        # projects_contents_list = [function, proj_name, proj_role, proj_updatedAt]
+        # projects_contents_list = self.ui_search_content.get_new_projects_content(
+        #    clear_cursor=True
+        # )
 
         # initialize the inherited widget, passing the card content
         super(ProjectSearchWidget, self).__init__(
             parent=parent,
             label_text=label_text,
-            cards_content_list=projects_contents_list,
+            cards_content_list=[],
         )
-
-        # customize load_more function
-        self._load_more = lambda: self._add_projects()
+        self._add_projects(clear_cursor=True)
 
     def _send_model_search_signal(self, callback):
         # needs to be a separate function, because the signal is not properly sent
         # from "partial"
         self.add_models_search_signal.emit(callback)
 
-    def _add_projects(self):
+    def _add_projects(self, clear_cursor=False):
 
         new_project_cards = self.ui_search_content.get_new_projects_content(
-            clear_cursor=False
+            clear_cursor=clear_cursor
         )
 
         if len(new_project_cards) == 0:
