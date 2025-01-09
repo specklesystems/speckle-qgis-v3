@@ -64,7 +64,13 @@ class SpeckleQGISv3Module:
             self.share_conversion_settings
         )
         self.connector_module.send_binding.send_operation_execute_signal.connect(
-            self.connector_module.execute_send_operation
+            self.execute_send_operation
+        )
+
+    def execute_send_operation(self, *args):
+        # execute and return send operation results
+        self.connector_module.send_binding.send_operation_result = (
+            self.connector_module.send_operation.execute(*args)
         )
 
     def share_conversion_settings(self, *args):

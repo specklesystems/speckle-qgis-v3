@@ -37,7 +37,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             cards_content_list=projects_list,
         )
 
-        self.load_more = lambda: self.add_projects()
+        self._load_more = lambda: self._add_projects()
 
     def _modify_card_callback(self, projects_contents_list: List[List]):
         # add a function for generating model card widget
@@ -58,7 +58,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         new_project_cards = self.ui_search_content.get_new_projects_content()
 
         if len(new_project_cards) == 0:
-            self.style_load_btn(active=False, text="No more projects found")
+            self._style_load_btn(active=False, text="No more projects found")
             return
 
         self._modify_card_callback(new_project_cards)

@@ -87,7 +87,3 @@ class QgisConnectorModule(QObject):
             client_factory=client_factory,
             activity_factory=None,
         )
-
-    def execute_send_operation(self, *args):
-        send_operation_result: SendOperationResult = self.send_operation.execute(*args)
-        self.send_binding.send_operation_result = send_operation_result

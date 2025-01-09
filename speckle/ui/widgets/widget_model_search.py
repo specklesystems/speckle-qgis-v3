@@ -10,6 +10,7 @@ from specklepy.core.api.models.current import Project
 
 class ModelSearchWidget(CardsListTemporaryWidget):
 
+    ui_search_content: UiSearchUtils = None
     _project: Project = None
 
     def __init__(
@@ -41,6 +42,7 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         self.background.show()
 
     def _add_models(self):
+
         new_models_cards = self.ui_search_content.get_new_models_content(self._project)
 
         if len(new_models_cards) == 0:
