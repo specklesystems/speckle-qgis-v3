@@ -19,6 +19,16 @@ class ConversionResult(ABC):
     result_type: Optional[str]
     error: Optional["ErrorWrapper"]
 
+    def __init__(
+        self, *, status, source_id, source_type, result_id, result_type, error
+    ):
+        self.status = status
+        self.source_id = source_id
+        self.source_type = source_type
+        self.result_id = result_id
+        self.result_type = result_type
+        self.error = error
+
     @staticmethod
     def format_error(exception: Optional[Exception] = None) -> ErrorWrapper | None:
         if exception is None:
@@ -33,6 +43,7 @@ class SendConversionResult(ConversionResult):
 
     def __init__(
         self,
+        *,
         status: str,
         source_id: str,
         source_type: str,

@@ -1,10 +1,13 @@
-from typing import Any, List
+from typing import Any, Dict, List
+from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
+from speckle.host_apps.qgis.converters.to_speckle.top_level import (
+    CoreObjectsBaseToSpeckleTopLevelConverter,
+)
 from speckle.sdk.connectors_common.api import ClientFactory
 from speckle.sdk.connectors_common.credentials import AccountManager
 from speckle.sdk.connectors_common.operations import (
     AccountService,
     SendOperation,
-    SendOperationResult,
 )
 from speckle.host_apps.qgis.connectors.bindings import (
     QgisBasicConnectorBinding,
@@ -40,6 +43,7 @@ class QgisConnectorModule(QObject):
 
     def __init__(self, iface):
         super().__init__()
+
         self.iface = iface
         bridge = None
         self.document_store = QgisDocumentStore()
@@ -67,12 +71,23 @@ class QgisConnectorModule(QObject):
         account_manager = AccountManager()
         self.account_service = AccountService(account_manager)
         self.send_operation = None
+
+        self.root_obj_builder = None
+        self.send_operation = None
+
+    def create_root_builder_send_operation(
+        self, conversion_settings: QgisConversionSettings
+    ):
+
+        # create modules for Send operation that require conversion_settings
         self.root_obj_builder = QgisRootObjectBuilder(
-            root_to_speckle_converter=None,
+            root_to_speckle_converter=CoreObjectsBaseToSpeckleTopLevelConverter(
+                conversion_settings=conversion_settings
+            ),
             send_conversion_cache=None,
             layer_unpacker=self.layer_unpacker,
             color_unpacker=self.color_unpacker,
-            converter_settings=None,
+            converter_settings=conversion_settings,
             layer_utils=self.layer_utils,
             logger=None,
             activity_factory=None,

@@ -10,7 +10,7 @@ from speckle.host_apps.qgis.converters.qgis_converter_module import (
     QgisConverterModule,
 )
 
-from speckle.ui.models import ModelCard, SendInfo
+from speckle.ui.models import ModelCard
 from speckle.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
 import webbrowser
@@ -60,22 +60,27 @@ class SpeckleQGISv3Module:
         )
 
     def connect_connector_module_signals(self):
-        self.connector_module.send_binding.create_conversion_settings_signal.connect(
-            self.share_conversion_settings
+        self.connector_module.send_binding.create_send_modules_signal.connect(
+            self._create_send_modules
         )
         self.connector_module.send_binding.send_operation_execute_signal.connect(
-            self.execute_send_operation
+            self._execute_send_operation
         )
 
-    def execute_send_operation(self, *args):
+    def _execute_send_operation(self, *args):
         # execute and return send operation results
         self.connector_module.send_binding.send_operation_result = (
             self.connector_module.send_operation.execute(*args)
         )
 
-    def share_conversion_settings(self, *args):
-        self.connector_module.root_obj_builder.converter_settings = (
-            self.converter_module.create_and_save_conversion_settings(*args)
+    def _create_send_modules(self, *args):
+
+        # create conversion settings
+        self.converter_module.create_and_save_conversion_settings(*args)
+
+        # create root object builder with conversion settings
+        self.connector_module.create_root_builder_send_operation(
+            self.converter_module.conversion_settings
         )
 
     def connect_converter_module_signals(self):
@@ -90,7 +95,6 @@ class SpeckleQGISv3Module:
 
     def send_model(self, model_card: ModelCard):
         # receiving signal from UI and passing it to SendBinding
-        print(model_card.model_card_id)
         self.connector_module.send_binding.send(model_card_id=model_card.model_card_id)
 
     def verify_dependencies(self):

@@ -9,8 +9,10 @@ from speckle.host_apps.qgis.connectors.host_app import (
 )
 from speckle.host_apps.qgis.connectors.utils import QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
+from speckle.sdk.connectors_common.conversion import SendConversionResult
 from speckle.sdk.converters_common.converters_common import IRootToSpeckleConverter
 from speckle.ui.models import SendInfo
+from specklepy.objects.data import QgisObject
 from specklepy.objects.models.collections.collection import Collection
 
 from qgis.core import QgsProject
@@ -56,6 +58,9 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
     ) -> RootObjectBuilderResult:
         # TODO
 
+        print("____BUILD")
+        print(self.converter_settings)
+
         qgis_project = QgsProject.instance()
         rootCollection: Collection = Collection(
             name=qgis_project.fileName(), elements=[]
@@ -79,9 +84,17 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             qgis_layers=layers_ordered, parent_collection=rootCollection
         )
 
-        results: List["SendConversionResult"] = []
+        results: List[SendConversionResult] = []
+
+        # here will be iteration loop through layers and their features
+        converted_obj: QgisObject = self.root_to_speckle_converter.convert(None)
+        result_1 = SendConversionResult(
+            status="SUCCESS", source_id="", source_type="type", result=converted_obj
+        )
+        results.append(result_1)
+        rootCollection.elements.append(converted_obj)
 
         return RootObjectBuilderResult(
             root_object=rootCollection,
-            conversion_results=[],
+            conversion_results=results,
         )

@@ -1,15 +1,18 @@
 from typing import Any, Dict, List
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
+from speckle.sdk.converters_common.converters_common import IRootToSpeckleConverter
 from speckle.sdk.converters_common.objects import IToSpeckleTopLevelConverter
 
-from specklepy.objects.base import Base
+from specklepy.objects.data import QgisObject
 
 
-class CoreObjectsBaseToSpeckleTopLevelConverter(IToSpeckleTopLevelConverter):
+class CoreObjectsBaseToSpeckleTopLevelConverter(
+    IToSpeckleTopLevelConverter, IRootToSpeckleConverter
+):
 
-    _display_value_extractor: "DisplayValueExtractor"
-    _properties_extractor: "PropertiesExtractor"
-    _conversion_settings: QgisConversionSettings
+    display_value_extractor: "DisplayValueExtractor"
+    properties_extractor: "PropertiesExtractor"
+    conversion_settings: QgisConversionSettings
 
     def __init__(
         self,
@@ -31,14 +34,15 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(IToSpeckleTopLevelConverter):
         # get properties
         properties: Dict[str, Any] = self._properties_extractor.get_properties(target)
 
+        """
         result: QgisObject = QgisObject(
             name=object_type,
             type=object_type,
-            displayValue=display,
-            properties=properties,
-            units=self._conversion_settings.speckle_units,
+            displayValue=[],  # display,
+            properties={},  # properties,
+            units=self.conversion_settings.speckle_units,
             application_id="",
         )
+        print(result.name)
+        print(result.properties)
         return result
-        """
-        return

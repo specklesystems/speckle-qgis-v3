@@ -99,7 +99,7 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
     changed_objects_ids: Dict[str, bytes]
     subscribed_layers: List[Any]
 
-    create_conversion_settings_signal = pyqtSignal(QgsProject, CRSoffsetRotation)
+    create_send_modules_signal = pyqtSignal(QgsProject, CRSoffsetRotation)
     send_operation_execute_signal = pyqtSignal(list, object, object, object)
     send_operation_result: SendOperationResult = None
 
@@ -150,10 +150,12 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
 
     def send(self, model_card_id: str) -> None:
 
+        print("____1 BINDINGS_SEND: first called operation from the main module")
+
         # get conversion settings by sending signal to the main module
         qgis_project = QgsProject.instance()
         crs_offset_rotation = CRSoffsetRotation(qgis_project.crs(), 0, 0, 0)
-        self.create_conversion_settings_signal.emit(qgis_project, crs_offset_rotation)
+        self.create_send_modules_signal.emit(qgis_project, crs_offset_rotation)
 
         model_card: SenderModelCard = self.store.get_model_by_id(model_card_id)
         if not isinstance(model_card, SenderModelCard):
