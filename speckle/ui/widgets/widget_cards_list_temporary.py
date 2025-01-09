@@ -27,7 +27,7 @@ class CardsListTemporaryWidget(QWidget):
         *,
         parent=None,
         label_text: str = "Label",
-        cards_content_list: List[List] = None,
+        cards_content_list: List[List],
     ):
         super(CardsListTemporaryWidget, self).__init__(parent)
         self.parentWidget: "SpeckleQGISv3Dialog" = parent
@@ -107,9 +107,6 @@ class CardsListTemporaryWidget(QWidget):
         return label
 
     def _create_scroll_area(self, cards_content_list: List[List] = None):
-
-        if not cards_content_list:
-            cards_content_list = []
 
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setStyleSheet("QScrollArea {" + f"{ZERO_MARGIN_PADDING}" + "}")

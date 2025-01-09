@@ -24,16 +24,18 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         self.parent = parent
         self.ui_search_content = ui_search_content
 
-        super(ModelSearchWidget, self).__init__(
-            parent=parent, label_text=label_text, cards_content_list=cards_content_list
-        )
-
         # extract project from the first card
         for item in cards_content_list:
             if isinstance(item[-1], Project):
                 self._project = cards_content_list[0][-1]
                 break
 
+        # initialize the inherited widget, passing the card content
+        super(ModelSearchWidget, self).__init__(
+            parent=parent, label_text=label_text, cards_content_list=cards_content_list
+        )
+
+        # customize load_more function
         self._load_more = lambda: self._add_models()
 
     def _add_background(self):

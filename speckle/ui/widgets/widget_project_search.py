@@ -31,12 +31,14 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         # modify the projects_list by sending signal to the parent Dockwidget
         self._modify_card_callback(projects_list)
 
+        # initialize the inherited widget, passing the card content
         super(ProjectSearchWidget, self).__init__(
             parent=parent,
             label_text=label_text,
             cards_content_list=projects_list,
         )
 
+        # customize load_more function
         self._load_more = lambda: self._add_projects()
 
     def _modify_card_callback(self, projects_contents_list: List[List]):
