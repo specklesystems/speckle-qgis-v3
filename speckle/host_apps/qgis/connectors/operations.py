@@ -9,6 +9,7 @@ from speckle.host_apps.qgis.connectors.host_app import (
 )
 from speckle.host_apps.qgis.connectors.utils import QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
+from speckle.sdk.converters_common.converters_common import IRootToSpeckleConverter
 from speckle.ui.models import SendInfo
 from specklepy.objects.models.collections.collection import Collection
 
@@ -16,7 +17,7 @@ from qgis.core import QgsProject
 
 
 class QgisRootObjectBuilder(IRootObjectBuilder):
-    root_to_speckle_converter: "IRootToSpeckleConverter"
+    root_to_speckle_converter: IRootToSpeckleConverter
     send_conversion_cache: "ISendConversionCache"
     layer_unpacker: QgisLayerUnpacker
     color_unpacker: QgisColorUnpacker
@@ -27,7 +28,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
     def __init__(
         self,
-        root_to_speckle_converter: "IRootToSpeckleConverter",
+        root_to_speckle_converter: IRootToSpeckleConverter,
         send_conversion_cache: "ISendConversionCache",
         layer_unpacker: QgisLayerUnpacker,
         color_unpacker: QgisColorUnpacker,

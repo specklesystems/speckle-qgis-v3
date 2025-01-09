@@ -20,8 +20,6 @@ from speckle.host_apps.qgis.connectors.operations import (
     QgisRootObjectBuilder,
 )
 from speckle.host_apps.qgis.connectors.utils import QgisLayerUtils
-from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
-from speckle.ui.models import SendInfo
 
 from PyQt5.QtCore import QObject
 
