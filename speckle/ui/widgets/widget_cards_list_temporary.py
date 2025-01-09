@@ -171,7 +171,7 @@ class CardsListTemporaryWidget(QWidget):
 
         return self.cards_list_widget
 
-    def _add_more_cards(self, new_cards_content_list: list):
+    def _add_more_cards(self, new_cards_content_list: list, keep_scroll_on_top=False):
 
         self.cards_list_widget.setParent(None)
 
@@ -185,9 +185,11 @@ class CardsListTemporaryWidget(QWidget):
         assigned_cards_list_widget = self._create_area_with_cards(existing_content)
 
         self.scroll_area.setWidget(assigned_cards_list_widget)
+
         # scroll down
-        vbar = self.scroll_area.verticalScrollBar()
-        vbar.setValue(vbar.maximum())
+        if not keep_scroll_on_top:
+            vbar = self.scroll_area.verticalScrollBar()
+            vbar.setValue(vbar.maximum())
 
     def resizeEvent(self, event=None):
         QtWidgets.QWidget.resizeEvent(self, event)

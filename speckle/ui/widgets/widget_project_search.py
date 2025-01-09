@@ -58,7 +58,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             self._style_load_btn(active=False, text="No more projects found")
             return
 
-        self._add_more_cards(new_project_cards)
+        self._add_more_cards(new_project_cards, clear_cursor)
 
         # adjust size of new widget:
         self.resizeEvent()

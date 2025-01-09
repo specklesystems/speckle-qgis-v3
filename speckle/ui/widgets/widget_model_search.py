@@ -40,6 +40,7 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         self._add_models(clear_cursor=True)
 
     def _add_background(self):
+
         # overwrite function to make background transparent
         self.background = BackgroundWidget(parent=self, transparent=True)
         self.background.show()
@@ -54,7 +55,7 @@ class ModelSearchWidget(CardsListTemporaryWidget):
             self._style_load_btn(active=False, text="No more models found")
             return
 
-        self._add_more_cards(new_models_cards)
+        self._add_more_cards(new_models_cards, clear_cursor)
 
         # adjust size of new widget:
         self.resizeEvent()
