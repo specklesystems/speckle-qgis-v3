@@ -252,54 +252,54 @@ class ModelCardsWidget(QWidget):
 
     def _remove_card(self, new_card: ModelCard):
 
-        all_widgets = []
-        existing_content = []
-        all_projects = []
+        # signal to remove ModelCard info from DocumentStore (handled by main module)
+        self.remove_model_signal.emit(new_card)
+
+        project_groups: List[dict] = []
 
         for i in range(self.cards_list_widget.layout().count()):
             widget = self.cards_list_widget.layout().itemAt(i).widget()
-            if isinstance(widget, ModelCardWidget):
-                # check if it's the card that needs to be removed
-                if (
+
+            if not isinstance(widget, ModelCardWidget):
+                # labels, will always come first before the card widgets
+                # indicates start of a new project group
+
+                # check if the previous group if empty
+                self._check_for_empty_group(project_groups)
+
+                # start a new project group, add label and a placeholder for cards
+                project_groups.append({"label": widget, "cards": []})
+            else:
+                # confirm it's NOT the card that needs to be removed
+                if not (
                     widget.card_content.server_url == new_card.server_url
                     and widget.card_content.project_id == new_card.project_id
                     and widget.card_content.model_id == new_card.model_id
                 ):
-                    # if the same model, don't add it
-                    pass
-                else:
-                    existing_content.append(widget.card_content)
-                    all_widgets.append(widget)
-                    all_projects.append(widget.card_content.model_id)
+                    project_groups[-1]["cards"].append(widget)
 
-            else:  # labels
-                # check if previous project group has at least 1 project
-                if len(all_projects) > 0:
-                    # only add label if there are projects in the group
-                    if len(all_projects[-1]) > 0:
-                        all_widgets.append(widget)
-                else:  # cannot verify, no project groups yey
-                    all_widgets.append(widget)
-
-                all_projects.append([])
-
-        # delete label if the last project group is empty
-        if len(all_projects) > 0 and len(all_projects[-1]) == 0:
-            all_widgets.pop()
+        # check if last group if empty
+        self._check_for_empty_group(project_groups)
 
         # if no cards left, remove widget completely
-        if len(existing_content) == 0:
-            self.remove_model_signal.emit(new_card)
+        all_widgets = [
+            item for gr in project_groups for item in [gr["label"]] + gr["cards"]
+        ]
+        if len(all_widgets) == 0:
             self.remove_model_cards_widget_signal.emit()
             return
 
         assigned_cards_list_widget = self._modify_area_with_cards(all_widgets)
         self.scroll_area.setWidget(assigned_cards_list_widget)
 
-        self.remove_model_signal.emit(new_card)
-
         # adjust size of new widget:
         self.resizeEvent()
+
+    def _check_for_empty_group(self, project_groups):
+
+        # check if the last project group only contains a label (no cards), then delete it
+        if len(project_groups) > 0 and len(project_groups[-1]["cards"]) == 0:
+            project_groups.pop()
 
     def resizeEvent(self, event=None):
         QtWidgets.QWidget.resizeEvent(self, event)
