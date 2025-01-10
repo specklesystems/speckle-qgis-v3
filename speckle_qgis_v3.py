@@ -2,7 +2,7 @@
 
 import os.path
 from typing import Optional
-from speckle.connectors.host_apps.qgis.qgis_module import SpeckleQGISv3Module
+from speckle.host_apps.qgis.qgis_module import SpeckleQGISv3Module
 
 # Initialize Qt resources from file resources.py
 from resources import *
