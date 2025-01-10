@@ -59,7 +59,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         # TODO
 
         print("____BUILD")
-        print(self.converter_settings)
+        print(layers)
 
         qgis_project = QgsProject.instance()
         rootCollection: Collection = Collection(
@@ -77,22 +77,26 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         rootCollection["crs"] = crs
 
         # TODO: wrap into activityFactory
+        # get_layers_in_order might be redundant, if we return clean list from
+        # handle get_layers_from_model_card_content previously in the Send Bindings
         layers_ordered: List[Any] = self.layer_utils.get_layers_in_order(
             qgis_project, layers
         )
-        unpackedLayers: List[Any] = self.layer_unpacker.unpack_selection(
+        unpacked_layers: List[Any] = self.layer_unpacker.unpack_selection(
             qgis_layers=layers_ordered, parent_collection=rootCollection
         )
 
+        # here will be iteration loop through layers and their features
         results: List[SendConversionResult] = []
 
-        # here will be iteration loop through layers and their features
-        converted_obj: QgisObject = self.root_to_speckle_converter.convert(None)
-        result_1 = SendConversionResult(
-            status="SUCCESS", source_id="", source_type="type", result=converted_obj
-        )
-        results.append(result_1)
-        rootCollection.elements.append(converted_obj)
+        unpacked_layers = layers.copy()
+        for lyr in unpacked_layers:
+            converted_obj: QgisObject = self.root_to_speckle_converter.convert(lyr)
+            result_1 = SendConversionResult(
+                status="SUCCESS", source_id="", source_type="type", result=converted_obj
+            )
+            results.append(result_1)
+            rootCollection.elements.append(converted_obj)
 
         return RootObjectBuilderResult(
             root_object=rootCollection,

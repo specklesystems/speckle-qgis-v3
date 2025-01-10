@@ -4,6 +4,7 @@ from typing import List
 from speckle.host_apps.qgis.connectors.filters import QgisSelectionFilter
 from speckle.ui.bindings import IBasicConnectorBinding, SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
+from speckle.ui.widgets.widget_model_card import ModelCardWidget
 from speckle.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.ui.widgets.widget_model_search import ModelSearchWidget
 from speckle.ui.widgets.widget_no_document import NoDocumentWidget
@@ -27,9 +28,9 @@ from speckle.ui.widgets.widget_selection_filter import SelectionFilterWidget
 class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     """Dockwidget (UI module) handles all Speckle UI events, including
     receiving and responding to the signals from child widgets.
-    SpeckleModule is set as .parent, so we have access to all other Speckle modules."""
+    SpeckleModule is set as .bridge, so we have access to all other Speckle modules."""
 
-    parent: "QgisConnectorModule"
+    bridge: "QgisConnectorModule"
     basic_binding: IBasicConnectorBinding
     widget_no_document: NoDocumentWidget = None
     widget_no_model_cards: NoModelCardsWidget = None
@@ -42,7 +43,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     add_model_signal = pyqtSignal(ModelCard)
     remove_model_signal = pyqtSignal(ModelCard)
 
-    def __init__(self, parent=None, basic_binding: IBasicConnectorBinding = None):
+    def __init__(self, bridge=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
         super(SpeckleQGISv3Dialog, self).__init__()
         # Set up the user interface from Designer through FORM_CLASS.
@@ -52,7 +53,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         # #widgets-and-dialogs-with-auto-connect
         # self.setupUi(self)
         self.basic_binding = basic_binding
-        self.parent = parent
+        self.bridge = bridge
 
     def runSetup(self, plugin):
         self._add_label(plugin)
@@ -194,7 +195,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         self.widget_model_cards.setParent(None)
         self.widget_model_cards = None
 
-    def _create_or_add_model_cards_widget(self, model_card):
+    def _create_or_add_model_cards_widget(self, model_card: ModelCard):
         self._remove_process_widgets()
         if not self.widget_model_cards:
 
@@ -223,17 +224,29 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_model_cards.remove_model_cards_widget_signal.connect(
                 self._remove_widget_model_cards
             )
-
-            # emit signal, for the card that was just added (because we subscribed after creating a widget)
-            self.widget_model_cards.add_new_card(model_card)
-            self.add_model_signal.emit(model_card)
-
             # add widgets to the layout
             self.layout().addWidget(self.widget_model_cards)
 
-        else:
-            self.widget_model_cards.add_new_card(model_card)
-            self.add_model_signal.emit(model_card)
+        # actually add a new widget
+        self._add_new_model_card_widget(model_card)
+
+    def _add_new_model_card_widget(self, model_card: ModelCard):
+
+        model_card_widget = self.widget_model_cards.add_new_card(model_card)
+        # emit signal, for the card that was just added (because we subscribed after creating a widget)
+        self.add_model_signal.emit(model_card)
+        # add correct Selection text
+        self._assign_filter_summary_to_model_card_widget(model_card_widget)
+
+    def _assign_filter_summary_to_model_card_widget(
+        self, model_card_widget: ModelCardWidget
+    ):
+        filter_summary: str = (
+            self.bridge.connector_module.layer_utils.get_selection_filter_summary_from_ids(
+                model_card_widget.card_content
+            )
+        )
+        model_card_widget.change_selection_text(filter_summary)
 
     def _subscribe_to_close_on_background_click(self, widget):
         """Receive signal from background click, calling to close the widget."""
@@ -281,7 +294,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             # get current user selection
             # TODO should be updated on change, without a call
             selection_info: SelectionInfo = (
-                self.parent.connector_module.selection_binding.get_selection()
+                self.bridge.connector_module.selection_binding.get_selection()
             )
             self.widget_selection_filter = SelectionFilterWidget(
                 parent=self,

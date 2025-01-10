@@ -201,7 +201,7 @@ class ModelCardsWidget(QWidget):
         self.cards_list_widget = cards_list_widget
         return self.cards_list_widget
 
-    def add_new_card(self, new_card: ModelCard):
+    def add_new_card(self, new_card: ModelCard) -> ModelCardWidget:
 
         all_widgets = []
         new_card_widget = None
@@ -243,11 +243,13 @@ class ModelCardsWidget(QWidget):
 
         # adjust size of new widget:
         self.resizeEvent()
+        return new_card_widget
 
     def _create_model_card_widget(self, new_card: ModelCard) -> ModelCardWidget:
 
         new_card_widget = ModelCardWidget(self, self.ui_model_card_utils, new_card)
         new_card_widget.remove_self_card_signal.connect(self._remove_card)
+
         return new_card_widget
 
     def _remove_card(self, new_card: ModelCard):

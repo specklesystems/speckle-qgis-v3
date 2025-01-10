@@ -29,9 +29,11 @@ from PyQt5.QtCore import QObject
 
 class QgisConnectorModule(QObject):
 
+    bridge: "SpeckleQGISv3Module"
     document_store: QgisDocumentStore
     basic_binding: QgisBasicConnectorBinding
     send_binding: QgisSendBinding
+    layer_utils: QgisLayerUtils
     selection_binding: QgisSelectionBinding
     root_obj_builder: QgisRootObjectBuilder
     account_service: AccountService
@@ -41,15 +43,15 @@ class QgisConnectorModule(QObject):
 
     iface = None  # will be assigned on plugin init
 
-    def __init__(self, iface):
+    def __init__(self, bridge, iface):
         super().__init__()
 
         self.iface = iface
-        bridge = None
+        self.bridge = bridge
         self.document_store = QgisDocumentStore()
         self.basic_binding = QgisBasicConnectorBinding(self.document_store, bridge)
         self.send_binding = QgisSendBinding(
-            parent=bridge,
+            bridge=bridge,
             store=self.document_store,
             _service_provider=None,
             _send_filters=[],
@@ -62,7 +64,7 @@ class QgisConnectorModule(QObject):
         )
         self.layer_utils = QgisLayerUtils()
         self.selection_binding = QgisSelectionBinding(
-            iface=self.iface, parent=None, layer_utils=self.layer_utils
+            iface=self.iface, bridge=self.bridge, layer_utils=self.layer_utils
         )
         self.layer_unpacker = QgisLayerUnpacker()
         self.color_unpacker = QgisColorUnpacker()
@@ -70,9 +72,6 @@ class QgisConnectorModule(QObject):
         self.root_obj_builder = None
         account_manager = AccountManager()
         self.account_service = AccountService(account_manager)
-        self.send_operation = None
-
-        self.root_obj_builder = None
         self.send_operation = None
 
     def create_root_builder_send_operation(self, converter_module):
