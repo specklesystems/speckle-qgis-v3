@@ -75,19 +75,19 @@ class QgisConnectorModule(QObject):
         self.root_obj_builder = None
         self.send_operation = None
 
-    def create_root_builder_send_operation(
-        self, conversion_settings: QgisConversionSettings
-    ):
+    def create_root_builder_send_operation(self, converter_module):
 
         # create modules for Send operation that require conversion_settings
         self.root_obj_builder = QgisRootObjectBuilder(
             root_to_speckle_converter=CoreObjectsBaseToSpeckleTopLevelConverter(
-                conversion_settings=conversion_settings
+                display_value_extractor=converter_module.display_value_extractor,
+                properties_extractor=converter_module.properties_extractor,
+                conversion_settings=converter_module.conversion_settings,
             ),
             send_conversion_cache=None,
             layer_unpacker=self.layer_unpacker,
             color_unpacker=self.color_unpacker,
-            converter_settings=conversion_settings,
+            converter_settings=converter_module.conversion_settings,
             layer_utils=self.layer_utils,
             logger=None,
             activity_factory=None,

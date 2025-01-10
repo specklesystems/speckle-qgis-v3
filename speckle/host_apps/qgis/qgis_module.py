@@ -79,9 +79,7 @@ class SpeckleQGISv3Module:
         self.converter_module.create_and_save_conversion_settings(*args)
 
         # create root object builder with conversion settings
-        self.connector_module.create_root_builder_send_operation(
-            self.converter_module.conversion_settings
-        )
+        self.connector_module.create_root_builder_send_operation(self.converter_module)
 
     def connect_converter_module_signals(self):
         return
