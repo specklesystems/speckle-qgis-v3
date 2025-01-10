@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from speckle.sdk.connectors_common.operations import SendOperationResult
-from speckle.host_apps.qgis.connectors.utils import QgisLayerUtils
+from speckle.host_apps.qgis.connectors.layer_utils import QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.utils import CRSoffsetRotation
 from speckle.ui.bindings import (

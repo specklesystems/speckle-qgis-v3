@@ -7,7 +7,7 @@ from speckle.host_apps.qgis.connectors.host_app import (
     QgisColorUnpacker,
     QgisLayerUnpacker,
 )
-from speckle.host_apps.qgis.connectors.utils import QgisLayerUtils
+from speckle.host_apps.qgis.connectors.layer_utils import QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.sdk.connectors_common.conversion import SendConversionResult
 from speckle.sdk.converters_common.converters_common import IRootToSpeckleConverter

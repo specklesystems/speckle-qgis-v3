@@ -22,7 +22,7 @@ from speckle.host_apps.qgis.connectors.host_app import (
 from speckle.host_apps.qgis.connectors.operations import (
     QgisRootObjectBuilder,
 )
-from speckle.host_apps.qgis.connectors.utils import QgisLayerUtils
+from speckle.host_apps.qgis.connectors.layer_utils import QgisLayerUtils
 
 from PyQt5.QtCore import QObject
 
