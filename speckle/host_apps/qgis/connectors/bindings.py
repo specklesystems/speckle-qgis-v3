@@ -211,6 +211,8 @@ class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
 
     def get_selection(self) -> SelectionInfo:
 
-        return self.bridge.connector_module.layer_utils.get_currently_selected_layers(
-            self.bridge.connector_module.iface
+        return (
+            self.bridge.connector_module.layer_utils.get_currently_selected_layers_info(
+                self.bridge.connector_module.iface
+            )
         )

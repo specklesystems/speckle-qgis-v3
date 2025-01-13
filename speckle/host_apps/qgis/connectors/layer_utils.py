@@ -1,9 +1,29 @@
-from typing import Any, List
+from dataclasses import dataclass
+from typing import Any, List, Optional
 
 from speckle.ui.bindings import SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
 
-from qgis.core import QgsProject
+from qgis.core import (
+    QgsProject,
+    QgsLayerTreeNode,
+    QgsLayerTreeGroup,
+    QgsLayerTreeLayer,
+    QgsVectorLayer,
+    QgsRasterLayer,
+)
+
+
+@dataclass
+class LayerStorage:
+    """This class is implemented to store different types of layers, which, depending
+    on the API, might or might not have direct calls to get their ID.
+    Name is used as a backup for missing ID.
+    """
+
+    name: str
+    id: Optional[str]  # None for QgsLayerTreeGroup
+    layer: QgsLayerTreeGroup | QgsVectorLayer | QgsRasterLayer
 
 
 class QgisLayerUtils:
@@ -22,46 +42,143 @@ class QgisLayerUtils:
 
         print("___get_selection_filter_summary_from_ids")
         if isinstance(card_content, SenderModelCard):
-            layers = self.get_layers_from_model_card_content(card_content)
+            layers: List[LayerStorage] = self.get_layers_from_model_card_content(
+                card_content
+            )
             selection_info: SelectionInfo = self.get_selection_info_from_layers(layers)
             return selection_info.summary
 
         else:
             return "0 layers"
 
-    def get_layers_from_model_card_content(self, card_content: ModelCard):
+    def get_layers_from_model_card_content(
+        self, card_content: ModelCard
+    ) -> List[LayerStorage]:
 
         print("_____get_layers_from_model_card_content")
-        layer_ids: List[str] = card_content.send_filter.refresh_object_ids()
+        layer_ids_and_group_names: List[str] = (
+            card_content.send_filter.refresh_object_ids()
+        )
         root = QgsProject.instance().layerTreeRoot()
 
-        # also extract actual .layer() from the found QgsLayerTreeLayer
-        layers: List[Any] = [root.findLayer(l_id).layer() for l_id in layer_ids]
+        # get groups
+        # for group in root.findGroups():
+        # get layer; also extract actual .layer() from the found QgsLayerTreeLayer
+        all_groups: List[LayerStorage] = self.traverse_nodes(
+            nodes=root.findGroups(), return_layers=False
+        )
 
-        # TODO: unpack nested layers
-        # all_nested_layers = ...
+        groups: List[LayerStorage] = [
+            LayerStorage(name=group.name, id=None, layer=group.layer)
+            for group in all_groups
+            if group.name in layer_ids_and_group_names
+        ]
 
+        layers: List[Any] = [
+            LayerStorage(
+                name=root.findLayer(l_id).layer().name(),
+                id=root.findLayer(l_id).layer().id(),
+                layer=root.findLayer(l_id).layer(),
+            )
+            for l_id in layer_ids_and_group_names
+            if root.findLayer(l_id) is not None
+        ]
+
+        all_layers = groups + layers
+        self.filter_out_duplicate_layers(all_layers)
+
+        return all_layers
+
+    def filter_out_duplicate_layers(
+        self, layers: List[LayerStorage]
+    ) -> List[LayerStorage]:
         return layers
 
-    def get_currently_selected_layers(self, iface):
+    def traverse_nodes(
+        self, nodes: QgsLayerTreeNode, return_layers=True, return_groups=True
+    ) -> List[LayerStorage]:
 
-        selected_layers = iface.layerTreeView().selectedLayers()
-        return self.get_selection_info_from_layers(selected_layers)
+        all_layers = []
+        for node in nodes:
+            if isinstance(node, QgsLayerTreeLayer):
+                if return_layers:
+                    all_layers.append(
+                        LayerStorage(
+                            name=node.layer().name(),
+                            id=node.layer().id(),
+                            layer=node.layer(),
+                        )
+                    )
+            elif isinstance(node, QgsLayerTreeGroup):
+                all_layers.extend(
+                    self.traverse_group(node, return_layers, return_groups)
+                )
 
-    def get_selection_info_from_layers(self, selected_layers):
+        return all_layers
+
+    def traverse_group(
+        self, group: QgsLayerTreeGroup, return_layers=True, return_groups=True
+    ) -> List[LayerStorage]:
+        all_layers = []
+        if return_groups:
+            all_layers.append(
+                LayerStorage(
+                    name=group.name(),
+                    id=None,
+                    layer=group,
+                )
+            )
+
+        children = group.children()
+        for child in children:
+            if isinstance(child, QgsLayerTreeLayer):
+                if return_layers:
+                    all_layers.append(
+                        LayerStorage(
+                            name=child.layer().name(),
+                            id=child.layer().id(),
+                            layer=child.layer(),
+                        )
+                    )
+            elif isinstance(child, QgsLayerTreeGroup):
+                all_layers.extend(
+                    self.traverse_group(child, return_layers, return_groups)
+                )
+
+        return all_layers
+
+    def get_currently_selected_layers(self, iface) -> List[LayerStorage]:
+
+        # get groups
+        selected_nodes = iface.layerTreeView().selectedNodes()  # QgsLayerTreeGroup
+        groups_content_layers: List[LayerStorage] = self.traverse_nodes(selected_nodes)
+
+        self.filter_out_duplicate_layers(groups_content_layers)
+
+        return groups_content_layers
+
+    def get_currently_selected_layers_info(self, iface) -> SelectionInfo:
+
+        return self.get_selection_info_from_layers(
+            self.get_currently_selected_layers(iface)
+        )
+
+    def get_selection_info_from_layers(
+        self, selected_layers: List[LayerStorage]
+    ) -> SelectionInfo:
         # possible inputs are coming from:
-        # - QgisSelectionBinding get_selection() = self.iface.layerTreeView().selectedLayers(): returns QgsVectorLayer, QgsRasterLayer
+        # - get_currently_selected_layers() = self.iface.layerTreeView().selectedLayers(): returns QgsVectorLayer, QgsRasterLayer
         # - get_layers_from_model_card_content(): List[Any] = [root.findLayer(l_id).layer() for l_id in layer_ids]: returns QgsVectorLayer, QgsRasterLayer
 
         object_types = list(
             set(
                 [
-                    str(type(layer)).split(".")[-1].split("'")[0].split(">")[0]
+                    str(type(layer.layer)).split(".")[-1].split("'")[0].split(">")[0]
                     for layer in selected_layers
                 ]
             )
         )
         return SelectionInfo(
-            selected_object_ids=[m.id() for m in selected_layers],
+            selected_object_ids=[layer.id or layer.name for layer in selected_layers],
             summary=f"{len(selected_layers)} layers ({", ".join(object_types)})",
         )
