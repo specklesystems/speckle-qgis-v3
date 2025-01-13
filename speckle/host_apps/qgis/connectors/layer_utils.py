@@ -85,14 +85,19 @@ class QgisLayerUtils:
         ]
 
         all_layers = groups + layers
-        self.filter_out_duplicate_layers(all_layers)
 
-        return all_layers
+        return self.filter_out_duplicate_layers(all_layers)
 
     def filter_out_duplicate_layers(
         self, layers: List[LayerStorage]
     ) -> List[LayerStorage]:
-        return layers
+
+        filtered_out_layers = []
+        for layer_storage in layers:
+            if layer_storage not in filtered_out_layers:
+                filtered_out_layers.append(layer_storage)
+
+        return filtered_out_layers
 
     def traverse_nodes(
         self, nodes: QgsLayerTreeNode, return_layers=True, return_groups=True
@@ -153,9 +158,7 @@ class QgisLayerUtils:
         selected_nodes = iface.layerTreeView().selectedNodes()  # QgsLayerTreeGroup
         groups_content_layers: List[LayerStorage] = self.traverse_nodes(selected_nodes)
 
-        self.filter_out_duplicate_layers(groups_content_layers)
-
-        return groups_content_layers
+        return self.filter_out_duplicate_layers(groups_content_layers)
 
     def get_currently_selected_layers_info(self, iface) -> SelectionInfo:
 
