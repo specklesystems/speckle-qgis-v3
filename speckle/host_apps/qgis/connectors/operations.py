@@ -51,7 +51,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
     def build(
         self,
-        layers: List[LayerStorage],
+        layers_flat: List[LayerStorage],
         send_info: SendInfo,
         on_operation_progressed: Any,
         ct: Any = None,
@@ -59,10 +59,10 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         # TODO
 
         print("____BUILD")
-        print(layers)
+        print(layers_flat)
 
         qgis_project = QgsProject.instance()
-        rootCollection: Collection = Collection(
+        root_collection: Collection = Collection(
             name=qgis_project.fileName(), elements=[]
         )
 
@@ -73,30 +73,32 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             "authid": qgis_project_crs.authid(),
             "wkt": qgis_project_crs.toWkt(),
         }
-        rootCollection["units"] = self.converter_settings.speckle_units
-        rootCollection["crs"] = crs
+        root_collection["units"] = self.converter_settings.speckle_units
+        root_collection["crs"] = crs
 
         # TODO: wrap into activityFactory
         layers_ordered: List[LayerStorage] = self.layer_utils.get_layers_in_order(
-            qgis_project, layers
+            qgis_project, layers_flat
         )
+
+        # will modify root_collection and return objects as flat list of Qgs Vector or Raster layers
         unpacked_layers: List[LayerStorage] = self.layer_unpacker.unpack_selection(
-            qgis_layers=layers_ordered, parent_collection=rootCollection
-        )  # will modify rootCollection
+            qgis_layers=layers_ordered, parent_collection=root_collection
+        )
 
         # here will be iteration loop through layers and their features
         results: List[SendConversionResult] = []
 
-        unpacked_layers = layers.copy()
+        # unpacked_layers = layers.copy()
         for lyr in unpacked_layers:
             converted_obj: QgisObject = self.root_to_speckle_converter.convert(lyr)
             result_1 = SendConversionResult(
                 status="SUCCESS", source_id="", source_type="type", result=converted_obj
             )
             results.append(result_1)
-            rootCollection.elements.append(converted_obj)
+            root_collection.elements.append(converted_obj)
 
         return RootObjectBuilderResult(
-            root_object=rootCollection,
+            root_object=root_collection,
             conversion_results=results,
         )

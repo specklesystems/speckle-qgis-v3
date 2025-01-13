@@ -53,6 +53,7 @@ class QgisLayerUnpacker:
                 group_collection: Collection = self.create_and_cache_layer_collection(
                     layer=layer, is_layer_group=True
                 )
+
                 parent_collection.elements.append(group_collection)
 
                 # pass all sub-layers through unpacking
@@ -83,6 +84,7 @@ class QgisLayerUnpacker:
     def create_and_cache_layer_collection(
         self, layer: QgsVectorLayer | QgsRasterLayer, is_layer_group: bool = False
     ):
+
         layer_app_id = get_speckle_app_id(layer)
         collection: Collection = Collection(
             name=layer.name(), applicationId=layer_app_id
@@ -90,7 +92,6 @@ class QgisLayerUnpacker:
         collection["type"] = type(layer)
 
         if isinstance(layer, QgsVectorLayer):
-
             layer_fields: Dict[str, Any] = {}
             for field in layer.fields():
                 layer_fields[field.name()] = field.type()

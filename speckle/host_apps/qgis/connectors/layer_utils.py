@@ -39,14 +39,22 @@ class QgisLayerUtils:
         return []
 
     def get_layers_in_order(
-        self, project, layers: List[LayerStorage]
+        self, qgis_project, layers_to_search: List[LayerStorage]
     ) -> List[LayerStorage]:
 
         # get all layer tree
-        root = QgsProject.instance().layerTreeRoot()
-        all_layers: List[LayerStorage] = self.traverse_nodes(root.children())
+        root_node = qgis_project.layerTreeRoot()
 
-        return [lyr for lyr in all_layers if lyr in layers]
+        original_layers_to_search: List[Any] = [lyr.layer for lyr in layers_to_search]
+        ordered_top_level_layers: List[LayerStorage] = []
+
+        # get only selected layers, EXCLUDING any child layers (if it's a group)
+        # will modify both input lists
+        self.traverse_and_select_group(
+            root_node, original_layers_to_search, ordered_top_level_layers
+        )
+
+        return ordered_top_level_layers
 
     def get_selection_filter_summary_from_ids(self, card_content: ModelCard) -> str:
 
@@ -108,6 +116,36 @@ class QgisLayerUtils:
                 filtered_out_layers.append(layer_storage)
 
         return filtered_out_layers
+
+    def traverse_and_select_group(
+        self, node: Any, list_to_clear, list_to_add: List[LayerStorage]
+    ) -> bool:
+
+        layer_found = False
+
+        if isinstance(node, QgsLayerTreeLayer):
+            if node.layer() in list_to_clear:
+                list_to_clear.remove(node.layer())
+                list_to_add.append(
+                    LayerStorage(
+                        name=node.layer().name(),
+                        id=node.layer().id(),
+                        layer=node.layer(),
+                    )
+                )
+                layer_found = True
+        elif isinstance(node, QgsLayerTreeGroup):
+            if node in list_to_clear:
+                list_to_clear.remove(node)
+                list_to_add.append(LayerStorage(name=node.name(), id=None, layer=node))
+                layer_found = True
+
+        # if the layer was roup, and it wasn't a part of selection: traverse further
+        if not layer_found and isinstance(node, QgsLayerTreeGroup):
+            children = node.children()
+            for child_node in children:
+                # will modify both input lists
+                self.traverse_and_select_group(child_node, list_to_clear, list_to_add)
 
     def traverse_nodes(
         self, nodes: QgsLayerTreeNode, return_layers=True, return_groups=True
