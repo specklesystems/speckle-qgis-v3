@@ -7,7 +7,7 @@ from speckle.host_apps.qgis.connectors.host_app import (
     QgisColorUnpacker,
     QgisLayerUnpacker,
 )
-from speckle.host_apps.qgis.connectors.layer_utils import QgisLayerUtils
+from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage, QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.sdk.connectors_common.conversion import SendConversionResult
 from speckle.sdk.converters_common.converters_common import IRootToSpeckleConverter
@@ -51,7 +51,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
     def build(
         self,
-        layers: List[Any],
+        layers: List[LayerStorage],
         send_info: SendInfo,
         on_operation_progressed: Any,
         ct: Any = None,
@@ -77,12 +77,10 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         rootCollection["crs"] = crs
 
         # TODO: wrap into activityFactory
-        # get_layers_in_order might be redundant, if we return clean list from
-        # handle get_layers_from_model_card_content previously in the Send Bindings
-        layers_ordered: List[Any] = self.layer_utils.get_layers_in_order(
+        layers_ordered: List[LayerStorage] = self.layer_utils.get_layers_in_order(
             qgis_project, layers
         )
-        unpacked_layers: List[Any] = self.layer_unpacker.unpack_selection(
+        unpacked_layers: List[LayerStorage] = self.layer_unpacker.unpack_selection(
             qgis_layers=layers_ordered, parent_collection=rootCollection
         )
 

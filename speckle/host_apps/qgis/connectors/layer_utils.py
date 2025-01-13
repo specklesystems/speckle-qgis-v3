@@ -27,6 +27,10 @@ class LayerStorage:
 
 
 class QgisLayerUtils:
+    iface: Any
+
+    def __init__(self, iface: Any):
+        self.iface = iface
 
     def get_all_layers(self, project) -> List[Any]:
         return []
@@ -34,9 +38,15 @@ class QgisLayerUtils:
     def unpack_layers(self, layers_to_unpack) -> List[Any]:
         return []
 
-    def get_layers_in_order(self, project, selected_layers) -> List[Any]:
-        #  selected_layers: QgsVectorLayer | QgsRasterLayer
-        return []
+    def get_layers_in_order(
+        self, project, layers: List[LayerStorage]
+    ) -> List[LayerStorage]:
+
+        # get all layer tree
+        root = QgsProject.instance().layerTreeRoot()
+        all_layers: List[LayerStorage] = self.traverse_nodes(root.children())
+
+        return [lyr for lyr in all_layers if lyr in layers]
 
     def get_selection_filter_summary_from_ids(self, card_content: ModelCard) -> str:
 
@@ -152,19 +162,17 @@ class QgisLayerUtils:
 
         return all_layers
 
-    def get_currently_selected_layers(self, iface) -> List[LayerStorage]:
+    def get_currently_selected_layers(self) -> List[LayerStorage]:
 
         # get groups
-        selected_nodes = iface.layerTreeView().selectedNodes()  # QgsLayerTreeGroup
+        selected_nodes = self.iface.layerTreeView().selectedNodes()  # QgsLayerTreeGroup
         groups_content_layers: List[LayerStorage] = self.traverse_nodes(selected_nodes)
 
         return self.filter_out_duplicate_layers(groups_content_layers)
 
-    def get_currently_selected_layers_info(self, iface) -> SelectionInfo:
+    def get_currently_selected_layers_info(self) -> SelectionInfo:
 
-        return self.get_selection_info_from_layers(
-            self.get_currently_selected_layers(iface)
-        )
+        return self.get_selection_info_from_layers(self.get_currently_selected_layers())
 
     def get_selection_info_from_layers(
         self, selected_layers: List[LayerStorage]

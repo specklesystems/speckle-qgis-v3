@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from speckle.sdk.connectors_common.operations import SendOperationResult
-from speckle.host_apps.qgis.connectors.layer_utils import QgisLayerUtils
+from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage, QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.utils import CRSoffsetRotation
 from speckle.ui.bindings import (
@@ -160,7 +160,7 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
             raise ValueError("SendFilter is None")
 
         # get layers
-        layers = (
+        layers: List[LayerStorage] = (
             self.bridge.connector_module.layer_utils.get_layers_from_model_card_content(
                 model_card
             )
@@ -199,6 +199,8 @@ class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
         # subscribe to selection change
         # use QTimer to handle the event AFTER the user UI selection event is fully processed
         # otherwise, on event trigger, the UI still has the pre-event layer selection active
+
+        # layerTreeView().currentLayerChanged doesn't cover GroupSelected event though
         iface.layerTreeView().currentLayerChanged.connect(
             lambda: QTimer.singleShot(0, self.on_selection_changed)
         )
@@ -212,7 +214,5 @@ class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
     def get_selection(self) -> SelectionInfo:
 
         return (
-            self.bridge.connector_module.layer_utils.get_currently_selected_layers_info(
-                self.bridge.connector_module.iface
-            )
+            self.bridge.connector_module.layer_utils.get_currently_selected_layers_info()
         )

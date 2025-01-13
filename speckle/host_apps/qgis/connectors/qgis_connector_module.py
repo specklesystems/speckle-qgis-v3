@@ -62,7 +62,7 @@ class QgisConnectorModule(QObject):
             _top_level_exception_handler=None,
             _qgis_conversion_settings=None,
         )
-        self.layer_utils = QgisLayerUtils()
+        self.layer_utils = QgisLayerUtils(iface=iface)
         self.selection_binding = QgisSelectionBinding(
             iface=self.iface, bridge=self.bridge, layer_utils=self.layer_utils
         )

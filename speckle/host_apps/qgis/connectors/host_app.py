@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional
 from speckle.host_apps.qgis.connectors.extensions import get_speckle_app_id
+from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage
 from speckle.ui.models import DocumentModelStore
 from specklepy.objects.models.collections.collection import Collection
 from specklepy.objects.proxies import ColorProxy
@@ -37,19 +38,21 @@ class QgisLayerUnpacker:
 
     def unpack_selection(
         self,
-        qgis_layers: List[Any],
+        qgis_layers: List[LayerStorage],
         parent_collection: Collection,
         objects: Optional[List[Any]] = None,
     ):
         if not objects:
             objects = []
 
-        for layer in qgis_layers:
+        for layer_storage in qgis_layers:
             # TODO: handle group layers
-            if layer not in objects:
-                collection: Collection = self.create_and_cache_layer_collection(layer)
+            if layer_storage not in objects:
+                collection: Collection = self.create_and_cache_layer_collection(
+                    layer_storage.layer
+                )
                 parent_collection.elements.append(collection)
-                objects.append(layer)
+                objects.append(layer_storage.layer)
 
         return objects
 
