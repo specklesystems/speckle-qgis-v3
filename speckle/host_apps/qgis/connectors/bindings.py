@@ -184,13 +184,14 @@ class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
     layer_utils: QgisLayerUtils
     name: str
     bridge: "SpeckleQGISv3Module"
-    iface: Any
 
     selection_changed_signal = pyqtSignal(SelectionInfo)
 
     def __init__(self, iface, bridge=None, layer_utils=None):
+        # iface variable cannot be derived from "connector_module" yet, because the binding itself is
+        # being initialized during connector_module initialization. But it can be called in other methods
+        # via "self.bridge.connector_module.iface"
         QObject.__init__(self)
-        self.iface = iface
         self.name = "selectionBinding"
         self.bridge = bridge
         self.layer_utils = layer_utils
@@ -210,7 +211,6 @@ class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
 
     def get_selection(self) -> SelectionInfo:
 
-        selected_layers = self.iface.layerTreeView().selectedLayers()
-        return self.bridge.connector_module.layer_utils.get_selection_info_from_layers(
-            selected_layers
+        return self.bridge.connector_module.layer_utils.get_currently_selected_layers(
+            self.bridge.connector_module.iface
         )

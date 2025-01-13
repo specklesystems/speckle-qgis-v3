@@ -15,6 +15,7 @@ class QgisLayerUtils:
         return []
 
     def get_layers_in_order(self, project, selected_layers) -> List[Any]:
+        #  selected_layers: QgsVectorLayer | QgsRasterLayer
         return []
 
     def get_selection_filter_summary_from_ids(self, card_content: ModelCard) -> str:
@@ -42,10 +43,15 @@ class QgisLayerUtils:
 
         return layers
 
+    def get_currently_selected_layers(self, iface):
+
+        selected_layers = iface.layerTreeView().selectedLayers()
+        return self.get_selection_info_from_layers(selected_layers)
+
     def get_selection_info_from_layers(self, selected_layers):
         # possible inputs are coming from:
-        # - selected_layers = self.iface.layerTreeView().selectedLayers(): returns QgsVectorLayer, QgsRasterLayer
-        # - layers: List[Any] = [root.findLayer(l_id).layer() for l_id in layer_ids]: returns QgsVectorLayer, QgsRasterLayer
+        # - QgisSelectionBinding get_selection() = self.iface.layerTreeView().selectedLayers(): returns QgsVectorLayer, QgsRasterLayer
+        # - get_layers_from_model_card_content(): List[Any] = [root.findLayer(l_id).layer() for l_id in layer_ids]: returns QgsVectorLayer, QgsRasterLayer
 
         object_types = list(
             set(
