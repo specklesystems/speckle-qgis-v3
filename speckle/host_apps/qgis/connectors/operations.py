@@ -82,7 +82,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         )
         unpacked_layers: List[LayerStorage] = self.layer_unpacker.unpack_selection(
             qgis_layers=layers_ordered, parent_collection=rootCollection
-        )
+        )  # will modify rootCollection
 
         # here will be iteration loop through layers and their features
         results: List[SendConversionResult] = []

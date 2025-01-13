@@ -5,7 +5,7 @@ from speckle.ui.models import DocumentModelStore
 from specklepy.objects.models.collections.collection import Collection
 from specklepy.objects.proxies import ColorProxy
 
-from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsFeature
+from qgis.core import QgsLayerTreeGroup, QgsVectorLayer, QgsRasterLayer, QgsFeature
 
 
 class QgisDocumentStore(DocumentModelStore):
@@ -46,18 +46,42 @@ class QgisLayerUnpacker:
             objects = []
 
         for layer_storage in qgis_layers:
-            # TODO: handle group layers
-            if layer_storage not in objects:
-                collection: Collection = self.create_and_cache_layer_collection(
-                    layer_storage.layer
+
+            layer = layer_storage.layer
+
+            if isinstance(layer, QgsLayerTreeGroup):
+                group_collection: Collection = self.create_and_cache_layer_collection(
+                    layer=layer, is_layer_group=True
                 )
-                parent_collection.elements.append(collection)
-                objects.append(layer_storage.layer)
+                parent_collection.elements.append(group_collection)
+
+                # pass all sub-layers through unpacking
+                sub_layers = [
+                    (
+                        LayerStorage(name=lyr.name(), id=None, layer=lyr)
+                        if isinstance(lyr, QgsLayerTreeGroup)
+                        else LayerStorage(
+                            name=lyr.layer().name(),
+                            id=lyr.layer().id(),
+                            layer=lyr.layer(),
+                        )
+                    )
+                    for lyr in layer.children()
+                ]
+                self.unpack_selection(sub_layers, group_collection, objects)
+
+            else:  # QgsVectorLayer, QgsRasterLayer
+                if layer not in objects:
+                    collection: Collection = self.create_and_cache_layer_collection(
+                        layer
+                    )
+                    parent_collection.elements.append(collection)
+                    objects.append(layer)
 
         return objects
 
     def create_and_cache_layer_collection(
-        self, layer: Any, is_layer_group: bool = False
+        self, layer: QgsVectorLayer | QgsRasterLayer, is_layer_group: bool = False
     ):
         layer_app_id = get_speckle_app_id(layer)
         collection: Collection = Collection(
@@ -74,8 +98,10 @@ class QgisLayerUnpacker:
             collection["fields"] = layer_fields
             collection["wkbType"] = layer.wkbType()
 
-        # TODO
-        # if is_layer_group:
+        elif isinstance(layer, QgsRasterLayer):
+            pass
+
+        # if not is_layer_group:
         # self.collection_cache[layer_app_id] = collection
 
         return collection
