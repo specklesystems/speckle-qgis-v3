@@ -63,7 +63,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
         qgis_project = QgsProject.instance()
         root_collection: Collection = Collection(
-            name=qgis_project.fileName(), elements=[]
+            name=qgis_project.fileName().split("/")[-1], elements=[]
         )
 
         qgis_project_crs = qgis_project.crs()
