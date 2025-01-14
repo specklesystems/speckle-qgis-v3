@@ -1,10 +1,13 @@
 from typing import Any, Dict, List
-from qgis.core import QgsFeature, QgsRasterLayer, QgsGeometry
+from qgis.core import QgsFeature, QgsRasterLayer, QgsGeometry, QgsCoordinateTransform
+from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.to_speckle.raw import PointToSpeckleConverter
 from specklepy.objects.base import Base
 
 
 class DisplayValueExtractor:
+
+    _conversion_settings: QgisConversionSettings
 
     _point_converter: PointToSpeckleConverter
     _multi_point_converter: "MultiPointToSpeckleConverter"
@@ -13,6 +16,7 @@ class DisplayValueExtractor:
     _raster_converter: "RasterToSpeckleConverter"
 
     def __init__(self, conversion_settings):
+        self._conversion_settings = conversion_settings
         self._point_converter = PointToSpeckleConverter(conversion_settings)
         r"""
         self._multi_point_converter = MultiPointToSpeckleConverter()
@@ -22,10 +26,12 @@ class DisplayValueExtractor:
         """
         pass
 
-    def get_display_value(self, core_object) -> List[Base]:
+    def get_display_value(
+        self, core_object: QgsFeature | QgsRasterLayer, layer_app_id: str
+    ) -> List[Base]:
 
         if isinstance(core_object, QgsFeature):
-            return self._get_feature_geometries(core_object)
+            return self._get_feature_geometries(core_object, layer_app_id)
 
         elif isinstance(core_object, QgsRasterLayer):
             # return self._raster_converter.convert(core_object)
@@ -35,14 +41,19 @@ class DisplayValueExtractor:
             f"Cannot extract displayValue from object of type '{type(core_object)}'"
         )
 
-    def _get_feature_geometries(self, feature: QgsFeature):
+    def _get_feature_geometries(self, feature: QgsFeature, layer_app_id: str):
 
         geometry: QgsGeometry = feature.geometry()
-        print(geometry)
         geometry_type = geometry.type().value
         # Point: 0, Line: 1, Polygon: 2, Unknown: 3, Null: 4
 
         abstract_geometry = geometry.get()
+
+        # reproject geometry: needs to be done here, while we have a layer reference
+        transformation: QgsCoordinateTransform = (
+            self._conversion_settings.layers_send_transforms[layer_app_id]
+        )
+        abstract_geometry.transform(transformation)
 
         if geometry_type == 0:
             return self._point_converter.convert(abstract_geometry)

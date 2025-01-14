@@ -32,12 +32,16 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(
         self._properties_extractor = properties_extractor
         self._conversion_settings = conversion_settings
 
-    def convert(self, target: Any) -> "QgisObject":
+    def convert(self, target_tuple: Any) -> "QgisObject":
+
+        target, layer_app_id = target_tuple
 
         object_type: str = type(target)
 
         # get display value
-        display: List[Base] = self._display_value_extractor.get_display_value(target)
+        display: List[Base] = self._display_value_extractor.get_display_value(
+            target, layer_app_id
+        )
 
         # get properties
         properties: Dict[str, Any] = self._properties_extractor.get_properties(target)

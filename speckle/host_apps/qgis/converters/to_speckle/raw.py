@@ -1,11 +1,7 @@
 import math
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 
-from qgis.core import (
-    QgsAbstractGeometry,
-    QgsCoordinateTransform,
-    QgsCoordinateTransformContext,
-)
+from qgis.core import QgsAbstractGeometry
 from specklepy.objects.geometry.point import Point
 
 
@@ -22,17 +18,7 @@ class PointToSpeckleConverter:
 
         result_geometry = []
 
-        # reproject geometry
-        transform_context: QgsCoordinateTransformContext = (
-            self._conversion_settings.project.transformContext()
-        )
-        transformation: QgsCoordinateTransform = QgsCoordinateTransform(
-            self._conversion_settings.active_crs_offset_rotation.crs,
-            self._conversion_settings.active_crs_offset_rotation.crs,
-            transform_context,
-        )
-
-        target.transform(transformation)
+        # construct Speckle geometry
         for pt in target.parts():
             speckle_point = Point(
                 x=pt.x(),

@@ -130,7 +130,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
         for feature in vector_layer.getFeatures():
             converted_feature: "QgisObject" = self.root_to_speckle_converter.convert(
-                feature
+                (feature, layer_app_id)
             )
             converted_feature.applicationId = get_speckle_app_id(feature, layer_app_id)
             converted_features.append(converted_feature)
