@@ -52,20 +52,22 @@ class DisplayValueExtractor:
 
         abstract_geometry = geometry.get()
 
-        # reproject geometry: needs to be done here, while we have a layer reference
-        transformation: QgsCoordinateTransform = (
-            self._conversion_settings.layers_send_transforms[layer_app_id]
-        )
-        abstract_geometry.transform(transformation)
+        if geometry_type in [0, 1, 2]:
+            # reproject geometry: needs to be done here, while we have a layer reference
+            transformation: QgsCoordinateTransform = (
+                self._conversion_settings.layers_send_transforms[layer_app_id]
+            )
+            abstract_geometry.transform(transformation)
 
-        if geometry_type == 0:
-            return self._point_converter.convert(abstract_geometry)
-        if geometry_type == 1:
-            return self._polyline_converter.convert(abstract_geometry)
-        if geometry_type == 2:
-            # return self._polygon_converter.convert(abstract_geometry)
-            pass
-        if geometry_type == 4:
+            if geometry_type == 0:
+                return self._point_converter.convert(abstract_geometry)
+            if geometry_type == 1:
+                return self._polyline_converter.convert(abstract_geometry)
+            if geometry_type == 2:
+                # return self._polygon_converter.convert(abstract_geometry)
+                pass
+
+        elif geometry_type == 3:  # no-geometry table feature
             return []
 
         raise ValueError(f"Unsopported geometry type: '{geometry.type().name}'")

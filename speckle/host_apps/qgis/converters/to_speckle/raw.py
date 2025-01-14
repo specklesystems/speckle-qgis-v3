@@ -46,7 +46,7 @@ class PolylineToSpeckleConverter:
     def convert(self, target: QgsAbstractGeometry) -> List[Polyline]:
 
         wkb_type = target.wkbType()
-        print(wkb_type.name)
+        # WkbTypes: https://qgis.org/pyqgis/master/core/Qgis.html#qgis.core.Qgis.WkbType
 
         if (
             wkb_type == QgsWkbTypes.LineString
@@ -59,8 +59,24 @@ class PolylineToSpeckleConverter:
             or wkb_type == QgsWkbTypes.MultiLineStringZ
             or wkb_type == QgsWkbTypes.MultiLineStringM
             or wkb_type == QgsWkbTypes.MultiLineStringZM
+            or wkb_type == QgsWkbTypes.MultiCurve
+            or wkb_type == QgsWkbTypes.MultiCurveZ
+            or wkb_type == QgsWkbTypes.MultiCurveM
+            or wkb_type == QgsWkbTypes.MultiCurveZM
         ):
             return [self._convert_linestring(part) for part in target.parts()]
+
+        if (
+            wkb_type == QgsWkbTypes.CircularString
+            or wkb_type == QgsWkbTypes.CircularStringZ
+            or wkb_type == QgsWkbTypes.CircularStringM
+            or wkb_type == QgsWkbTypes.CircularStringZM
+            or wkb_type == QgsWkbTypes.CompoundCurve
+            or wkb_type == QgsWkbTypes.CompoundCurveZ
+            or wkb_type == QgsWkbTypes.CompoundCurveM
+            or wkb_type == QgsWkbTypes.CompoundCurveZM
+        ):
+            return [self._convert_circularstring(part) for part in target.parts()]
 
         raise ValueError(f"Geometry of type '{wkb_type.name}' cannot be converted")
 
@@ -77,3 +93,9 @@ class PolylineToSpeckleConverter:
             units=self._conversion_settings.speckle_units,
             closed=linestring.isClosed(),
         )
+
+    def _convert_circularstring(self, circularstring) -> Polyline:
+
+        new_linestring = circularstring.clone().curveToLine()
+
+        return self._convert_linestring(new_linestring)
