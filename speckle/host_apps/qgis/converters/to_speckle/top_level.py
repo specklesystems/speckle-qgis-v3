@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.to_speckle.helpers import (
     DisplayValueExtractor,
