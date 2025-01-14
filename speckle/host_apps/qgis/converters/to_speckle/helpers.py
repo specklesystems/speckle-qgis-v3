@@ -1,7 +1,10 @@
 from typing import Any, Dict, List
 from qgis.core import QgsFeature, QgsRasterLayer, QgsGeometry, QgsCoordinateTransform
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
-from speckle.host_apps.qgis.converters.to_speckle.raw import PointToSpeckleConverter
+from speckle.host_apps.qgis.converters.to_speckle.raw import (
+    PointToSpeckleConverter,
+    PolylineToSpeckleConverter,
+)
 from specklepy.objects.base import Base
 
 
@@ -10,19 +13,19 @@ class DisplayValueExtractor:
     _conversion_settings: QgisConversionSettings
 
     _point_converter: PointToSpeckleConverter
-    _multi_point_converter: "MultiPointToSpeckleConverter"
-    _polyline_converter: "PolylineToSpeckleConverter"
+    _polyline_converter: PolylineToSpeckleConverter
     _polygon_converter: "PolygonToSpeckleConverter"
     _raster_converter: "RasterToSpeckleConverter"
 
     def __init__(self, conversion_settings):
         self._conversion_settings = conversion_settings
         self._point_converter = PointToSpeckleConverter(conversion_settings)
+        self._polyline_converter = PolylineToSpeckleConverter(
+            conversion_settings, self._point_converter
+        )
         r"""
-        self._multi_point_converter = MultiPointToSpeckleConverter()
-        self._polyline_converter = PolylineToSpeckleConverter()
-        self._polygon_converter = PolygonToSpeckleConverter()
-        self._raster_converter = RasterToSpeckleConverter()
+        self._polygon_converter = PolygonToSpeckleConverter(conversion_settings)
+        self._raster_converter = RasterToSpeckleConverter(conversion_settings)
         """
         pass
 
@@ -57,12 +60,10 @@ class DisplayValueExtractor:
 
         if geometry_type == 0:
             return self._point_converter.convert(abstract_geometry)
-            pass
         if geometry_type == 1:
-            # return self._polyline_converter.convert(geometry)
-            pass
+            return self._polyline_converter.convert(abstract_geometry)
         if geometry_type == 2:
-            # return self._polygon_converter.convert(geometry)
+            # return self._polygon_converter.convert(abstract_geometry)
             pass
         if geometry_type == 4:
             return []

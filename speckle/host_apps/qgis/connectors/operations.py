@@ -103,11 +103,18 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             status = "SUCCESS"
 
             if isinstance(lyr, QgsVectorLayer):
-                converted_features: List[Base] = self.convert_vector_features(
-                    lyr, layer_app_id
-                )
 
-                layer_collection.elements.extend(converted_features)
+                # TODO handle layers that failed to convert
+                # right now, the entire layer will fail if 1 feature fails
+                try:
+                    converted_features: List[Base] = self.convert_vector_features(
+                        lyr, layer_app_id
+                    )
+                    layer_collection.elements.extend(converted_features)
+
+                except ValueError as e:
+                    status = "ERROR"
+                    print(e)
 
             result_1 = SendConversionResult(
                 status=status,
