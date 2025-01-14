@@ -18,7 +18,9 @@ class QgisConverterModule:
     def __init__(
         self,
     ):
-        self.display_value_extractor = DisplayValueExtractor()
+        self.display_value_extractor = (
+            None  # will be assigned on operation DisplayValueExtractor()
+        )
         self.properties_extractor = PropertiesExtractor()
         self.conversion_settings = None  # will be assigned on operation
 
@@ -29,4 +31,6 @@ class QgisConverterModule:
         self.conversion_settings = QgisConversionSettings(
             project=qgis_project, activeCrsOffsetRotation=crs_offset_rotation
         )
+        self.display_value_extractor = DisplayValueExtractor(self.conversion_settings)
+
         return self.conversion_settings

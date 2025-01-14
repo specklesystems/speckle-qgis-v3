@@ -1,23 +1,24 @@
 from typing import Any, Dict, List
 from qgis.core import QgsFeature, QgsRasterLayer, QgsGeometry
+from speckle.host_apps.qgis.converters.to_speckle.raw import PointToSpeckleConverter
 from specklepy.objects.base import Base
 
 
 class DisplayValueExtractor:
 
-    _point_converter: "PointConverter"
-    _multi_point_converter: "MultiPointConverter"
-    _polyline_converter: "PolylineConverter"
-    _polygon_converter: "PolygonConverter"
-    _raster_converter: "RasterConverter"
+    _point_converter: PointToSpeckleConverter
+    _multi_point_converter: "MultiPointToSpeckleConverter"
+    _polyline_converter: "PolylineToSpeckleConverter"
+    _polygon_converter: "PolygonToSpeckleConverter"
+    _raster_converter: "RasterToSpeckleConverter"
 
-    def __init__(self):
+    def __init__(self, conversion_settings):
+        self._point_converter = PointToSpeckleConverter(conversion_settings)
         r"""
-        self._point_converter = PointConverter()
-        self._multi_point_converter = MultiPointConverter()
-        self._polyline_converter = PolylineConverter()
-        self._polygon_converter = PolygonConverter()
-        self._raster_converter = RasterConverter()
+        self._multi_point_converter = MultiPointToSpeckleConverter()
+        self._polyline_converter = PolylineToSpeckleConverter()
+        self._polygon_converter = PolygonToSpeckleConverter()
+        self._raster_converter = RasterToSpeckleConverter()
         """
         pass
 
@@ -41,8 +42,10 @@ class DisplayValueExtractor:
         geometry_type = geometry.type().value
         # Point: 0, Line: 1, Polygon: 2, Unknown: 3, Null: 4
 
+        abstract_geometry = geometry.get()
+
         if geometry_type == 0:
-            # return self._point_converter.convert(geometry)
+            return self._point_converter.convert(abstract_geometry)
             pass
         if geometry_type == 1:
             # return self._polyline_converter.convert(geometry)
