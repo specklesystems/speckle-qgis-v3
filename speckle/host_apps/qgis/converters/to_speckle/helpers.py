@@ -21,6 +21,6 @@ class PropertiesExtractor:
 
     def get_properties(self, core_object: Any) -> Dict[str, Any]:
         if isinstance(core_object, QgsFeature):
-            return {}
+            return core_object.attributeMap()
 
         return {}
