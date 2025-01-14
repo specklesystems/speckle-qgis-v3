@@ -29,7 +29,7 @@ class QgisConverterModule:
     ):
 
         self.conversion_settings = QgisConversionSettings(
-            project=qgis_project, activeCrsOffsetRotation=crs_offset_rotation
+            project=qgis_project, active_crs_offset_rotation=crs_offset_rotation
         )
         self.display_value_extractor = DisplayValueExtractor(self.conversion_settings)
 

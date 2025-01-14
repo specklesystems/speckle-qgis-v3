@@ -8,7 +8,8 @@ from speckle.sdk.converters_common.converters_common import IRootToSpeckleConver
 from speckle.sdk.converters_common.objects import IToSpeckleTopLevelConverter
 
 from specklepy.objects.base import Base
-from specklepy.objects.data import QgisObject
+
+# from specklepy.objects.data import QgisObject
 
 from qgis.core import QgsFeature
 
@@ -31,7 +32,7 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(
         self._properties_extractor = properties_extractor
         self._conversion_settings = conversion_settings
 
-    def convert(self, target: Any) -> QgisObject:
+    def convert(self, target: Any) -> "QgisObject":
 
         object_type: str = type(target)
 

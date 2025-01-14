@@ -15,7 +15,8 @@ from speckle.sdk.converters_common.converters_common import IRootToSpeckleConver
 from speckle.ui.models import SendInfo
 
 from specklepy.objects.base import Base
-from specklepy.objects.data import QgisObject
+
+# from specklepy.objects.data import QgisObject
 from specklepy.objects.models.collections.collection import Collection
 
 from qgis.core import QgsProject, QgsLayerTreeGroup, QgsVectorLayer, QgsRasterLayer
@@ -128,7 +129,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         # TODO: _colorUnpacker.StoreRendererAndFields(featureLayer);
 
         for feature in vector_layer.getFeatures():
-            converted_feature: QgisObject = self.root_to_speckle_converter.convert(
+            converted_feature: "QgisObject" = self.root_to_speckle_converter.convert(
                 feature
             )
             converted_feature.applicationId = get_speckle_app_id(feature, layer_app_id)
@@ -137,4 +138,3 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             # TODO: _colorUnpacker.ProcessFeatureLayerColor(row, applicationId);
 
         return converted_features
-

@@ -11,18 +11,18 @@ from speckle.host_apps.qgis.converters.utils import (
 @dataclass
 class QgisConversionSettings:
     project: QgsProject
-    activeCrsOffsetRotation: CRSoffsetRotation
+    active_crs_offset_rotation: CRSoffsetRotation
     unit_converter: IHostToSpeckleUnitConverter[str]
     speckle_units: str
 
     def __init__(
         self,
         project: QgsProject,
-        activeCrsOffsetRotation: CRSoffsetRotation,
+        active_crs_offset_rotation: CRSoffsetRotation,
         # unit_converter: IHostToSpeckleUnitConverter[Qgis.DistanceUnit],
     ):
         self.project = project
-        self.activeCrsOffsetRotation = activeCrsOffsetRotation
+        self.active_crs_offset_rotation = active_crs_offset_rotation
         self.unit_converter = QgisToSpeckleUnitConverter()
         self.speckle_units = self.unit_converter.convert_or_throw(
             self.project.distanceUnits()
