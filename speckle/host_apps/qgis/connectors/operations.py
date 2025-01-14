@@ -86,6 +86,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
         # will modify root_collection and return objects as flat list of Qgs Vector or Raster layers
         # will pre-populate Collections with Type, Fields and WkbType
+
         unpacked_layers_to_convert: List[Any] = self.layer_unpacker.unpack_selection(
             qgis_layers=layers_ordered, parent_collection=root_collection
         )
@@ -104,6 +105,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
                 converted_features: List[Base] = self.convert_vector_features(
                     lyr, layer_app_id
                 )
+
                 layer_collection.elements.extend(converted_features)
 
             result_1 = SendConversionResult(
@@ -135,3 +137,4 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             # TODO: _colorUnpacker.ProcessFeatureLayerColor(row, applicationId);
 
         return converted_features
+
