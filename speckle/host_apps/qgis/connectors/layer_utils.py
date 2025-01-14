@@ -140,7 +140,7 @@ class QgisLayerUtils:
                 list_to_add.append(LayerStorage(name=node.name(), id=None, layer=node))
                 layer_found = True
 
-        # if the layer was roup, and it wasn't a part of selection: traverse further
+        # if the layer was a group, and it wasn't a part of selection: traverse further
         if not layer_found and isinstance(node, QgsLayerTreeGroup):
             children = node.children()
             for child_node in children:

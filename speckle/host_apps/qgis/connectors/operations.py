@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+from speckle.host_apps.qgis.connectors.extensions import get_speckle_app_id
 from speckle.sdk.connectors_common.builders import (
     IRootObjectBuilder,
     RootObjectBuilderResult,
@@ -12,10 +13,12 @@ from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.sdk.connectors_common.conversion import SendConversionResult
 from speckle.sdk.converters_common.converters_common import IRootToSpeckleConverter
 from speckle.ui.models import SendInfo
+
+from specklepy.objects.base import Base
 from specklepy.objects.data import QgisObject
 from specklepy.objects.models.collections.collection import Collection
 
-from qgis.core import QgsProject
+from qgis.core import QgsProject, QgsLayerTreeGroup, QgsVectorLayer, QgsRasterLayer
 
 
 class QgisRootObjectBuilder(IRootObjectBuilder):
@@ -82,23 +85,37 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         )
 
         # will modify root_collection and return objects as flat list of Qgs Vector or Raster layers
-        unpacked_layers: List[LayerStorage] = self.layer_unpacker.unpack_selection(
+        unpacked_layers_to_convert: List[Any] = self.layer_unpacker.unpack_selection(
             qgis_layers=layers_ordered, parent_collection=root_collection
         )
+        print("____UNPACKED LAYERS TO CONVERT")
+        print(unpacked_layers_to_convert)
 
         # here will be iteration loop through layers and their features
         results: List[SendConversionResult] = []
+        for lyr in unpacked_layers_to_convert:
+            layer_app_id: str = get_speckle_app_id(lyr)
+            layer_collection = self.layer_unpacker.collection_cache[layer_app_id]
 
-        # unpacked_layers = layers.copy()
-        for lyr in unpacked_layers:
-            converted_obj: QgisObject = self.root_to_speckle_converter.convert(lyr)
+            status = "SUCCESS"
+
+            if isinstance(lyr, QgsVectorLayer):
+                converted_features: List[Base] = self.convert_vector_features(lyr)
+                layer_collection.elements.extend(converted_features)
+
             result_1 = SendConversionResult(
-                status="SUCCESS", source_id="", source_type="type", result=converted_obj
+                status=status,
+                source_id=layer_app_id,
+                source_type=type(lyr),
+                result=layer_collection,
             )
             results.append(result_1)
-            root_collection.elements.append(converted_obj)
 
         return RootObjectBuilderResult(
             root_object=root_collection,
             conversion_results=results,
         )
+
+    def convert_vector_features(self, layer: QgsVectorLayer):
+        converted_obj: QgisObject = self.root_to_speckle_converter.convert(layer)
+        return [converted_obj]

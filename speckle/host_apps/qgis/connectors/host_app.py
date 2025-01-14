@@ -42,18 +42,16 @@ class QgisLayerUnpacker:
         parent_collection: Collection,
         objects: Optional[List[Any]] = None,
     ):
-        if not objects:
+        if objects is None:
             objects = []
 
         for layer_storage in qgis_layers:
-
             layer = layer_storage.layer
 
             if isinstance(layer, QgsLayerTreeGroup):
                 group_collection: Collection = self.create_and_cache_layer_collection(
                     layer=layer, is_layer_group=True
                 )
-
                 parent_collection.elements.append(group_collection)
 
                 # pass all sub-layers through unpacking
@@ -82,7 +80,9 @@ class QgisLayerUnpacker:
         return objects
 
     def create_and_cache_layer_collection(
-        self, layer: QgsVectorLayer | QgsRasterLayer, is_layer_group: bool = False
+        self,
+        layer: QgsLayerTreeGroup | QgsVectorLayer | QgsRasterLayer,
+        is_layer_group: bool = False,
     ):
 
         layer_app_id = get_speckle_app_id(layer)
@@ -102,8 +102,8 @@ class QgisLayerUnpacker:
         elif isinstance(layer, QgsRasterLayer):
             pass
 
-        # if not is_layer_group:
-        # self.collection_cache[layer_app_id] = collection
+        if not is_layer_group:
+            self.collection_cache[layer_app_id] = collection
 
         return collection
 
