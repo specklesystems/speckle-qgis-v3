@@ -85,6 +85,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         )
 
         # will modify root_collection and return objects as flat list of Qgs Vector or Raster layers
+        # will pre-populate Collections with Type, Fields and WkbType
         unpacked_layers_to_convert: List[Any] = self.layer_unpacker.unpack_selection(
             qgis_layers=layers_ordered, parent_collection=root_collection
         )
@@ -100,7 +101,9 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             status = "SUCCESS"
 
             if isinstance(lyr, QgsVectorLayer):
-                converted_features: List[Base] = self.convert_vector_features(lyr)
+                converted_features: List[Base] = self.convert_vector_features(
+                    lyr, layer_app_id
+                )
                 layer_collection.elements.extend(converted_features)
 
             result_1 = SendConversionResult(
@@ -116,6 +119,19 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             conversion_results=results,
         )
 
-    def convert_vector_features(self, layer: QgsVectorLayer):
-        converted_obj: QgisObject = self.root_to_speckle_converter.convert(layer)
-        return [converted_obj]
+    def convert_vector_features(
+        self, vector_layer: QgsVectorLayer, layer_app_id: str
+    ) -> List[Base]:
+        converted_features: List[Base] = []
+        # TODO: _colorUnpacker.StoreRendererAndFields(featureLayer);
+
+        for feature in vector_layer.getFeatures():
+            converted_feature: QgisObject = self.root_to_speckle_converter.convert(
+                feature
+            )
+            converted_feature.applicationId = get_speckle_app_id(feature, layer_app_id)
+            converted_features.append(converted_feature)
+
+            # TODO: _colorUnpacker.ProcessFeatureLayerColor(row, applicationId);
+
+        return converted_features
