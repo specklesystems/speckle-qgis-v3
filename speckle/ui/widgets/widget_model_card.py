@@ -1,6 +1,5 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QColor, QCursor
 from PyQt5.QtWidgets import (
     QVBoxLayout,
@@ -14,9 +13,6 @@ from PyQt5.QtWidgets import (
 
 from speckle.ui.models import ModelCard, SenderModelCard
 from speckle.ui.utils.model_cards_widget_utils import UiModelCardsUtils
-from speckle.ui.widgets.qgis_utils import (
-    get_selection_filter_summary_from_ids,
-)
 from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
@@ -40,6 +36,9 @@ class ModelCardWidget(QWidget):
     close_btn: QPushButton = None
     open_web_btn: QPushButton = None
     ui_model_card_utils: UiModelCardsUtils = None
+
+    summary_text: str = "No objects are selected"
+    selection_filter_text: QPushButton
 
     # for the use in parent widget - to keep track if signals are already connected and not connect to btns twice
     connected: bool = False
@@ -113,12 +112,17 @@ class ModelCardWidget(QWidget):
         )
         layout_line.addWidget(clickable_text)
 
-        summary_text = get_selection_filter_summary_from_ids(
-            card_content
-        )  # or, "0 layers"
-        layout_line.addWidget(self.add_text(summary_text, color="rgba(130,130,130,1)"))
+        self.selection_filter_text = self.add_text(
+            self.summary_text, color="rgba(130,130,130,1)"
+        )
+        layout_line.addWidget(self.selection_filter_text)
 
         return line
+
+    def change_selection_text(self, selection_text: str):
+        # function accessed from the parent dockwidget
+        # change text on the widget
+        self.selection_filter_text.setText(selection_text)
 
     def create_card_header(self, card_content: ModelCard):
         top_line = QWidget()

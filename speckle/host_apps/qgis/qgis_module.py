@@ -35,7 +35,7 @@ class SpeckleQGISv3Module:
 
     def create_dockwidget(self):
         self.dockwidget = SpeckleQGISv3Dialog(
-            parent=self, basic_binding=self.connector_module.basic_binding
+            bridge=self, basic_binding=self.connector_module.basic_binding
         )
         self.dockwidget.runSetup(self)
         self.connect_dockwidget_signals()
@@ -43,7 +43,7 @@ class SpeckleQGISv3Module:
     def instantiate_module_dependencies(self, iface):
 
         self.converter_module = QgisConverterModule()
-        self.connector_module = QgisConnectorModule(iface)
+        self.connector_module = QgisConnectorModule(bridge=self, iface=iface)
 
         self.connect_connector_module_signals()
         self.connect_converter_module_signals()
@@ -53,11 +53,13 @@ class SpeckleQGISv3Module:
         self.dockwidget.add_model_signal.connect(self.add_model_card_to_store)
         self.dockwidget.remove_model_signal.connect(self.remove_model_card_from_store)
 
-        # moved here frpm "connect_connector_module_signals", because it's
+        # moved here from "connect_connector_module_signals", because it's
         # calling dockwidget and should only be accessed after dockwidget is created
         self.connector_module.selection_binding.selection_changed_signal.connect(
             self.dockwidget.handle_change_selection_info
         )
+        # all dockwidget subscribtions to child widget signals are handled in Dockwidget class,
+        # because child widget are not persistent
 
     def connect_connector_module_signals(self):
         self.connector_module.send_binding.create_send_modules_signal.connect(
@@ -85,7 +87,7 @@ class SpeckleQGISv3Module:
         return
 
     def add_model_card_to_store(self, model_card: ModelCard):
-        print("dockwidget: to add card to Store")
+        print("dockwidget-originated signal: to add card to Store")
         self.connector_module.document_store.add_model(model_card=model_card)
 
     def remove_model_card_from_store(self, model_card: ModelCard):

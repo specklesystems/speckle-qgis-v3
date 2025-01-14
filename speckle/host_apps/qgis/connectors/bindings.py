@@ -1,12 +1,11 @@
 from typing import Any, Dict, List, Optional
-from speckle.sdk.connectors_common.operations import SendOperation, SendOperationResult
-from speckle.host_apps.qgis.connectors.utils import QgisLayerUtils
+from speckle.sdk.connectors_common.operations import SendOperationResult
+from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage, QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.utils import CRSoffsetRotation
 from speckle.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
-    IBrowserBridge,
     ISelectionBinding,
     ISendBinding,
     SelectionInfo,
@@ -22,21 +21,17 @@ from speckle.ui.models import (
 
 from qgis.core import QgsProject
 from PyQt5.QtCore import pyqtSignal, QObject, QTimer
-from speckle.ui.widgets.qgis_utils import (
-    get_layers_from_model_card_content,
-    get_selection_info_from_layers,
-)
 
 
 class QgisBasicConnectorBinding(IBasicConnectorBinding):
     store: DocumentModelStore
     speckle_application: Any  # TODO
 
-    def __init__(self, store, parent):
+    def __init__(self, store, bridge):
         self.store = store
         self.name = "baseBinding"
-        self.parent = parent
-        self.commands = BasicConnectorBindingCommands(parent)
+        self.parent = bridge
+        self.commands = BasicConnectorBindingCommands(bridge)
 
         self.store.document_changed = lambda: self.commands.notify_document_changed()
 
@@ -85,7 +80,7 @@ class MetaQObject(type(QObject), type(ISendBinding)):
 class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
     name: str = "sendBinding"
     commands: SendBindingUICommands
-    parent: IBrowserBridge
+    parent: "SpeckleQGISv3Module"
     store: DocumentModelStore
     _service_provider: "IServiceProvider"
     _send_filters: List[ISendFilter]
@@ -105,7 +100,7 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
 
     def __init__(
         self,
-        parent: IBrowserBridge,
+        bridge: "SpeckleQGISv3Module",
         store: DocumentModelStore,
         _service_provider: "IServiceProvider",
         _send_filters: List[ISendFilter],
@@ -127,8 +122,8 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         self._top_level_exception_handler = _top_level_exception_handler
         self._qgis_conversion_settings = _qgis_conversion_settings
 
-        self.parent = parent
-        self.commads = SendBindingUICommands(parent)
+        self.bridge = bridge
+        self.commads = SendBindingUICommands(bridge)
         self.subscribe_to_qgis_events()
 
         def new_func():
@@ -165,7 +160,11 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
             raise ValueError("SendFilter is None")
 
         # get layers
-        layers = get_layers_from_model_card_content(model_card)
+        layers: List[LayerStorage] = (
+            self.bridge.connector_module.layer_utils.get_layers_from_model_card_content(
+                model_card
+            )
+        )
 
         self.send_operation_execute_signal.emit(
             layers, model_card.get_send_info("QGIS"), None, None
@@ -184,21 +183,24 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
 class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
     layer_utils: QgisLayerUtils
     name: str
-    parent: IBrowserBridge
-    iface: Any
+    bridge: "SpeckleQGISv3Module"
 
     selection_changed_signal = pyqtSignal(SelectionInfo)
 
-    def __init__(self, iface, parent=None, layer_utils=None):
+    def __init__(self, iface, bridge=None, layer_utils=None):
+        # iface variable cannot be derived from "connector_module" yet, because the binding itself is
+        # being initialized during connector_module initialization. But it can be called in other methods
+        # via "self.bridge.connector_module.iface"
         QObject.__init__(self)
-        self.iface = iface
         self.name = "selectionBinding"
-        self.parent = parent
+        self.bridge = bridge
         self.layer_utils = layer_utils
 
         # subscribe to selection change
         # use QTimer to handle the event AFTER the user UI selection event is fully processed
         # otherwise, on event trigger, the UI still has the pre-event layer selection active
+
+        # layerTreeView().currentLayerChanged doesn't cover GroupSelected event though
         iface.layerTreeView().currentLayerChanged.connect(
             lambda: QTimer.singleShot(0, self.on_selection_changed)
         )
@@ -211,5 +213,6 @@ class QgisSelectionBinding(ISelectionBinding, QObject, metaclass=MetaQObject):
 
     def get_selection(self) -> SelectionInfo:
 
-        selected_layers = self.iface.layerTreeView().selectedLayers()
-        return get_selection_info_from_layers(selected_layers)
+        return (
+            self.bridge.connector_module.layer_utils.get_currently_selected_layers_info()
+        )
