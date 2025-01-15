@@ -4,6 +4,7 @@ from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.to_speckle.raw import (
     PointToSpeckleConverter,
     PolylineToSpeckleConverter,
+    PolygonToSpeckleConverter,
 )
 from specklepy.objects.base import Base
 
@@ -14,7 +15,7 @@ class DisplayValueExtractor:
 
     _point_converter: PointToSpeckleConverter
     _polyline_converter: PolylineToSpeckleConverter
-    _polygon_converter: "PolygonToSpeckleConverter"
+    _polygon_converter: PolygonToSpeckleConverter
     _raster_converter: "RasterToSpeckleConverter"
 
     def __init__(self, conversion_settings):
@@ -23,8 +24,10 @@ class DisplayValueExtractor:
         self._polyline_converter = PolylineToSpeckleConverter(
             conversion_settings, self._point_converter
         )
+        self._polygon_converter = PolygonToSpeckleConverter(
+            conversion_settings, self._polyline_converter
+        )
         r"""
-        self._polygon_converter = PolygonToSpeckleConverter(conversion_settings)
         self._raster_converter = RasterToSpeckleConverter(conversion_settings)
         """
         pass
@@ -64,7 +67,7 @@ class DisplayValueExtractor:
             if geometry_type == 1:
                 return self._polyline_converter.convert(abstract_geometry)
             if geometry_type == 2:
-                # return self._polygon_converter.convert(abstract_geometry)
+                return self._polygon_converter.convert(abstract_geometry)
                 pass
 
         elif geometry_type == 3:  # no-geometry table feature
