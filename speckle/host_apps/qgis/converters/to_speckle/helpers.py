@@ -68,7 +68,6 @@ class DisplayValueExtractor:
                 return self._polyline_converter.convert(abstract_geometry)
             if geometry_type == 2:
                 return self._polygon_converter.convert(abstract_geometry)
-                pass
 
         elif geometry_type == 3:  # no-geometry table feature
             return []

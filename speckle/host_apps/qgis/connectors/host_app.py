@@ -97,7 +97,7 @@ class QgisLayerUnpacker:
                 layer_fields[field.name()] = field.type()
 
             collection["fields"] = layer_fields
-            collection["wkbType"] = layer.wkbType()
+            collection["wkbType"] = layer.wkbType().name
 
         elif isinstance(layer, QgsRasterLayer):
             pass
