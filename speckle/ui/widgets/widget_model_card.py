@@ -16,6 +16,7 @@ from speckle.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
+    BACKGR_COLOR_SUCCESS_SEND,
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
     BACKGR_COLOR_TRANSPARENT,
@@ -39,6 +40,7 @@ class ModelCardWidget(QWidget):
 
     summary_text: str = "No objects are selected"
     selection_filter_text: QPushButton
+    notification_line: QWidget
 
     # for the use in parent widget - to keep track if signals are already connected and not connect to btns twice
     connected: bool = False
@@ -59,15 +61,15 @@ class ModelCardWidget(QWidget):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignTop)
         layout.setContentsMargins(
+            0,
             10,
-            10,
-            10,
-            10,
+            0,
+            0,
         )
         self.setStyleSheet(
             "QWidget {"
             + f"border-radius:5px;{ZERO_MARGIN_PADDING}"
-            + "margin-bottom:3px; max-height:80px;"
+            + "margin-bottom:3px; height:110px;"
             + f"{BACKGR_COLOR_WHITE}"
             + "}"
         )
@@ -77,10 +79,12 @@ class ModelCardWidget(QWidget):
         # create areas in the card
         top_section = self.create_card_header(card_content)
         bottom_section = self.create_send_filter_line(card_content)
+        notification_section = self._create_notification_section()
 
         # add to layout
         layout.addWidget(top_section)
         layout.addWidget(bottom_section)
+        layout.addWidget(notification_section)
 
     def add_drop_shadow(self, item=None):
         if not item:
@@ -97,7 +101,7 @@ class ModelCardWidget(QWidget):
         line = QWidget()
         layout_line = QHBoxLayout(line)
         layout_line.setAlignment(Qt.AlignLeft)
-        layout_line.setContentsMargins(0, 0, 0, 0)
+        layout_line.setContentsMargins(10, 0, 10, 0)
         line.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
@@ -119,6 +123,76 @@ class ModelCardWidget(QWidget):
 
         return line
 
+    def _create_notification_section(self):
+        line = QWidget()
+        line.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        line.setStyleSheet(
+            "QWidget {"
+            + f"height:40px; border-radius: 0;color:white;{ZERO_MARGIN_PADDING}"
+            + f"text-align: left;{BACKGR_COLOR_SUCCESS_SEND}"
+            + "}"
+        )
+        layout_line = QHBoxLayout(line)
+        layout_line.setAlignment(Qt.AlignLeft)
+        layout_line.setContentsMargins(10, 0, 10, 2)
+
+        clickable_text = self.add_text("Version created!", color=SPECKLE_COLOR)
+        layout_line.addWidget(clickable_text)
+
+        # Add a spacer item to push the next button to the right
+        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        layout_line.addItem(spacer)
+
+        # Dismiss buttom
+        r"""
+        open_web_btn = QPushButton("Dismiss")
+        open_web_btn.clicked.connect(lambda: self._hide_notification_line())
+        open_web_btn.setStyleSheet(
+            "QPushButton {"
+            + f"color:{SPECKLE_COLOR}; border-radius: 10px;{ZERO_MARGIN_PADDING}"
+            + f"{BACKGR_COLOR_TRANSPARENT} height:20px;text-align: center; "
+            + " }"
+        )
+        open_web_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        layout_line.addWidget(open_web_btn)
+        """
+
+        # View in Web buttom
+        open_web_btn = QPushButton("View")
+        open_web_btn.clicked.connect(lambda: self.open_in_web(self.card_content))
+        open_web_btn.setStyleSheet(
+            "QPushButton {"
+            + f"color:white; border-radius: 5px;{ZERO_MARGIN_PADDING}"
+            + f"{BACKGR_COLOR} height:15px; text-align: center; padding: 0px 10px;"
+            + "} QPushButton:hover { "
+            + f"{BACKGR_COLOR_LIGHT};"
+            + " }"
+        )
+        open_web_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        layout_line.addWidget(open_web_btn)
+
+        self.notification_line = line
+
+        return line
+
+    def _hide_notification_line(self):
+        # not working well: all other widgets became cropped, and it appears on rezise
+        self.resize(
+            self.frameSize().width(),
+            self.frameSize().height() - self.notification_line.frameSize().height(),
+        )
+        self.notification_line.resize(0, 0)
+
+    def show_notification_line(self):
+        self.notification_line.resize(
+            self.parentWidget.parentWidget.frameSize().width(),
+            30,
+        )
+        self.resize(
+            self.frameSize().width(),
+            110,
+        )
+
     def change_selection_text(self, selection_text: str):
         # function accessed from the parent dockwidget
         # change text on the widget
@@ -128,7 +202,7 @@ class ModelCardWidget(QWidget):
         top_line = QWidget()
         layout_top_line = QHBoxLayout(top_line)
         layout_top_line.setAlignment(Qt.AlignLeft)
-        layout_top_line.setContentsMargins(0, 0, 0, 0)
+        layout_top_line.setContentsMargins(10, 0, 10, 0)
         top_line.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"

@@ -19,6 +19,7 @@ ERROR_COLOR_LIGHT = (255, 210, 210, 1)
 
 COLOR = f"color: {SPECKLE_COLOR};"
 BACKGR_COLOR_TRANSPARENT = f"background-color: rgba(0,0,0,0);"
+BACKGR_COLOR_SUCCESS_SEND = f"background-color: rgba(225,235,255,1);"
 BACKGR_COLOR_SEMI_TRANSPARENT = "background-color: rgba(250,250,250,80);"
 BACKGR_COLOR_HIGHLIGHT = f"background-color: rgba{str(COLOR_HIGHLIGHT)};"
 BACKGR_COLOR = f"background-color: {SPECKLE_COLOR};"
