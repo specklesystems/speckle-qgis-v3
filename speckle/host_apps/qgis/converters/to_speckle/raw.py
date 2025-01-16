@@ -448,9 +448,9 @@ class RasterToSpeckleConverter:
             vals_blue = [0 for _ in range(cells_number)]
             vals_alpha = None
 
-            val_min_red = val_min_green = val_min_blue = 0
-            vals_range_red = vals_range_green = vals_range_blue = 0
-            val_na_red = val_na_green = val_na_blue = 0
+            val_min_red = val_min_green = val_min_blue = val_min_alpha = 0
+            vals_range_red = vals_range_green = vals_range_blue = vals_range_alpha = 0
+            val_na_red = val_na_green = val_na_blue = val_na_alpha = None
 
             # if statements are not exclusive, as QGIS allows to assugn 1 band to several color channels
             if band_index == int(target.renderer().redBand()):
