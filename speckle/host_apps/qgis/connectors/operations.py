@@ -17,6 +17,7 @@ from speckle.ui.models import SendInfo
 from specklepy.objects.base import Base
 
 # from specklepy.objects.data import QgisObject
+from specklepy.objects.geometry.mesh import Mesh
 from specklepy.objects.models.collections.collection import Collection
 
 from qgis.core import QgsProject, QgsLayerTreeGroup, QgsVectorLayer, QgsRasterLayer
@@ -116,6 +117,15 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
                     status = "ERROR"
                     print(e)
 
+            elif isinstance(lyr, QgsRasterLayer):
+                try:
+                    converted_raster = self.convert_raster_feature(lyr, layer_app_id)
+                    layer_collection.elements.append(converted_raster)
+
+                except ValueError as e:
+                    status = "ERROR"
+                    print(e)
+
             result_1 = SendConversionResult(
                 status=status,
                 source_id=layer_app_id,
@@ -137,11 +147,20 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
         for feature in vector_layer.getFeatures():
             converted_feature: "QgisObject" = self.root_to_speckle_converter.convert(
-                (feature, layer_app_id)
+                {"target": feature, "layer_application_id": layer_app_id}
             )
-            converted_feature.applicationId = get_speckle_app_id(feature, layer_app_id)
             converted_features.append(converted_feature)
 
             # TODO: _colorUnpacker.ProcessFeatureLayerColor(row, applicationId);
 
         return converted_features
+
+    def convert_raster_feature(
+        self, raster_layer: QgsRasterLayer, layer_app_id: str
+    ) -> Mesh:
+
+        converted_raster: "QgisObject" = self.root_to_speckle_converter.convert(
+            {"target": raster_layer, "layer_application_id": layer_app_id}
+        )
+
+        return converted_raster

@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+from speckle.host_apps.qgis.connectors.extensions import get_speckle_app_id
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.to_speckle.helpers import (
     DisplayValueExtractor,
@@ -11,7 +12,7 @@ from specklepy.objects.base import Base
 
 # from specklepy.objects.data import QgisObject
 
-from qgis.core import QgsFeature
+from qgis.core import QgsFeature, QgsRasterLayer
 
 
 class CoreObjectsBaseToSpeckleTopLevelConverter(
@@ -32,13 +33,14 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(
         self._properties_extractor = properties_extractor
         self._conversion_settings = conversion_settings
 
-    def convert(self, target_tuple: Any) -> "QgisObject":
+    def convert(self, target_dict: Dict[str, Any]) -> "QgisObject":
 
-        target, layer_app_id = target_tuple
+        target: QgsFeature | QgsRasterLayer = target_dict["target"]
+        layer_app_id = target_dict["layer_application_id"]
 
         object_type: str = type(target)
 
-        # get display value
+        # get displayValue
         display: List[Base] = self._display_value_extractor.get_display_value(
             target, layer_app_id
         )
@@ -46,7 +48,10 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(
         # get properties
         properties: Dict[str, Any] = self._properties_extractor.get_properties(target)
 
+        # get applicationId
+        application_id = ""
         if isinstance(target, QgsFeature):
+            application_id = get_speckle_app_id(target, layer_app_id)
             r"""TODO : implement
             result: QgisObject = QgisObject(
                 name=object_type,
@@ -57,16 +62,20 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(
                 application_id="",
             )
             """
-            result: Base = Base()
-            result.units = self._conversion_settings.speckle_units
-            result.name = object_type
-            result.type = object_type
-            result.displayValue = display
-            result.properties = properties
-            result.application_id = ""
+        elif isinstance(target, QgsRasterLayer):
+            application_id = get_speckle_app_id(target)
+        else:
+            raise NotImplementedError(
+                f"Conversion of objects of type '{object_type}' is not supported"
+            )
 
-            return result
+        result: Base = Base()
 
-        raise NotImplementedError(
-            f"Conversion of objects of type '{object_type}' is not supported"
-        )
+        result.units = self._conversion_settings.speckle_units
+        result.name = object_type
+        result.type = object_type
+        result.displayValue = display
+        result.properties = properties
+        result.applicationId = application_id
+
+        return result
