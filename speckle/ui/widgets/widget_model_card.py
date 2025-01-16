@@ -134,7 +134,7 @@ class ModelCardWidget(QWidget):
         )
         layout_line = QHBoxLayout(line)
         layout_line.setAlignment(Qt.AlignLeft)
-        layout_line.setContentsMargins(10, 0, 10, 2)
+        layout_line.setContentsMargins(10, 0, 10, 0)
 
         clickable_text = self.add_text("Version created!", color=SPECKLE_COLOR)
         layout_line.addWidget(clickable_text)
