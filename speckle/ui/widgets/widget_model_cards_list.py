@@ -297,6 +297,17 @@ class ModelCardsWidget(QWidget):
         # adjust size of new widget:
         self.resizeEvent()
 
+    def _find_card_widget(self, model_card_id: str):
+
+        for i in range(self.cards_list_widget.layout().count()):
+            widget = self.cards_list_widget.layout().itemAt(i).widget()
+
+            if isinstance(widget, ModelCardWidget):
+                if widget.card_content.model_card_id == model_card_id:
+                    return widget
+
+        raise ValueError(f"Model Card with id '{model_card_id}' not found")
+
     def _check_for_empty_group(self, project_groups):
 
         # check if the last project group only contains a label (no cards), then delete it

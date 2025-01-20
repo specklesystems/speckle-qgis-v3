@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QColor, QCursor
 from PyQt5.QtWidgets import (
     QVBoxLayout,
@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QGraphicsDropShadowEffect,
     QSpacerItem,
     QSizePolicy,
+    QStackedLayout,
 )
 
 from speckle.ui.models import ModelCard, SenderModelCard
@@ -16,6 +17,7 @@ from speckle.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
+    BACKGR_COLOR_SUCCESS_SEND,
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
     BACKGR_COLOR_TRANSPARENT,
@@ -39,6 +41,8 @@ class ModelCardWidget(QWidget):
 
     summary_text: str = "No objects are selected"
     selection_filter_text: QPushButton
+    notification_line: QWidget
+    main_content: QWidget
 
     # for the use in parent widget - to keep track if signals are already connected and not connect to btns twice
     connected: bool = False
@@ -53,34 +57,41 @@ class ModelCardWidget(QWidget):
         self.ui_model_card_utils = ui_model_card_utils
         self.card_content = card_content
 
-        # self.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        self.layout = QStackedLayout(self)
+        self.layout.setStackingMode(QStackedLayout.StackAll)
 
-        self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignTop)
-        layout.setContentsMargins(
-            10,
-            10,
-            10,
-            10,
-        )
-        self.setStyleSheet(
+        self.add_drop_shadow()
+
+        # add to layout
+        content = QWidget()
+        content.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        content.setStyleSheet(
             "QWidget {"
             + f"border-radius:5px;{ZERO_MARGIN_PADDING}"
-            + "margin-bottom:3px; max-height:80px;"
+            + "margin-bottom:3px;"
             + f"{BACKGR_COLOR_WHITE}"
             + "}"
         )
-
-        self.add_drop_shadow()
+        content.layout = QVBoxLayout(content)
+        content.layout.setAlignment(Qt.AlignTop)
+        content.layout.setContentsMargins(
+            0,
+            10,
+            0,
+            0,
+        )
 
         # create areas in the card
         top_section = self.create_card_header(card_content)
         bottom_section = self.create_send_filter_line(card_content)
 
-        # add to layout
-        layout.addWidget(top_section)
-        layout.addWidget(bottom_section)
+        content.layout.addWidget(top_section)
+        content.layout.addWidget(bottom_section)
+        self.main_content = content
+        self.layout.addWidget(self.main_content)
+
+        # placeholder for notification bar to create on demand later
+        self.notification_line = None
 
     def add_drop_shadow(self, item=None):
         if not item:
@@ -97,7 +108,7 @@ class ModelCardWidget(QWidget):
         line = QWidget()
         layout_line = QHBoxLayout(line)
         layout_line.setAlignment(Qt.AlignLeft)
-        layout_line.setContentsMargins(0, 0, 0, 0)
+        layout_line.setContentsMargins(10, 0, 10, 15)
         line.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
@@ -119,6 +130,93 @@ class ModelCardWidget(QWidget):
 
         return line
 
+    def _create_notification_section(self):
+
+        # create a container that will be added to the main Stacked layout
+        content_notification_widget = QWidget()
+        content_notification_widget.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        content_notification_widget.setStyleSheet(
+            "QWidget {"
+            + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
+            + f"text-align: left;{BACKGR_COLOR_TRANSPARENT}"
+            + "}"
+        )
+        content_notification_widget.layout = QVBoxLayout(content_notification_widget)
+        content_notification_widget.layout.setAlignment(Qt.AlignBottom)
+        content_notification_widget.layout.setContentsMargins(
+            0,
+            0,
+            0,
+            0,
+        )
+        # create a line widget
+        line = QWidget()
+        line.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        line.setStyleSheet(
+            "QWidget {"
+            + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
+            + f"text-align: left;{BACKGR_COLOR_SUCCESS_SEND}"
+            + "}"
+        )
+        layout_line = QHBoxLayout(line)
+        layout_line.setAlignment(Qt.AlignLeft)
+        layout_line.setContentsMargins(10, 5, 10, 5)
+
+        clickable_text = self.add_text("Version created!", color=SPECKLE_COLOR)
+        layout_line.addWidget(clickable_text)
+
+        # Add a spacer item to push the next button to the right
+        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        layout_line.addItem(spacer)
+
+        # Dismiss buttom
+        dismiss_btn = QPushButton("Dismiss")
+        dismiss_btn.clicked.connect(lambda: self._hide_notification_line())
+        dismiss_btn.setStyleSheet(
+            "QPushButton {"
+            + f"color:{SPECKLE_COLOR}; {ZERO_MARGIN_PADDING}"
+            + f"{BACKGR_COLOR_TRANSPARENT} height:15px;text-align: center; "
+            + " }"
+        )
+        dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        layout_line.addWidget(dismiss_btn)
+
+        # View in Web buttom
+        dismiss_btn = QPushButton("View")
+        dismiss_btn.clicked.connect(lambda: self.open_in_web(self.card_content))
+        dismiss_btn.setStyleSheet(
+            "QPushButton {"
+            + f"color:white; border-radius: 5px;{ZERO_MARGIN_PADDING}"
+            + f"{BACKGR_COLOR} height:15px; text-align: center; padding: 0px 10px;"
+            + "} QPushButton:hover { "
+            + f"{BACKGR_COLOR_LIGHT};"
+            + " }"
+        )
+        dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        layout_line.addWidget(dismiss_btn)
+
+        # Add line widget to the container
+        content_notification_widget.layout.addWidget(line)
+
+        return content_notification_widget
+
+    def _hide_notification_line(self):
+
+        self.layout.setCurrentWidget(self.main_content)
+        self.notification_line.resize(self.frameSize().width(), 0)
+
+    def show_notification_line(self):
+
+        # for the first launch:
+        if not self.notification_line:
+            self.notification_line = self._create_notification_section()
+            self.layout.addWidget(self.notification_line)
+
+        self.layout.setCurrentWidget(self.notification_line)
+        self.notification_line.resize(
+            self.frameSize().width(), self.frameSize().height()
+        )
+
     def change_selection_text(self, selection_text: str):
         # function accessed from the parent dockwidget
         # change text on the widget
@@ -128,10 +226,10 @@ class ModelCardWidget(QWidget):
         top_line = QWidget()
         layout_top_line = QHBoxLayout(top_line)
         layout_top_line.setAlignment(Qt.AlignLeft)
-        layout_top_line.setContentsMargins(0, 0, 0, 0)
+        layout_top_line.setContentsMargins(10, 0, 10, 0)
         top_line.setStyleSheet(
             "QWidget {"
-            + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
+            + f"color:white;{ZERO_MARGIN_PADDING}"
             + f"text-align: left;{BACKGR_COLOR_TRANSPARENT}"
             + "}"
         )

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any
+from typing import Any, List
 from plugin_utils.panel_logging import logToUser
 
 from speckle.host_apps.qgis.connectors.qgis_connector_module import (
@@ -10,7 +10,8 @@ from speckle.host_apps.qgis.converters.qgis_converter_module import (
     QgisConverterModule,
 )
 
-from speckle.ui.models import ModelCard
+from speckle.sdk.connectors_common.operations import SendOperationResult
+from speckle.ui.models import ModelCard, SendInfo
 from speckle.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
 import webbrowser
@@ -69,10 +70,30 @@ class SpeckleQGISv3Module:
             self._execute_send_operation
         )
 
-    def _execute_send_operation(self, *args):
+    def _execute_send_operation(
+        self,
+        objects: List[Any],
+        send_info: SendInfo,
+        on_operation_progressed: "IProgress[CardProgress]",
+        ct: "CancellationToken",
+    ):
         # execute and return send operation results
-        self.connector_module.send_binding.send_operation_result = (
-            self.connector_module.send_operation.execute(*args)
+        send_operation_result: SendOperationResult = (
+            self.connector_module.send_operation.execute(
+                objects, send_info, on_operation_progressed, ct
+            )
+        )
+        self.connector_module.send_binding.send_operation_result = send_operation_result
+
+    def bridge_send(
+        self,
+        command: str,
+        model_card_id: str,
+        version_id: str,
+        send_conversion_results: List[SendOperationResult],
+    ):
+        self.dockwidget.add_send_notification(
+            command, model_card_id, version_id, send_conversion_results
         )
 
     def _create_send_modules(self, *args):
