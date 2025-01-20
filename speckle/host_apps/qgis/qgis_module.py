@@ -84,7 +84,17 @@ class SpeckleQGISv3Module:
             )
         )
         self.connector_module.send_binding.send_operation_result = send_operation_result
-        # self.dockwidget.add_send_notification()
+
+    def bridge_send(
+        self,
+        command: str,
+        model_card_id: str,
+        version_id: str,
+        send_conversion_results: List[SendOperationResult],
+    ):
+        self.dockwidget.add_send_notification(
+            command, model_card_id, version_id, send_conversion_results
+        )
 
     def _create_send_modules(self, *args):
 

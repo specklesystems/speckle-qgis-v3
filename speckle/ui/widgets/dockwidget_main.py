@@ -2,6 +2,7 @@
 
 from typing import List
 from speckle.host_apps.qgis.connectors.filters import QgisSelectionFilter
+from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.bindings import IBasicConnectorBinding, SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
 from speckle.ui.widgets.widget_model_card import ModelCardWidget
@@ -316,6 +317,16 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     def handle_change_selection_info(self, *args):
         if self.widget_selection_filter:
             self.widget_selection_filter.change_selection_info(*args)
+
+    def add_send_notification(
+        self,
+        command: str,
+        model_card_id: str,
+        version_id: str,
+        send_conversion_results: List[SendOperationResult],
+    ):
+        model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
+        model_card_widget.show_notification_line()
 
     def resizeEvent(self, event):
         QtWidgets.QDockWidget.resizeEvent(self, event)

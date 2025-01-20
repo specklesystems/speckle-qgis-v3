@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, Callable, Dict, List, Optional
 
+from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.models import (
     DocumentInfo,
     DocumentModelStore,
@@ -162,12 +163,15 @@ class SendBindingUICommands(BasicConnectorBindingCommands):
         self,
         model_card_id: str,
         version_id: str,
-        send_conversion_results: List["SendConversionResults"],
+        send_conversion_results: List[SendOperationResult],
     ) -> None:
-        # TODO
-        # bridge.send(SET_MODEL_SEND_RESULT_UI_COMMAND_NAME, model_card_id, version_id, send_conversion_results)
-        # pass results to the UI
-        return
+
+        self.bridge.bridge_send(
+            self.SET_MODEL_SEND_RESULT_UI_COMMAND_NAME,
+            model_card_id,
+            version_id,
+            send_conversion_results,
+        )
 
 
 class ISendBinding(IBinding, ABC):

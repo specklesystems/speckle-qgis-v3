@@ -79,12 +79,11 @@ class ModelCardWidget(QWidget):
         # create areas in the card
         top_section = self.create_card_header(card_content)
         bottom_section = self.create_send_filter_line(card_content)
-        notification_section = self._create_notification_section()
+        self._create_notification_section()
 
         # add to layout
         layout.addWidget(top_section)
         layout.addWidget(bottom_section)
-        layout.addWidget(notification_section)
 
     def add_drop_shadow(self, item=None):
         if not item:
@@ -175,9 +174,13 @@ class ModelCardWidget(QWidget):
 
     def _hide_notification_line(self):
         self.layout().removeWidget(self.notification_line)
+        self.notification_line.resize(0, 0)
+        self.resize(self.sizeHint())
 
     def show_notification_line(self):
         self.layout().addWidget(self.notification_line)
+        self.notification_line.resize(self.notification_line.sizeHint())
+        self.resize(self.sizeHint())
 
     def change_selection_text(self, selection_text: str):
         # function accessed from the parent dockwidget
