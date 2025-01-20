@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QColor, QCursor
 from PyQt5.QtWidgets import (
     QVBoxLayout,
@@ -84,14 +84,14 @@ class ModelCardWidget(QWidget):
         # create areas in the card
         top_section = self.create_card_header(card_content)
         bottom_section = self.create_send_filter_line(card_content)
-        self.notification_line = self._create_notification_section()  # to use later
 
         content.layout.addWidget(top_section)
         content.layout.addWidget(bottom_section)
         self.main_content = content
-
         self.layout.addWidget(self.main_content)
-        self.layout.addWidget(self.notification_line)
+
+        # placeholder for notification bar to create on demand later
+        self.notification_line = None
 
     def add_drop_shadow(self, item=None):
         if not item:
@@ -132,6 +132,7 @@ class ModelCardWidget(QWidget):
 
     def _create_notification_section(self):
 
+        # create a container that will be added to the main Stacked layout
         content_notification_widget = QWidget()
         content_notification_widget.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         content_notification_widget.setStyleSheet(
@@ -148,7 +149,7 @@ class ModelCardWidget(QWidget):
             0,
             0,
         )
-        ###############################
+        # create a line widget
         line = QWidget()
         line.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         line.setStyleSheet(
@@ -159,7 +160,7 @@ class ModelCardWidget(QWidget):
         )
         layout_line = QHBoxLayout(line)
         layout_line.setAlignment(Qt.AlignLeft)
-        layout_line.setContentsMargins(10, 0, 10, 0)
+        layout_line.setContentsMargins(10, 5, 10, 5)
 
         clickable_text = self.add_text("Version created!", color=SPECKLE_COLOR)
         layout_line.addWidget(clickable_text)
@@ -194,10 +195,7 @@ class ModelCardWidget(QWidget):
         dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         layout_line.addWidget(dismiss_btn)
 
-        spacer_vertical = QSpacerItem(
-            40, 20, QSizePolicy.Minimum, QSizePolicy.Expanding
-        )
-        # content_notification_widget.layout.addItem(spacer_vertical)
+        # Add line widget to the container
         content_notification_widget.layout.addWidget(line)
 
         return content_notification_widget
@@ -205,12 +203,19 @@ class ModelCardWidget(QWidget):
     def _hide_notification_line(self):
 
         self.layout.setCurrentWidget(self.main_content)
-        self.notification_line.layout.setAlignment(Qt.AlignVCenter)
+        self.notification_line.resize(self.frameSize().width(), 0)
 
     def show_notification_line(self):
 
+        # for the first launch:
+        if not self.notification_line:
+            self.notification_line = self._create_notification_section()
+            self.layout.addWidget(self.notification_line)
+
         self.layout.setCurrentWidget(self.notification_line)
-        self.notification_line.layout.setAlignment(Qt.AlignBottom)
+        self.notification_line.resize(
+            self.frameSize().width(), self.frameSize().height()
+        )
 
     def change_selection_text(self, selection_text: str):
         # function accessed from the parent dockwidget
