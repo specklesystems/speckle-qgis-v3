@@ -69,7 +69,7 @@ class ModelCardWidget(QWidget):
         self.setStyleSheet(
             "QWidget {"
             + f"border-radius:5px;{ZERO_MARGIN_PADDING}"
-            + "margin-bottom:3px; height:110px;"
+            + "margin-bottom:3px;"
             + f"{BACKGR_COLOR_WHITE}"
             + "}"
         )
@@ -101,7 +101,7 @@ class ModelCardWidget(QWidget):
         line = QWidget()
         layout_line = QHBoxLayout(line)
         layout_line.setAlignment(Qt.AlignLeft)
-        layout_line.setContentsMargins(10, 0, 10, 0)
+        layout_line.setContentsMargins(10, 0, 10, 5)
         line.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
@@ -128,7 +128,7 @@ class ModelCardWidget(QWidget):
         line.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         line.setStyleSheet(
             "QWidget {"
-            + f"height:40px; border-radius: 0;color:white;{ZERO_MARGIN_PADDING}"
+            + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
             + f"text-align: left;{BACKGR_COLOR_SUCCESS_SEND}"
             + "}"
         )
@@ -144,23 +144,21 @@ class ModelCardWidget(QWidget):
         layout_line.addItem(spacer)
 
         # Dismiss buttom
-        r"""
-        open_web_btn = QPushButton("Dismiss")
-        open_web_btn.clicked.connect(lambda: self._hide_notification_line())
-        open_web_btn.setStyleSheet(
+        dismiss_btn = QPushButton("Dismiss")
+        dismiss_btn.clicked.connect(lambda: self._hide_notification_line())
+        dismiss_btn.setStyleSheet(
             "QPushButton {"
-            + f"color:{SPECKLE_COLOR}; border-radius: 10px;{ZERO_MARGIN_PADDING}"
-            + f"{BACKGR_COLOR_TRANSPARENT} height:20px;text-align: center; "
+            + f"color:{SPECKLE_COLOR}; {ZERO_MARGIN_PADDING}"
+            + f"{BACKGR_COLOR_TRANSPARENT} height:15px;text-align: center; "
             + " }"
         )
-        open_web_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        layout_line.addWidget(open_web_btn)
-        """
+        dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        layout_line.addWidget(dismiss_btn)
 
         # View in Web buttom
-        open_web_btn = QPushButton("View")
-        open_web_btn.clicked.connect(lambda: self.open_in_web(self.card_content))
-        open_web_btn.setStyleSheet(
+        dismiss_btn = QPushButton("View")
+        dismiss_btn.clicked.connect(lambda: self.open_in_web(self.card_content))
+        dismiss_btn.setStyleSheet(
             "QPushButton {"
             + f"color:white; border-radius: 5px;{ZERO_MARGIN_PADDING}"
             + f"{BACKGR_COLOR} height:15px; text-align: center; padding: 0px 10px;"
@@ -168,30 +166,18 @@ class ModelCardWidget(QWidget):
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"
         )
-        open_web_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        layout_line.addWidget(open_web_btn)
+        dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        layout_line.addWidget(dismiss_btn)
 
         self.notification_line = line
 
         return line
 
     def _hide_notification_line(self):
-        # not working well: all other widgets became cropped, and it appears on rezise
-        self.resize(
-            self.frameSize().width(),
-            self.frameSize().height() - self.notification_line.frameSize().height(),
-        )
-        self.notification_line.resize(0, 0)
+        self.layout().removeWidget(self.notification_line)
 
     def show_notification_line(self):
-        self.notification_line.resize(
-            self.parentWidget.parentWidget.frameSize().width(),
-            30,
-        )
-        self.resize(
-            self.frameSize().width(),
-            110,
-        )
+        self.layout().addWidget(self.notification_line)
 
     def change_selection_text(self, selection_text: str):
         # function accessed from the parent dockwidget
