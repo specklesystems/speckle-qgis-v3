@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QGraphicsDropShadowEffect,
     QSpacerItem,
     QSizePolicy,
+    QStackedLayout,
 )
 
 from speckle.ui.models import ModelCard, SenderModelCard
@@ -41,6 +42,7 @@ class ModelCardWidget(QWidget):
     summary_text: str = "No objects are selected"
     selection_filter_text: QPushButton
     notification_line: QWidget
+    main_content: QWidget
 
     # for the use in parent widget - to keep track if signals are already connected and not connect to btns twice
     connected: bool = False
@@ -55,35 +57,41 @@ class ModelCardWidget(QWidget):
         self.ui_model_card_utils = ui_model_card_utils
         self.card_content = card_content
 
-        # self.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        self.layout = QStackedLayout(self)
+        self.layout.setStackingMode(QStackedLayout.StackAll)
 
-        self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignTop)
-        layout.setContentsMargins(
-            0,
-            10,
-            0,
-            0,
-        )
-        self.setStyleSheet(
+        self.add_drop_shadow()
+
+        # add to layout
+        content = QWidget()
+        content.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        content.setStyleSheet(
             "QWidget {"
             + f"border-radius:5px;{ZERO_MARGIN_PADDING}"
             + "margin-bottom:3px;"
             + f"{BACKGR_COLOR_WHITE}"
             + "}"
         )
-
-        self.add_drop_shadow()
+        content.layout = QVBoxLayout(content)
+        content.layout.setAlignment(Qt.AlignTop)
+        content.layout.setContentsMargins(
+            0,
+            10,
+            0,
+            0,
+        )
 
         # create areas in the card
         top_section = self.create_card_header(card_content)
         bottom_section = self.create_send_filter_line(card_content)
-        self._create_notification_section()
+        self.notification_line = self._create_notification_section()  # to use later
 
-        # add to layout
-        layout.addWidget(top_section)
-        layout.addWidget(bottom_section)
+        content.layout.addWidget(top_section)
+        content.layout.addWidget(bottom_section)
+        self.main_content = content
+
+        self.layout.addWidget(self.main_content)
+        self.layout.addWidget(self.notification_line)
 
     def add_drop_shadow(self, item=None):
         if not item:
@@ -100,7 +108,7 @@ class ModelCardWidget(QWidget):
         line = QWidget()
         layout_line = QHBoxLayout(line)
         layout_line.setAlignment(Qt.AlignLeft)
-        layout_line.setContentsMargins(10, 0, 10, 5)
+        layout_line.setContentsMargins(10, 0, 10, 15)
         line.setStyleSheet(
             "QWidget {"
             + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
@@ -123,6 +131,24 @@ class ModelCardWidget(QWidget):
         return line
 
     def _create_notification_section(self):
+
+        content_notification_widget = QWidget()
+        content_notification_widget.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        content_notification_widget.setStyleSheet(
+            "QWidget {"
+            + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
+            + f"text-align: left;{BACKGR_COLOR_TRANSPARENT}"
+            + "}"
+        )
+        content_notification_widget.layout = QVBoxLayout(content_notification_widget)
+        content_notification_widget.layout.setAlignment(Qt.AlignBottom)
+        content_notification_widget.layout.setContentsMargins(
+            0,
+            0,
+            0,
+            0,
+        )
+        ###############################
         line = QWidget()
         line.setAttribute(QtCore.Qt.WA_StyledBackground, True)
         line.setStyleSheet(
@@ -168,19 +194,23 @@ class ModelCardWidget(QWidget):
         dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         layout_line.addWidget(dismiss_btn)
 
-        self.notification_line = line
+        spacer_vertical = QSpacerItem(
+            40, 20, QSizePolicy.Minimum, QSizePolicy.Expanding
+        )
+        # content_notification_widget.layout.addItem(spacer_vertical)
+        content_notification_widget.layout.addWidget(line)
 
-        return line
+        return content_notification_widget
 
     def _hide_notification_line(self):
-        self.layout().removeWidget(self.notification_line)
-        self.notification_line.resize(0, 0)
-        self.resize(self.sizeHint())
+
+        self.layout.setCurrentWidget(self.main_content)
+        self.notification_line.layout.setAlignment(Qt.AlignVCenter)
 
     def show_notification_line(self):
-        self.layout().addWidget(self.notification_line)
-        self.notification_line.resize(self.notification_line.sizeHint())
-        self.resize(self.sizeHint())
+
+        self.layout.setCurrentWidget(self.notification_line)
+        self.notification_line.layout.setAlignment(Qt.AlignBottom)
 
     def change_selection_text(self, selection_text: str):
         # function accessed from the parent dockwidget
@@ -194,7 +224,7 @@ class ModelCardWidget(QWidget):
         layout_top_line.setContentsMargins(10, 0, 10, 0)
         top_line.setStyleSheet(
             "QWidget {"
-            + f"color:white;border-radius: 5px;{ZERO_MARGIN_PADDING}"
+            + f"color:white;{ZERO_MARGIN_PADDING}"
             + f"text-align: left;{BACKGR_COLOR_TRANSPARENT}"
             + "}"
         )
