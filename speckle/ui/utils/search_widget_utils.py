@@ -29,6 +29,7 @@ class UiSearchUtils(QObject):
     batch_size: int = None
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
     add_models_search_signal = pyqtSignal(Project)
+    select_account_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -42,6 +43,12 @@ class UiSearchUtils(QObject):
             accounts[0]
         )
         self.batch_size = QUERY_BATCH_SIZE
+
+    def get_account_initials(self):
+        name = self.speckle_client.account.userInfo.name
+        if isinstance(name, str) and len(name) > 0:
+            return name[0]
+        return "X"
 
     def get_new_projects_content(self, clear_cursor=False):
 

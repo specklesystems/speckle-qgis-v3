@@ -274,6 +274,14 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
                 self._open_select_models_widget
             )
 
+            # subscribe to select_account_signal signal
+            self.widget_project_search.ui_search_content.select_account_signal.connect(
+                self._open_select_accounts_widget
+            )
+
+    def _open_select_accounts_widget(self):
+        pass
+
     def _open_select_models_widget(self, project):
 
         if not self.widget_model_search:

@@ -69,13 +69,13 @@ class ModelCardsWidget(QWidget):
         self._create_search_button()  # will be added later to the child widget
 
         ##########################
-        cards_selection_widget = self._create_cards_selection_widget()
+        self.scroll_container = self._create_cards_selection_widget()
 
         content = QWidget()
         content.layout = QVBoxLayout(self)
         content.layout.setContentsMargins(0, LABEL_HEIGHT, 0, 0)
         content.layout.setAlignment(Qt.AlignCenter)
-        content.layout.addWidget(cards_selection_widget)
+        content.layout.addWidget(self.scroll_container)
         content.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
         ##########################
 

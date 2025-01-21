@@ -22,6 +22,8 @@ class CardsListTemporaryWidget(QWidget):
     load_more_btn: QPushButton = None
     scroll_area: QtWidgets.QScrollArea = None
 
+    scroll_container: QWidget = None  # overall container, added after the label
+
     def __init__(
         self,
         *,
@@ -43,7 +45,7 @@ class CardsListTemporaryWidget(QWidget):
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
 
-        cards_selection_widget = self._create_cards_selection_widget(
+        self.scroll_container = self._create_cards_selection_widget(
             label_text, cards_content_list
         )
 
@@ -56,7 +58,7 @@ class CardsListTemporaryWidget(QWidget):
             WIDGET_SIDE_BUFFER,
         )
         content.layout.setAlignment(Qt.AlignCenter)
-        content.layout.addWidget(cards_selection_widget)
+        content.layout.addWidget(self.scroll_container)
 
         self.layout.addWidget(content)
 
