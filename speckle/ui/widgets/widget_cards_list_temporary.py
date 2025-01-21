@@ -181,7 +181,6 @@ class CardsListTemporaryWidget(QWidget):
 
         existing_content = []
         for i in range(self.cards_list_widget.layout().count()):
-            print(self.cards_list_widget.layout().itemAt(i))
             widget = self.cards_list_widget.layout().itemAt(i).widget()
             if isinstance(widget, CardInListWidget):
                 existing_content.append(widget.card_content)
