@@ -64,6 +64,10 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         # adjust size of new widget:
         self.resizeEvent()
 
+    def refresh_projects(self):
+        self._remove_all_cards()
+        self._add_projects(clear_cursor=True)
+
     def _add_account_switch_btn(self):
 
         # create a line widget

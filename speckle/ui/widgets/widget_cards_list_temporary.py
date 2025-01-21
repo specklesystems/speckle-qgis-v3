@@ -181,6 +181,7 @@ class CardsListTemporaryWidget(QWidget):
 
         existing_content = []
         for i in range(self.cards_list_widget.layout().count()):
+            print(self.cards_list_widget.layout().itemAt(i))
             widget = self.cards_list_widget.layout().itemAt(i).widget()
             if isinstance(widget, CardInListWidget):
                 existing_content.append(widget.card_content)
@@ -199,6 +200,13 @@ class CardsListTemporaryWidget(QWidget):
         if len(new_cards_content_list) < batch_size:
             self._style_load_btn(active=False, text="No more items found")
             return
+
+    def _remove_all_cards(self):
+        all_count = self.cards_list_widget.layout().count()
+        for i in range(all_count):
+            # remove items by reversed index
+            widget = self.cards_list_widget.layout().itemAt(all_count - i - 1).widget()
+            widget.setParent(None)
 
     def resizeEvent(self, event=None):
         QtWidgets.QWidget.resizeEvent(self, event)
