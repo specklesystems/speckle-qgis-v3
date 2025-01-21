@@ -5,6 +5,7 @@ from speckle.host_apps.qgis.connectors.filters import QgisSelectionFilter
 from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.bindings import IBasicConnectorBinding, SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
+from speckle.ui.widgets.widget_account_search import AccountSearchWidget
 from speckle.ui.widgets.widget_model_card import ModelCardWidget
 from speckle.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.ui.widgets.widget_model_search import ModelSearchWidget
@@ -37,6 +38,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     widget_no_model_cards: NoModelCardsWidget = None
     widget_project_search: ProjectSearchWidget = None
     widget_model_search: ModelSearchWidget = None
+    widget_account_search: AccountSearchWidget = None
     widget_model_cards: ModelCardsWidget = None
     widget_selection_filter: SelectionFilterWidget = None
 
@@ -150,6 +152,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         if self.widget_model_search:
             self._remove_widget_model_search()
 
+        if self.widget_account_search:
+            self._remove_widget_account_search()
+
         if self.widget_selection_filter:
             self.remove_widget_selection_filter()
 
@@ -167,6 +172,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         elif self.widget_model_cards == widget:
             self._remove_widget_model_cards()
 
+        elif self.widget_account_search == widget:
+            self._remove_widget_account_search()
+
         elif self.widget_selection_filter == widget:
             self.remove_widget_selection_filter()
 
@@ -180,6 +188,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         if self.widget_selection_filter:
             self.remove_widget_selection_filter()
 
+        if self.widget_account_search:
+            self._remove_widget_account_search()
+
     def _remove_widget_project_search(self):
         self.widget_project_search.setParent(None)
         self.widget_project_search = None
@@ -187,6 +198,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     def _remove_widget_model_search(self):
         self.widget_model_search.setParent(None)
         self.widget_model_search = None
+
+    def _remove_widget_account_search(self):
+        self.widget_account_search.setParent(None)
+        self.widget_account_search = None
 
     def remove_widget_selection_filter(self):
         self.widget_selection_filter.setParent(None)
@@ -273,6 +288,32 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_project_search.ui_search_content.add_models_search_signal.connect(
                 self._open_select_models_widget
             )
+
+            # subscribe to select_account_signal signal
+            self.widget_project_search.ui_search_content.select_account_signal.connect(
+                self._open_select_accounts_widget
+            )
+
+            # subscribe to select_account_signal signal
+            self.widget_project_search.ui_search_content.change_account_and_projects_signal.connect(
+                self._update_account_project_list
+            )
+
+    def _update_account_project_list(self):
+        self._remove_widget_account_search()
+        self.widget_project_search.refresh_projects()
+
+    def _open_select_accounts_widget(self):
+        if not self.widget_account_search:
+            self.widget_account_search = AccountSearchWidget(
+                parent=self,
+                ui_search_content=self.widget_project_search.ui_search_content,
+            )
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_account_search)
+
+            # subscribe to close-on-background-click event
+            self._subscribe_to_close_on_background_click(self.widget_account_search)
 
     def _open_select_models_widget(self, project):
 
@@ -361,6 +402,12 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
         if self.widget_selection_filter:
             self.widget_selection_filter.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
+
+        if self.widget_account_search:
+            self.widget_account_search.resize(
                 self.frameSize().width(),
                 self.frameSize().height(),
             )

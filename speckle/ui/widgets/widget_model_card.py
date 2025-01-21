@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QColor, QCursor
 from PyQt5.QtWidgets import (
     QVBoxLayout,
@@ -149,6 +149,7 @@ class ModelCardWidget(QWidget):
             0,
             0,
         )
+        
         # create a line widget
         line = QWidget()
         line.setAttribute(QtCore.Qt.WA_StyledBackground, True)

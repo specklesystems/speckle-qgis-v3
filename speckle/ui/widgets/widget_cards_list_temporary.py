@@ -22,6 +22,8 @@ class CardsListTemporaryWidget(QWidget):
     load_more_btn: QPushButton = None
     scroll_area: QtWidgets.QScrollArea = None
 
+    scroll_container: QWidget = None  # overall container, added after the label
+
     def __init__(
         self,
         *,
@@ -43,7 +45,7 @@ class CardsListTemporaryWidget(QWidget):
         self.layout = QStackedLayout()
         self.layout.addWidget(self.background)
 
-        cards_selection_widget = self._create_cards_selection_widget(
+        self.scroll_container = self._create_cards_selection_widget(
             label_text, cards_content_list
         )
 
@@ -56,7 +58,7 @@ class CardsListTemporaryWidget(QWidget):
             WIDGET_SIDE_BUFFER,
         )
         content.layout.setAlignment(Qt.AlignCenter)
-        content.layout.addWidget(cards_selection_widget)
+        content.layout.addWidget(self.scroll_container)
 
         self.layout.addWidget(content)
 
@@ -197,6 +199,13 @@ class CardsListTemporaryWidget(QWidget):
         if len(new_cards_content_list) < batch_size:
             self._style_load_btn(active=False, text="No more items found")
             return
+
+    def _remove_all_cards(self):
+        all_count = self.cards_list_widget.layout().count()
+        for i in range(all_count):
+            # remove items by reversed index
+            widget = self.cards_list_widget.layout().itemAt(all_count - i - 1).widget()
+            widget.setParent(None)
 
     def resizeEvent(self, event=None):
         QtWidgets.QWidget.resizeEvent(self, event)
