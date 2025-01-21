@@ -30,6 +30,7 @@ class UiSearchUtils(QObject):
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
     add_models_search_signal = pyqtSignal(Project)
     select_account_signal = pyqtSignal()
+    change_account_and_projects_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -44,10 +45,34 @@ class UiSearchUtils(QObject):
         )
         self.batch_size = QUERY_BATCH_SIZE
 
+    def get_accounts_content(self):
+        accounts: List[Account] = get_accounts()
+        if len(accounts) == 0:  # TODO handle no local accounts
+            raise SpeckleException(
+                "Add accounts via Speckle Desktop Manager in order to start"
+            )
+
+        content_list = [
+            [
+                partial(self._replace_projects_list_with_new_account, acc),
+                acc.serverInfo.name,
+                acc.serverInfo.url,
+            ]
+            for acc in accounts
+        ]
+        return content_list
+
+    def _replace_projects_list_with_new_account(self, account: Account):
+        self.speckle_client: SpeckleClient = get_authenticate_client_for_account(
+            account
+        )
+        self.change_account_and_projects_signal.emit()
+
     def get_account_initials(self):
         name = self.speckle_client.account.userInfo.name
         if isinstance(name, str) and len(name) > 0:
             return name[0]
+
         return "X"
 
     def get_new_projects_content(self, clear_cursor=False):
