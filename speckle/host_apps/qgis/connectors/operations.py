@@ -135,7 +135,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             )
             results.append(result_1)
 
-        root_collection[ProxyKeys.COLOR] = list(
+        root_collection[ProxyKeys().COLOR] = list(
             self.color_unpacker.color_proxy_cache.values()
         )
 
@@ -148,8 +148,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         self, vector_layer: QgsVectorLayer, layer_app_id: str
     ) -> List[Base]:
         converted_features: List[Base] = []
-        self.color_unpacker.store_renderer_and_fields
-        # TODO: _colorUnpacker.StoreRendererAndFields(featureLayer);
+        self.color_unpacker.store_renderer_and_fields(vector_layer)
 
         for feature in vector_layer.getFeatures():
             converted_feature: "QgisObject" = self.root_to_speckle_converter.convert(

@@ -17,6 +17,7 @@ from speckle.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
+    BACKGR_COLOR_SEMI_TRANSPARENT,
     BACKGR_COLOR_SUCCESS_SEND,
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
@@ -138,7 +139,7 @@ class ModelCardWidget(QWidget):
         content_notification_widget.setStyleSheet(
             "QWidget {"
             + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
-            + f"text-align: left;{BACKGR_COLOR_TRANSPARENT}"
+            + f"text-align: left;{BACKGR_COLOR_SEMI_TRANSPARENT}"
             + "}"
         )
         content_notification_widget.layout = QVBoxLayout(content_notification_widget)
@@ -149,7 +150,7 @@ class ModelCardWidget(QWidget):
             0,
             0,
         )
-        
+
         # create a line widget
         line = QWidget()
         line.setAttribute(QtCore.Qt.WA_StyledBackground, True)

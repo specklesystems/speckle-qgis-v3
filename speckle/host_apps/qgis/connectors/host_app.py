@@ -5,6 +5,7 @@ from speckle.ui.models import DocumentModelStore
 from specklepy.objects.models.collections.collection import Collection
 from specklepy.objects.proxies import ColorProxy
 
+from PyQt5.QtGui import QColor
 from qgis.core import QgsLayerTreeGroup, QgsVectorLayer, QgsRasterLayer, QgsFeature
 
 
@@ -111,7 +112,7 @@ class QgisLayerUnpacker:
 class QgisColorUnpacker:
 
     color_proxy_cache: Dict[int, ColorProxy]
-    stored_renderer_fields: List[str]
+    stored_renderer_field: str = None
     stored_renderer: Optional["QgsFeatureRenderer"] = None
     stored_color: Optional[int] = None
 
@@ -121,19 +122,23 @@ class QgisColorUnpacker:
     def store_renderer_and_fields(self, vector_layer: QgsVectorLayer) -> None:
 
         # clear stored values
-        self.stored_renderer_fields.clear()
+        self.stored_renderer_field = None
         self.stored_color = None
         self.stored_renderer = None
 
-        renderer_type = vector_layer.renderer().type()
+        renderer = vector_layer.renderer()
+        if not renderer:  # e.g. for Tables
+            return
+
+        renderer_type = renderer.type()
 
         if renderer_type == "singleSymbol":
-            self.stored_renderer = vector_layer.renderer()
+            self.stored_renderer = renderer
 
         elif renderer_type in ["categorizedSymbol", "graduatedSymbol"]:
-            self.stored_renderer = vector_layer.renderer()
+            self.stored_renderer = renderer
             # field name or expression string, needs to be double-checked when used to get field value
-            self.stored_renderer_fields.append(self.stored_renderer.classAttribute())
+            self.stored_renderer_field = self.stored_renderer.classAttribute()
 
     def process_vector_layer_color(
         self, feature: QgsFeature, feature_app_id: str
@@ -141,61 +146,74 @@ class QgisColorUnpacker:
         """Processes a feature color from a vector layer by the stored renderer,
         and stores the feature's id and color proxy to the color_proxy_cache."""
 
+        if not self.stored_renderer:
+            return
+
         if self.stored_color:
             self.add_object_id_to_color_proxy_cache(feature_app_id, self.stored_color)
+            return
 
-        color = None
-        r"""
-        switch (StoredRenderer)
-        {
-        // simple renderers do not rely on fields, so the color can be retrieved from the renderer directly
-        case AC.CIM.CIMSimpleRenderer simpleRenderer:
-            color = simpleRenderer.Symbol.Symbol.GetColor();
-            break;
+        color_rgba: int = None
+        renderer_type = self.stored_renderer.type()
 
-        case AC.CIM.CIMUniqueValueRenderer uniqueValueRenderer:
-            color = GetRowColorByUniqueValueRenderer(uniqueValueRenderer, row);
-            break;
+        if renderer_type == "singleSymbol":
+            color_rgba = self.stored_renderer.symbol().color().rgba()
 
-        case AC.CIM.CIMClassBreaksRenderer classBreaksRenderer:
-            color = GetRowColorByClassBreaksRenderer(classBreaksRenderer, row);
-         
-            break;
-        }
-        
-        if (color is null)
-        {
-        // TODO: log error or throw exception that color could not be retrieved
-        return;
-        }
+        elif renderer_type == "categorizedSymbol":
+            color_rgba = self.get_feature_color_by_categorized_renderer(
+                self.stored_renderer, feature
+            )
 
-        // get or create the color proxy for the row
-        int argb = CIMColorToInt(color);
-        AddObjectIdToColorProxyCache(rowApplicationId, argb);
+        elif renderer_type == "graduatedSymbol":
+            color_rgba = self.get_feature_color_by_graduated_values_renderer(
+                self.stored_renderer, feature
+            )
 
-        // store color if from simple renderer
-        if (StoredRenderer is AC.CIM.CIMSimpleRenderer)
-        {
-        StoredColor = argb;
-        }
-        """
+        print(color_rgba)
 
-    def get_feature_color_by_graduate_renderer(
+        if not color_rgba:
+            return
+
+        # argb: int = self.color_list_to_int(color_rgba)
+        self.add_object_id_to_color_proxy_cache(feature_app_id, color_rgba)
+
+        if renderer_type == "singleSymbol":
+            self.stored_color = color_rgba
+
+    def get_feature_color_by_categorized_renderer(
         self, renderer: Any, feature: QgsFeature
     ) -> Any:
-        return
 
-    def get_feature_color_by_unique_values_renderer(
+        feature_value_for_rendering = feature.attribute(self.stored_renderer_field)
+        value_symbol = renderer.symbolForValue(
+            feature_value_for_rendering
+        )  # should be deprecated from 3.40
+        if not value_symbol:
+            value_symbol = renderer.sourceSymbol()
+
+        color = value_symbol.color().rgba()
+        return color
+
+    def get_feature_color_by_graduated_values_renderer(
         self, renderer: Any, feature: QgsFeature
     ) -> Any:
-        return
+
+        feature_value_for_rendering = feature.attribute(self.stored_renderer_field)
+        value_symbol = renderer.symbolForValue(feature_value_for_rendering)
+        if not value_symbol:
+            value_symbol = renderer.sourceSymbol()
+
+        color = value_symbol.color().rgba()
+        return color
 
     def add_object_id_to_color_proxy_cache(self, object_id: str, argb: int):
 
-        new_color_proxy: ColorProxy = self.color_proxy_cache.get(argb)
-        if not new_color_proxy:
+        existing_color_proxy: ColorProxy = self.color_proxy_cache.get(argb)
+
+        if existing_color_proxy:
+            existing_color_proxy.objects.append(object_id)
+        else:
             new_color_proxy = ColorProxy(
                 name=str(argb), value=argb, objects=[object_id], applicationId=str(argb)
             )
-
-        self.color_proxy_cache[argb] = new_color_proxy
+            self.color_proxy_cache[argb] = new_color_proxy

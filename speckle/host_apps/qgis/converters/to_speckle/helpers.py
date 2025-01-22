@@ -81,7 +81,7 @@ class DisplayValueExtractor:
         elif geometry_type == 3:  # no-geometry table feature
             return []
 
-        raise ValueError(f"Unsopported geometry type: '{geometry.type().name}'")
+        raise ValueError(f"Unsupported geometry type: '{geometry.type().name}'")
 
     def _get_raster_geometry(self, raster: QgsRasterLayer):
         # transformation will be done already in converter
