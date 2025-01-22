@@ -109,21 +109,76 @@ class QgisLayerUnpacker:
 
 
 class QgisColorUnpacker:
+
     color_proxy_cache: Dict[int, ColorProxy]
-    stored_renderer: Optional[Any]
     stored_renderer_fields: List[str]
-    stored_color: Optional[int]
+    stored_renderer: Optional["QgsFeatureRenderer"] = None
+    stored_color: Optional[int] = None
 
     def __init__(self):
         self.color_proxy_cache = {}
 
     def store_renderer_and_fields(self, vector_layer: QgsVectorLayer) -> None:
-        return
+
+        # clear stored values
+        self.stored_renderer_fields.clear()
+        self.stored_color = None
+        self.stored_renderer = None
+
+        renderer_type = vector_layer.renderer().type()
+
+        if renderer_type == "singleSymbol":
+            self.stored_renderer = vector_layer.renderer()
+
+        elif renderer_type in ["categorizedSymbol", "graduatedSymbol"]:
+            self.stored_renderer = vector_layer.renderer()
+            # field name or expression string, needs to be double-checked when used to get field value
+            self.stored_renderer_fields.append(self.stored_renderer.classAttribute())
 
     def process_vector_layer_color(
         self, feature: QgsFeature, feature_app_id: str
     ) -> None:
-        return
+        """Processes a feature color from a vector layer by the stored renderer,
+        and stores the feature's id and color proxy to the color_proxy_cache."""
+
+        if self.stored_color:
+            self.add_object_id_to_color_proxy_cache(feature_app_id, self.stored_color)
+
+        color = None
+        r"""
+        switch (StoredRenderer)
+        {
+        // simple renderers do not rely on fields, so the color can be retrieved from the renderer directly
+        case AC.CIM.CIMSimpleRenderer simpleRenderer:
+            color = simpleRenderer.Symbol.Symbol.GetColor();
+            break;
+
+        case AC.CIM.CIMUniqueValueRenderer uniqueValueRenderer:
+            color = GetRowColorByUniqueValueRenderer(uniqueValueRenderer, row);
+            break;
+
+        case AC.CIM.CIMClassBreaksRenderer classBreaksRenderer:
+            color = GetRowColorByClassBreaksRenderer(classBreaksRenderer, row);
+         
+            break;
+        }
+        
+        if (color is null)
+        {
+        // TODO: log error or throw exception that color could not be retrieved
+        return;
+        }
+
+        // get or create the color proxy for the row
+        int argb = CIMColorToInt(color);
+        AddObjectIdToColorProxyCache(rowApplicationId, argb);
+
+        // store color if from simple renderer
+        if (StoredRenderer is AC.CIM.CIMSimpleRenderer)
+        {
+        StoredColor = argb;
+        }
+        """
 
     def get_feature_color_by_graduate_renderer(
         self, renderer: Any, feature: QgsFeature
@@ -134,3 +189,13 @@ class QgisColorUnpacker:
         self, renderer: Any, feature: QgsFeature
     ) -> Any:
         return
+
+    def add_object_id_to_color_proxy_cache(self, object_id: str, argb: int):
+
+        new_color_proxy: ColorProxy = self.color_proxy_cache.get(argb)
+        if not new_color_proxy:
+            new_color_proxy = ColorProxy(
+                name=str(argb), value=argb, objects=[object_id], applicationId=str(argb)
+            )
+
+        self.color_proxy_cache[argb] = new_color_proxy

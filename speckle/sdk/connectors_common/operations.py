@@ -140,3 +140,37 @@ class SendOperation:
         )
 
         return (obj_id, {})
+
+
+@dataclass
+class ProxyKeys:
+
+    @staticmethod
+    @property
+    def COLOR() -> str:
+        return "colorProxies"
+
+    @staticmethod
+    @property
+    def RENDER_MATERIAL() -> str:
+        return "renderMaterialProxies"
+
+    @staticmethod
+    @property
+    def INSTANCE_DEFINITION() -> str:
+        return "instanceDefinitionProxies"
+
+    @staticmethod
+    @property
+    def GROUP() -> str:
+        return "groupProxies"
+
+    @staticmethod
+    @property
+    def PARAMETER_DEFINITIONS() -> str:
+        return "parameterDefinitions"
+
+    @staticmethod
+    @property
+    def PROPERTYSET_DEFINITIONS() -> str:
+        return "propertySetDefinitions"

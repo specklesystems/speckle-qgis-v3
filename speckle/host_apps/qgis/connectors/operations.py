@@ -11,6 +11,7 @@ from speckle.host_apps.qgis.connectors.host_app import (
 from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage, QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.sdk.connectors_common.conversion import SendConversionResult
+from speckle.sdk.connectors_common.operations import ProxyKeys
 from speckle.sdk.converters_common.converters_common import IRootToSpeckleConverter
 from speckle.ui.models import SendInfo
 
@@ -134,6 +135,10 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             )
             results.append(result_1)
 
+        root_collection[ProxyKeys.COLOR] = list(
+            self.color_unpacker.color_proxy_cache.values()
+        )
+
         return RootObjectBuilderResult(
             root_object=root_collection,
             conversion_results=results,
@@ -143,6 +148,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         self, vector_layer: QgsVectorLayer, layer_app_id: str
     ) -> List[Base]:
         converted_features: List[Base] = []
+        self.color_unpacker.store_renderer_and_fields
         # TODO: _colorUnpacker.StoreRendererAndFields(featureLayer);
 
         for feature in vector_layer.getFeatures():
@@ -151,7 +157,9 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
             )
             converted_features.append(converted_feature)
 
-            # TODO: _colorUnpacker.ProcessFeatureLayerColor(row, applicationId);
+            self.color_unpacker.process_vector_layer_color(
+                feature, get_speckle_app_id(feature, layer_app_id)
+            )
 
         return converted_features
 
