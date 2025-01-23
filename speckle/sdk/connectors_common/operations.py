@@ -140,3 +140,14 @@ class SendOperation:
         )
 
         return (obj_id, {})
+
+
+@dataclass
+class ProxyKeys:
+
+    COLOR = "colorProxies"
+    RENDER_MATERIAL = "renderMaterialProxies"
+    INSTANCE_DEFINITION = "instanceDefinitionProxies"
+    GROUP = "groupProxies"
+    PARAMETER_DEFINITIONS = "parameterDefinitions"
+    PROPERTYSET_DEFINITIONS = "propertySetDefinitions"
