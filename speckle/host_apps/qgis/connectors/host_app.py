@@ -169,8 +169,6 @@ class QgisColorUnpacker:
                 self.stored_renderer, feature
             )
 
-        print(color_rgba)
-
         if not color_rgba:
             return
 
@@ -185,9 +183,9 @@ class QgisColorUnpacker:
     ) -> Any:
 
         feature_value_for_rendering = feature.attribute(self.stored_renderer_field)
-        value_symbol = renderer.symbolForValue(
-            feature_value_for_rendering
-        )  # should be deprecated from 3.40
+        category_index = renderer.categoryIndexForValue(feature_value_for_rendering)
+        value_symbol = renderer.categories()[category_index].symbol()
+
         if not value_symbol:
             value_symbol = renderer.sourceSymbol()
 
