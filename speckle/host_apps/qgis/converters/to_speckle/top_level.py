@@ -10,7 +10,7 @@ from speckle.sdk.converters_common.objects import IToSpeckleTopLevelConverter
 
 from specklepy.objects.base import Base
 
-# from specklepy.objects.data import QgisObject
+from specklepy.objects.data_objects import QgisObject
 
 from qgis.core import QgsFeature, QgsRasterLayer
 
@@ -52,16 +52,7 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(
         application_id = ""
         if isinstance(target, QgsFeature):
             application_id = get_speckle_app_id(target, layer_app_id)
-            r"""TODO : implement
-            result: QgisObject = QgisObject(
-                name=object_type,
-                type=object_type,
-                displayValue=display,
-                properties=properties,
-                units=self._conversion_settings.speckle_units,
-                application_id="",
-            )
-            """
+
         elif isinstance(target, QgsRasterLayer):
             application_id = get_speckle_app_id(target)
         else:
@@ -69,13 +60,13 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(
                 f"Conversion of objects of type '{object_type}' is not supported"
             )
 
-        result: Base = Base()
-
-        result.units = self._conversion_settings.speckle_units
-        result.name = object_type
-        result.type = object_type
-        result.displayValue = display
-        result.properties = properties
-        result.applicationId = application_id
+        result: QgisObject = QgisObject(
+            name=object_type,
+            type=object_type,
+            displayValue=display,
+            properties=properties,
+            units=self._conversion_settings.speckle_units,
+            applicationId=application_id,
+        )
 
         return result
