@@ -230,5 +230,4 @@ class CardsListTemporaryWidget(QWidget):
         return
 
     def mouseReleaseEvent(self, event):
-        # print("Mouse Release Event")
         return

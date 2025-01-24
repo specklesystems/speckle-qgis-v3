@@ -98,11 +98,12 @@ class PolylineToSpeckleConverter:
             for pt in linestring.points()
         ]
         coord_list = [item for pt in speckle_points for item in [pt.x, pt.y, pt.z]]
+        if linestring.isClosed() and len(coord_list) >= 3:
+            coord_list.extend(coord_list[:3])
 
         return Polyline(
             value=coord_list,
             units=self._conversion_settings.speckle_units,
-            closed=linestring.isClosed(),
         )
 
     def _convert_circularstring(self, circularstring) -> Polyline:
