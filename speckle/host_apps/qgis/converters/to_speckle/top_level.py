@@ -38,7 +38,7 @@ class CoreObjectsBaseToSpeckleTopLevelConverter(
         target: QgsFeature | QgsRasterLayer = target_dict["target"]
         layer_app_id = target_dict["layer_application_id"]
 
-        object_type: str = type(target)
+        object_type: str = type(target).__name__
 
         # get displayValue
         display: List[Base] = self._display_value_extractor.get_display_value(
