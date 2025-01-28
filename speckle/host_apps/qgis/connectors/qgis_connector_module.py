@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+from speckle.host_apps.qgis.connectors.utils import QgisThreadContext
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.to_speckle.top_level import (
     CoreObjectsBaseToSpeckleTopLevelConverter,
@@ -30,6 +31,7 @@ from PyQt5.QtCore import QObject
 class QgisConnectorModule(QObject):
 
     bridge: "SpeckleQGISv3Module"
+    thread_context: QgisThreadContext
     document_store: QgisDocumentStore
     basic_binding: QgisBasicConnectorBinding
     send_binding: QgisSendBinding
@@ -48,6 +50,7 @@ class QgisConnectorModule(QObject):
 
         self.iface = iface
         self.bridge = bridge
+        self.thread_context = QgisThreadContext()
         self.document_store = QgisDocumentStore()
         self.basic_binding = QgisBasicConnectorBinding(self.document_store, bridge)
         self.send_binding = QgisSendBinding(
