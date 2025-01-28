@@ -1,6 +1,4 @@
-from typing import Any, Dict, List
 from speckle.host_apps.qgis.connectors.utils import QgisThreadContext
-from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.to_speckle.top_level import (
     CoreObjectsBaseToSpeckleTopLevelConverter,
 )
@@ -96,6 +94,7 @@ class QgisConnectorModule(QObject):
         )
         client_factory = ClientFactory()
         self.send_operation: SendOperation = SendOperation(
+            thread_context=self.thread_context,  # not in C#
             root_object_builder=self.root_obj_builder,
             send_conversion_cache=None,
             account_service=self.account_service,

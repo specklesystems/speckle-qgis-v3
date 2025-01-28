@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
+from speckle.host_apps.qgis.connectors.utils import QgisThreadContext
 from speckle.sdk.connectors_common.api import IClientFactory, IOperations
 from speckle.sdk.connectors_common.builders import (
     IRootObjectBuilder,
@@ -45,6 +46,7 @@ class SendOperationResult:
 
 
 class SendOperation:
+    thread_context: QgisThreadContext
     root_object_builder: IRootObjectBuilder
     send_conversion_cache: "ISendConversionCache"
     account_service: AccountService
@@ -55,6 +57,7 @@ class SendOperation:
 
     def __init__(
         self,
+        thread_context: QgisThreadContext,
         root_object_builder: IRootObjectBuilder,
         send_conversion_cache: "ISendConversionCache",
         account_service: AccountService,
@@ -63,6 +66,7 @@ class SendOperation:
         client_factory: IClientFactory,
         activity_factory: "IActivityFactory",
     ):
+        self.thread_context = thread_context
         self.root_object_builder = root_object_builder
         self.send_conversion_cache = send_conversion_cache
         self.account_service = account_service
@@ -78,9 +82,17 @@ class SendOperation:
         on_operation_progressed: "IProgress[CardProgress]",
         ct: "CancellationToken",
     ) -> SendOperationResult:
-        build_result: RootObjectBuilderResult = self.root_object_builder.build(
-            objects, send_info, on_operation_progressed, ct
+
+        # send operation to thread:
+        build_result: RootObjectBuilderResult = self.thread_context.run_on_thread_async(
+            lambda: self.root_object_builder.build(
+                objects, send_info, on_operation_progressed, ct
+            ),
+            True,
         )
+        # build_result: RootObjectBuilderResult = self.root_object_builder.build(
+        #    objects, send_info, on_operation_progressed, ct
+        # )
         build_result.root_object["version"] = 3
 
         obj_id_and_converted_refs = self.send(
