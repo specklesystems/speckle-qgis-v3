@@ -5,8 +5,8 @@ from speckle.sdk.connectors_common.threading import ThreadContext
 
 class QgisThreadContext(ThreadContext):
 
-    def worker_to_main_async(action: Callable):
+    def worker_to_main_async(self, action: Callable):
         raise NotImplementedError()
 
-    def main_to_worker_async(action: Callable):
-        raise NotImplementedError()
+    def main_to_worker_async(self, action: Callable):
+        self.run_on_thread_async(action, False)

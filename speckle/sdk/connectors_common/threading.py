@@ -11,13 +11,13 @@ class ThreadContext(ABC):
             return True
         return False
 
-    def run_on_thread_async(action: Callable, use_main: bool):
+    def run_on_thread_async(self, action: Callable, use_main: bool):
         raise NotImplementedError()
 
     @abstractmethod
-    def worker_to_main_async(action: Callable):
+    def worker_to_main_async(self, action: Callable):
         raise NotImplementedError()
 
     @abstractmethod
-    def main_to_worker_async(action: Callable):
+    def main_to_worker_async(self, action: Callable):
         raise NotImplementedError()
