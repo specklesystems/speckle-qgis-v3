@@ -6,9 +6,40 @@ from qgis.core import (
     QgsTask,
     QgsApplication,
 )
+from PyQt5.QtCore import QObject
 
 
-class ThreadContext(ABC):
+class MyTask(QgsTask):
+
+    action: Callable
+
+    def __init__(
+        self,
+        thread_context: "ThreadContext",
+        action: Callable,
+        description=None,
+    ):
+
+        super().__init__(description, QgsTask.CanCancel)
+        self.exception = None
+        self.action = action
+        self.thread_context = thread_context
+
+    def run(self):
+        # print(f"Is main thread: {self.thread_context.is_main_thread()}")
+        self.action()
+
+    def finished(self, result):
+        return
+
+
+class MetaQObject(type(QObject), type(ABC)):
+    # avoiding TypeError: metaclass conflict: the metaclass of a derived class
+    # must be a (non-strict) subclass of the metaclasses of all its bases
+    pass
+
+
+class ThreadContext(ABC, QObject, metaclass=MetaQObject):
 
     @staticmethod
     def is_main_thread() -> bool:
@@ -25,10 +56,18 @@ class ThreadContext(ABC):
                 raise NotImplementedError()
         else:
             if self.is_main_thread():
-                task = QgsTask.fromFunction(
-                    "Speckle task", action, on_finished=lambda: None
+
+                # QgsApplication.taskManager().cancelAll()
+                task = MyTask(
+                    self,
+                    action=action,
                 )
+
                 QgsApplication.taskManager().addTask(task)
+                print(
+                    QgsApplication.taskManager().tasks()
+                )  # weird way to trigger the task, otherwise it just doesn't run
+
             else:
                 return action()
 

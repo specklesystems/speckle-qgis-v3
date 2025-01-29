@@ -89,12 +89,9 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
         # will modify root_collection and return objects as flat list of Qgs Vector or Raster layers
         # will pre-populate Collections with Type, Fields and WkbType
-
         unpacked_layers_to_convert: List[Any] = self.layer_unpacker.unpack_selection(
             qgis_layers=layers_ordered, parent_collection=root_collection
         )
-        print("____UNPACKED LAYERS TO CONVERT")
-        print(unpacked_layers_to_convert)
 
         # here will be iteration loop through layers and their features
         results: List[SendConversionResult] = []
