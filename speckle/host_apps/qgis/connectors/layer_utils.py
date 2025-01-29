@@ -73,15 +73,14 @@ class QgisLayerUtils:
         self, card_content: ModelCard
     ) -> List[LayerStorage]:
 
-        print("_____get_layers_from_model_card_content")
         layer_ids_and_group_names: List[str] = (
             card_content.send_filter.refresh_object_ids()
         )
         root = QgsProject.instance().layerTreeRoot()
 
         # get groups
-        # for group in root.findGroups():
-        # get layer; also extract actual .layer() from the found QgsLayerTreeLayer
+        # for group in root.findGroups() get layer;
+        # then extract actual .layer() from the found QgsLayerTreeLayer
         all_groups: List[LayerStorage] = self.traverse_nodes(
             nodes=root.findGroups(), return_layers=False
         )
@@ -103,6 +102,10 @@ class QgisLayerUtils:
         ]
 
         all_layers = groups + layers
+
+        if len(all_layers) != len(layer_ids_and_group_names):
+            pass
+            # TODO: raise Warning about missing layers. Likely due to document opening/change, or deleted layers
 
         return self.filter_out_duplicate_layers(all_layers)
 

@@ -52,13 +52,7 @@ class SpeckleQGISv3Module:
         self.connect_converter_module_signals()
 
     def connect_dockwidget_signals(self):
-        self.dockwidget.send_model_signal.connect(self.send_model)
-        r"""
-        self.dockwidget.send_model_signal.connect(
-            lambda model_card: self.connector_module.thread_context.run_on_thread_async(
-                lambda: self.send_model(model_card),
-                False,))
-        """
+        self.dockwidget.send_model_signal.connect(self._send_model)
         self.dockwidget.add_model_signal.connect(self.add_model_card_to_store)
         self.dockwidget.remove_model_signal.connect(self.remove_model_card_from_store)
 
@@ -111,6 +105,7 @@ class SpeckleQGISv3Module:
         )
 
     def _bridge_send(self, *args):
+        """Send a UI notification after Send operation."""
         self.dockwidget.add_send_notification(*args)
 
     def _create_send_modules(self, *args):
@@ -125,13 +120,12 @@ class SpeckleQGISv3Module:
         return
 
     def add_model_card_to_store(self, model_card: ModelCard):
-        print("dockwidget-originated signal: to add card to Store")
         self.connector_module.document_store.add_model(model_card=model_card)
 
     def remove_model_card_from_store(self, model_card: ModelCard):
         self.connector_module.document_store.remove_model(model_card=model_card)
 
-    def send_model(self, model_card: ModelCard):
+    def _send_model(self, model_card: ModelCard):
 
         # receiving signal from UI and passing it to SendBinding
         # this part of the operation will only get a model card, layers and conversion settings,
