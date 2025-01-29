@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
 from speckle.host_apps.qgis.connectors.filters import QgisSelectionFilter
 from speckle.ui.bindings import SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
-from speckle.ui.widgets.background import BackgroundWidget
+from speckle.ui.widgets.background_widget import BackgroundWidget
 from speckle.ui.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     BACKGR_COLOR,

@@ -1,5 +1,5 @@
 from speckle.ui.utils.search_widget_utils import UiSearchUtils
-from speckle.ui.widgets.background import BackgroundWidget
+from speckle.ui.widgets.background_widget import BackgroundWidget
 from speckle.ui.widgets.widget_cards_list_temporary import (
     CardsListTemporaryWidget,
 )

@@ -11,7 +11,7 @@ from speckle.ui.widgets.utils.global_resources import (
     LABEL_HEIGHT,
     BACKGR_COLOR_LIGHT_GREY2,
 )
-from speckle.ui.widgets.background import BackgroundWidget
+from speckle.ui.widgets.background_widget import BackgroundWidget
 from speckle.ui.widgets.widget_card_from_list import CardInListWidget
 
 

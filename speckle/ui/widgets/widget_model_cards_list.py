@@ -22,7 +22,7 @@ from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR_LIGHT_GREY2,
 )
-from speckle.ui.widgets.background import BackgroundWidget
+from speckle.ui.widgets.background_widget import BackgroundWidget
 from speckle.ui.widgets.widget_model_card import ModelCardWidget
 from specklepy.core.api.models.current import Project
 
