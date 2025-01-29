@@ -12,6 +12,8 @@ from speckle.ui.models import (
     ModelCard,
 )
 
+from PyQt5.QtCore import pyqtSignal, QObject
+
 
 class IBinding(ABC):
     name: str
@@ -130,14 +132,19 @@ class ToastNotificationType(Enum):
     INFO = auto()
 
 
-class SendBindingUICommands(BasicConnectorBindingCommands):
+class SendBindingUICommands(BasicConnectorBindingCommands, QObject):
     REFRESH_SEND_FILTERS_UI_COMMAND_NAME: str = "refreshSendFilters"
     SET_MODELS_EXPIRED_UI_COMMAND_NAME: str = "setModelsExpired"
     SET_MODEL_SEND_RESULT_UI_COMMAND_NAME: str = "setModelSendResult"
     SET_ID_MAP_COMMAND_NAME: str = "setIdMap"
 
+    bridge_send_signal = pyqtSignal(str, str, str, list)
+
     def __init__(self, bridge: IBrowserBridge):
-        super().__init__(bridge=bridge)
+
+        # initialize parent classes separately
+        BasicConnectorBindingCommands.__init__(self, bridge=bridge)
+        QObject.__init__(self)
 
     def refresh_send_filter(self) -> None:
         # TODO
@@ -166,7 +173,8 @@ class SendBindingUICommands(BasicConnectorBindingCommands):
         send_conversion_results: List[SendOperationResult],
     ) -> None:
 
-        self.bridge.bridge_send(
+        # need to pass the operation back to main thread, therefore, emitting a signal instead of directly calling a command
+        self.bridge_send_signal.emit(
             self.SET_MODEL_SEND_RESULT_UI_COMMAND_NAME,
             model_card_id,
             version_id,

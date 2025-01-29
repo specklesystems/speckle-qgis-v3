@@ -1,5 +1,5 @@
 import math
-from typing import Dict, List
+from typing import List
 from speckle.host_apps.qgis.connectors.extensions import get_speckle_app_id
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 
@@ -12,7 +12,6 @@ from qgis.core import (
     QgsWkbTypes,
     QgsPoint,
     QgsRasterLayer,
-    QgsPointXY,
     QgsRasterBandStats,
 )
 from osgeo import gdal

@@ -14,6 +14,8 @@ from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.models import ModelCard, SendInfo
 from speckle.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
+from qgis.core import QgsApplication
+
 import webbrowser
 
 SPECKLE_COLOR = (59, 130, 246)
@@ -50,7 +52,7 @@ class SpeckleQGISv3Module:
         self.connect_converter_module_signals()
 
     def connect_dockwidget_signals(self):
-        self.dockwidget.send_model_signal.connect(self.send_model)
+        self.dockwidget.send_model_signal.connect(self._send_model)
         self.dockwidget.add_model_signal.connect(self.add_model_card_to_store)
         self.dockwidget.remove_model_signal.connect(self.remove_model_card_from_store)
 
@@ -66,12 +68,24 @@ class SpeckleQGISv3Module:
         self.connector_module.send_binding.create_send_modules_signal.connect(
             self._create_send_modules
         )
+
+        # move operation to worker thread
         self.connector_module.send_binding.send_operation_execute_signal.connect(
-            self._execute_send_operation
+            lambda model_card_id, obj, send_info, progress, ct: self.connector_module.thread_context.run_on_thread_async(
+                lambda: self._execute_send_operation(
+                    model_card_id, obj, send_info, progress, ct
+                ),
+                False,
+            )
+        )
+
+        self.connector_module.send_binding.commads.bridge_send_signal.connect(
+            self._bridge_send
         )
 
     def _execute_send_operation(
         self,
+        model_card_id: str,
         objects: List[Any],
         send_info: SendInfo,
         on_operation_progressed: "IProgress[CardProgress]",
@@ -83,18 +97,16 @@ class SpeckleQGISv3Module:
                 objects, send_info, on_operation_progressed, ct
             )
         )
-        self.connector_module.send_binding.send_operation_result = send_operation_result
 
-    def bridge_send(
-        self,
-        command: str,
-        model_card_id: str,
-        version_id: str,
-        send_conversion_results: List[SendOperationResult],
-    ):
-        self.dockwidget.add_send_notification(
-            command, model_card_id, version_id, send_conversion_results
+        self.connector_module.send_binding.commads.set_model_send_result(
+            model_card_id=model_card_id,
+            version_id=send_operation_result.root_obj_id,
+            send_conversion_results=send_operation_result.converted_references,
         )
+
+    def _bridge_send(self, *args):
+        """Send a UI notification after Send operation."""
+        self.dockwidget.add_send_notification(*args)
 
     def _create_send_modules(self, *args):
 
@@ -108,14 +120,16 @@ class SpeckleQGISv3Module:
         return
 
     def add_model_card_to_store(self, model_card: ModelCard):
-        print("dockwidget-originated signal: to add card to Store")
         self.connector_module.document_store.add_model(model_card=model_card)
 
     def remove_model_card_from_store(self, model_card: ModelCard):
         self.connector_module.document_store.remove_model(model_card=model_card)
 
-    def send_model(self, model_card: ModelCard):
+    def _send_model(self, model_card: ModelCard):
+
         # receiving signal from UI and passing it to SendBinding
+        # this part of the operation will only get a model card, layers and conversion settings,
+        # and send a signal to execute Build and Send
         self.connector_module.send_binding.send(model_card_id=model_card.model_card_id)
 
     def verify_dependencies(self):

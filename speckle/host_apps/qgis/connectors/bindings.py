@@ -1,5 +1,4 @@
 from typing import Any, Dict, List, Optional
-from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage, QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.utils import CRSoffsetRotation
@@ -95,8 +94,7 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
     subscribed_layers: List[Any]
 
     create_send_modules_signal = pyqtSignal(QgsProject, CRSoffsetRotation, list)
-    send_operation_execute_signal = pyqtSignal(list, object, object, object)
-    send_operation_result: SendOperationResult = None
+    send_operation_execute_signal = pyqtSignal(str, list, object, object, object)
 
     def __init__(
         self,
@@ -167,13 +165,7 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         self.create_send_modules_signal.emit(qgis_project, crs_offset_rotation, layers)
 
         self.send_operation_execute_signal.emit(
-            layers, model_card.get_send_info("QGIS"), None, None
-        )  # should assign self.send_operation_result
-
-        self.commads.set_model_send_result(
-            model_card_id=model_card_id,
-            version_id=self.send_operation_result.root_obj_id,
-            send_conversion_results=self.send_operation_result.converted_references,
+            model_card_id, layers, model_card.get_send_info("QGIS"), None, None
         )
 
     def cancel_send(self, model_card_id):

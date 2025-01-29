@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
+from speckle.host_apps.qgis.connectors.utils import QgisThreadContext
 from speckle.sdk.connectors_common.api import IClientFactory, IOperations
 from speckle.sdk.connectors_common.builders import (
     IRootObjectBuilder,
@@ -78,6 +79,7 @@ class SendOperation:
         on_operation_progressed: "IProgress[CardProgress]",
         ct: "CancellationToken",
     ) -> SendOperationResult:
+
         build_result: RootObjectBuilderResult = self.root_object_builder.build(
             objects, send_info, on_operation_progressed, ct
         )
