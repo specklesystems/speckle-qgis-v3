@@ -138,12 +138,17 @@ class ModelCardWidget(QWidget):
         self.layout.removeWidget(self.notification_line)
         self.notification_line = None
 
-    def show_notification_line(self):
+    def show_notification_line(
+        self, main_text: str, btn_dismiss: bool, btn_view_web: bool
+    ):
 
-        self.notification_line = ModelCardNotificationWidget(self.card_content)
-        self.notification_line.dismiss_btn.clicked.connect(
-            lambda: self._hide_notification_line()
+        self.notification_line = ModelCardNotificationWidget(
+            self.card_content, main_text, btn_dismiss, btn_view_web
         )
+        if btn_dismiss:
+            self.notification_line.dismiss_btn.clicked.connect(
+                lambda: self._hide_notification_line()
+            )
         self.layout.addWidget(self.notification_line)
 
         self.layout.setCurrentWidget(self.notification_line)

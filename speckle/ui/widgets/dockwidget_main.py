@@ -367,7 +367,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         send_conversion_results: List[SendOperationResult],
     ):
         model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
-        model_card_widget.show_notification_line()
+        model_card_widget.show_notification_line("Version created!", True, True)
 
     def resizeEvent(self, event):
         QtWidgets.QDockWidget.resizeEvent(self, event)

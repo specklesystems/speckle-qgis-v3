@@ -25,16 +25,22 @@ from speckle.ui.widgets.utils.utils import create_text_for_widget, open_in_web
 
 
 class ModelCardNotificationWidget(QWidget):
-    dismiss_btn: QPushButton
+    dismiss_btn: QPushButton = None
     card_content: ModelCard
 
     def __init__(
         self,
         card_content: ModelCard,
+        main_text: str,
+        btn_dismiss: bool,
+        btn_view_web: bool,
         parent=None,
     ):
         super(ModelCardNotificationWidget, self).__init__(parent)
         self.card_content = card_content
+        self.main_text = main_text
+        self.btn_dismiss = btn_dismiss
+        self.btn_view_web = btn_view_web
 
         # create a container that will be added to the main Stacked layout
         # make it semi-transparent
@@ -70,7 +76,7 @@ class ModelCardNotificationWidget(QWidget):
         layout_line.setContentsMargins(10, 5, 10, 5)
 
         # add main text
-        main_text = self.create_main_text("Version created!")
+        main_text = self.create_main_text(self.main_text)
         layout_line.addWidget(main_text)
 
         # Add a spacer item to push the next button to the right
@@ -78,13 +84,15 @@ class ModelCardNotificationWidget(QWidget):
         layout_line.addItem(spacer)
 
         # Add dismiss buttom
-        dismiss_btn = self.create_dismiss_btn()
-        layout_line.addWidget(dismiss_btn)
-        self.dismiss_btn = dismiss_btn
+        if self.btn_dismiss:
+            dismiss_btn = self.create_dismiss_btn()
+            layout_line.addWidget(dismiss_btn)
+            self.dismiss_btn = dismiss_btn
 
         # Add view in Web buttom
-        view_web = self.create_web_view_btn()
-        layout_line.addWidget(view_web)
+        if self.btn_view_web:
+            view_web = self.create_web_view_btn()
+            layout_line.addWidget(view_web)
 
         return line
 
