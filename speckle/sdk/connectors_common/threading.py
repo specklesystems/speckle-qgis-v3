@@ -17,10 +17,10 @@ class MyTask(QgsTask):
         self,
         thread_context: "ThreadContext",
         action: Callable,
-        description=None,
+        model_card_id: str,
     ):
 
-        super().__init__(description, QgsTask.CanCancel)
+        super().__init__(f"speckle_{model_card_id}", QgsTask.CanCancel)
         self.exception = None
         self.action = action
         self.thread_context = thread_context
@@ -47,7 +47,9 @@ class ThreadContext(ABC, QObject, metaclass=MetaQObject):
             return True
         return False
 
-    def run_on_thread_async(self, action: Callable, use_main: bool = False):
+    def run_on_thread_async(
+        self, action: Callable, model_card_id: str, use_main: bool = False
+    ):
         if use_main:
             if self.is_main_thread():
                 return action()
@@ -61,6 +63,7 @@ class ThreadContext(ABC, QObject, metaclass=MetaQObject):
                 task = MyTask(
                     self,
                     action=action,
+                    model_card_id=model_card_id,
                 )
 
                 QgsApplication.taskManager().addTask(task)

@@ -85,6 +85,7 @@ class SpeckleQGISv3Module:
                 lambda: self._execute_send_operation(
                     model_card_id, obj, send_info, progress, ct
                 ),
+                model_card_id,
                 False,
             )
         )

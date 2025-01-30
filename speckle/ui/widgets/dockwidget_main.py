@@ -374,8 +374,15 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
         model_card_widget.hide_notification_line()
 
-        # actually cancel operation
-        QgsApplication.taskManager().cancelAll()
+        # actually cancel operations
+        print(QgsApplication.taskManager().tasks())
+        for task in QgsApplication.taskManager().tasks():
+            if task.description() == f"speckle_{model_card_id}":
+                task.cancel()
+                print(task.canCancel())
+                print(task.description())
+                print(task.progress())
+                print(task.isCanceled())
 
     def add_activity_status(self, model_card_id: str, main_text: str):
         model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
