@@ -27,6 +27,7 @@ from speckle.ui.widgets.utils.utils import create_text_for_widget, open_in_web
 class ModelCardNotificationWidget(QWidget):
     dismiss_btn: QPushButton = None
     card_content: ModelCard
+    cancel_operation_signal = pyqtSignal()
 
     def __init__(
         self,
@@ -34,6 +35,7 @@ class ModelCardNotificationWidget(QWidget):
         main_text: str,
         btn_dismiss: bool,
         btn_view_web: bool,
+        btn_cancel: bool,
         parent=None,
     ):
         super(ModelCardNotificationWidget, self).__init__(parent)
@@ -41,6 +43,7 @@ class ModelCardNotificationWidget(QWidget):
         self.main_text = main_text
         self.btn_dismiss = btn_dismiss
         self.btn_view_web = btn_view_web
+        self.btn_cancel = btn_cancel
 
         # create a container that will be added to the main Stacked layout
         # make it semi-transparent
@@ -55,10 +58,26 @@ class ModelCardNotificationWidget(QWidget):
         self.layout.setAlignment(Qt.AlignBottom)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        line = self.create_notification_line()
+        # Add cancel buttom
+        if self.btn_cancel:
+            top_line = QWidget()
+            top_line.setStyleSheet(
+                "QWidget {"
+                + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
+                + "text-align: left;}"
+            )
+            layout_line = QHBoxLayout(top_line)
+            layout_line.setAlignment(Qt.AlignLeft)
+            layout_line.setContentsMargins(10, 5, 10, 5)
+
+            cancel_btn = self.create_cancel_btn()
+            layout_line.addWidget(cancel_btn)
+            self.layout.addWidget(top_line)
+
+        bottom_line = self.create_notification_line()
 
         # Add line widget to the container
-        self.layout.addWidget(line)
+        self.layout.addWidget(bottom_line)
 
     def create_notification_line(self):
 
@@ -128,3 +147,18 @@ class ModelCardNotificationWidget(QWidget):
         )
         dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         return dismiss_btn
+
+    def create_cancel_btn(self):
+
+        cancel_btn = QPushButton("x")
+        cancel_btn.setStyleSheet(
+            "QPushButton {"
+            + f"color:white; border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 24px;font-weight: bold;"
+            + f"{BACKGR_COLOR} height:20px;text-align: center; padding: 0px 10px;"
+            + "} QPushButton:hover { "
+            + f"{BACKGR_COLOR_LIGHT};"
+            + " }"
+        )
+        cancel_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+        self.cancel_operation_signal.emit()
+        return cancel_btn

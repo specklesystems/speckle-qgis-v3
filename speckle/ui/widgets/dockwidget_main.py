@@ -361,14 +361,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         if self.widget_selection_filter:
             self.widget_selection_filter.change_selection_info(*args)
 
-    def add_activity_status(
-        self,
-        model_card_id: str,
-        main_text: str,
-    ):
+    def add_activity_status(self, model_card_id: str, main_text: str):
         model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
         # enable Dismiss button for occasional situation, when the progress is stuck
-        model_card_widget.show_notification_line(main_text, True, False)
+        model_card_widget.show_notification_line(main_text, True, False, True)
 
     def add_send_notification(
         self,
@@ -378,7 +374,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         send_conversion_results: List[SendOperationResult],
     ):
         model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
-        model_card_widget.show_notification_line("Version created!", True, True)
+        model_card_widget.show_notification_line("Version created!", True, True, False)
 
     def resizeEvent(self, event):
         QtWidgets.QDockWidget.resizeEvent(self, event)
