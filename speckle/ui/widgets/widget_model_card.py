@@ -35,7 +35,7 @@ class ModelCardWidget(QWidget):
     card_content: ModelCard = None
     send_model_btn: QPushButton = None
     send_model_signal = pyqtSignal(SenderModelCard)
-    cancel_operation_signal = pyqtSignal(SenderModelCard)
+    cancel_operation_signal = pyqtSignal(str)
     remove_self_card_signal = pyqtSignal(ModelCard)
     shadow_effect = None
     close_btn: QPushButton = None
@@ -133,7 +133,7 @@ class ModelCardWidget(QWidget):
 
         return line
 
-    def _hide_notification_line(self):
+    def hide_notification_line(self):
 
         self.layout.setCurrentWidget(self.main_content)
         self.layout.removeWidget(self.notification_line)
@@ -143,7 +143,7 @@ class ModelCardWidget(QWidget):
         self, main_text: str, btn_dismiss: bool, btn_view_web: bool, btn_cancel: bool
     ):
         if self.notification_line:
-            self._hide_notification_line()
+            self.hide_notification_line()
 
         self.notification_line = ModelCardNotificationWidget(
             self.card_content, main_text, btn_dismiss, btn_view_web, btn_cancel, self
@@ -151,11 +151,13 @@ class ModelCardWidget(QWidget):
         # connect buttons from the new notification widget
         if btn_dismiss:
             self.notification_line.dismiss_btn.clicked.connect(
-                lambda: self._hide_notification_line()
+                lambda: self.hide_notification_line()
             )
         if btn_cancel:
-            self.notification_line.cancel_operation_signal.connect(
-                lambda: self.cancel_operation_signal.emit(self.card_content)
+            self.notification_line.cancel_operation_signal_no_card.connect(
+                lambda: self.cancel_operation_signal.emit(
+                    self.card_content.model_card_id
+                )
             )
         self.layout.addWidget(self.notification_line)
 

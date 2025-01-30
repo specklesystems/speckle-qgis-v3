@@ -139,7 +139,7 @@ class SpeckleQGISv3Module:
         # this part of the operation will only get a model card, layers and conversion settings,
         # and send a signal to execute Build and Send
 
-        # first, update UI status
+        # first, update UI status through the main thread
         self.dockwidget.activity_start_signal.emit(
             model_card.model_card_id, "Preparing to send.."
         )

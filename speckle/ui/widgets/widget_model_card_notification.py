@@ -27,7 +27,7 @@ from speckle.ui.widgets.utils.utils import create_text_for_widget, open_in_web
 class ModelCardNotificationWidget(QWidget):
     dismiss_btn: QPushButton = None
     card_content: ModelCard
-    cancel_operation_signal = pyqtSignal()
+    cancel_operation_signal_no_card = pyqtSignal()
 
     def __init__(
         self,
@@ -150,7 +150,7 @@ class ModelCardNotificationWidget(QWidget):
 
     def create_cancel_btn(self):
 
-        cancel_btn = QPushButton("x")
+        cancel_btn = QPushButton("⨯")
         cancel_btn.setStyleSheet(
             "QPushButton {"
             + f"color:white; border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 24px;font-weight: bold;"
@@ -160,5 +160,5 @@ class ModelCardNotificationWidget(QWidget):
             + " }"
         )
         cancel_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        self.cancel_operation_signal.emit()
+        cancel_btn.clicked.connect(self.cancel_operation_signal_no_card.emit)
         return cancel_btn
