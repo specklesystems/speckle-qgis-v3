@@ -21,7 +21,7 @@ from specklepy.objects.base import Base
 from specklepy.objects.geometry.mesh import Mesh
 from specklepy.objects.models.collections.collection import Collection
 
-from qgis.core import QgsProject, QgsLayerTreeGroup, QgsVectorLayer, QgsRasterLayer
+from qgis.core import QgsProject, QgsVectorLayer, QgsRasterLayer
 
 
 class QgisRootObjectBuilder(IRootObjectBuilder):

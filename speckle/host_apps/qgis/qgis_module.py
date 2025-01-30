@@ -14,8 +14,6 @@ from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.models import ModelCard, SendInfo
 from speckle.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
-from PyQt5.QtCore import pyqtSignal
-
 import webbrowser
 
 SPECKLE_COLOR = (59, 130, 246)
@@ -99,6 +97,12 @@ class SpeckleQGISv3Module:
         on_operation_progressed: "IProgress[CardProgress]",
         ct: "CancellationToken",
     ):
+
+        # first, update UI status
+        self.dockwidget.activity_start_signal.emit(
+            model_card_id, "Converting and sending.."
+        )
+
         # execute and return send operation results
         send_operation_result: SendOperationResult = (
             self.connector_module.send_operation.execute(

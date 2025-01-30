@@ -367,7 +367,8 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         main_text: str,
     ):
         model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
-        model_card_widget.show_notification_line(main_text, False, False)
+        # enable Dismiss button for occasional situation, when the progress is stuck
+        model_card_widget.show_notification_line(main_text, True, False)
 
     def add_send_notification(
         self,
