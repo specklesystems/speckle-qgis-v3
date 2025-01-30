@@ -46,6 +46,8 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     add_model_signal = pyqtSignal(ModelCard)
     remove_model_signal = pyqtSignal(ModelCard)
 
+    activity_start_signal = pyqtSignal(str, str)
+
     def __init__(self, bridge=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
         super(SpeckleQGISv3Dialog, self).__init__()
@@ -358,6 +360,14 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     def handle_change_selection_info(self, *args):
         if self.widget_selection_filter:
             self.widget_selection_filter.change_selection_info(*args)
+
+    def add_activity_status(
+        self,
+        model_card_id: str,
+        main_text: str,
+    ):
+        model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
+        model_card_widget.show_notification_line(main_text, False, False)
 
     def add_send_notification(
         self,

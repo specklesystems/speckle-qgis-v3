@@ -14,7 +14,7 @@ from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.models import ModelCard, SendInfo
 from speckle.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
-from qgis.core import QgsApplication
+from PyQt5.QtCore import pyqtSignal
 
 import webbrowser
 
@@ -42,6 +42,7 @@ class SpeckleQGISv3Module:
         )
         self.dockwidget.runSetup(self)
         self.connect_dockwidget_signals()
+        self.connect_self_signals()
 
     def instantiate_module_dependencies(self, iface):
 
@@ -61,8 +62,19 @@ class SpeckleQGISv3Module:
         self.connector_module.selection_binding.selection_changed_signal.connect(
             self.dockwidget.handle_change_selection_info
         )
+
+        self.connector_module.send_binding.commads.bridge_send_signal.connect(
+            self.dockwidget.add_send_notification
+        )  # Send a UI notification after Send operation
+
         # all dockwidget subscribtions to child widget signals are handled in Dockwidget class,
         # because child widget are not persistent
+
+    def connect_self_signals(self):
+        # signal to update UI, needs t be transferred to the main thread
+        self.dockwidget.activity_start_signal.connect(
+            self.dockwidget.add_activity_status
+        )
 
     def connect_connector_module_signals(self):
         self.connector_module.send_binding.create_send_modules_signal.connect(
@@ -77,10 +89,6 @@ class SpeckleQGISv3Module:
                 ),
                 False,
             )
-        )
-
-        self.connector_module.send_binding.commads.bridge_send_signal.connect(
-            self._bridge_send
         )
 
     def _execute_send_operation(
@@ -104,10 +112,6 @@ class SpeckleQGISv3Module:
             send_conversion_results=send_operation_result.converted_references,
         )
 
-    def _bridge_send(self, *args):
-        """Send a UI notification after Send operation."""
-        self.dockwidget.add_send_notification(*args)
-
     def _create_send_modules(self, *args):
 
         # create conversion settings
@@ -130,6 +134,12 @@ class SpeckleQGISv3Module:
         # receiving signal from UI and passing it to SendBinding
         # this part of the operation will only get a model card, layers and conversion settings,
         # and send a signal to execute Build and Send
+
+        # first, update UI status
+        self.dockwidget.activity_start_signal.emit(
+            model_card.model_card_id, "Preparing to send.."
+        )
+
         self.connector_module.send_binding.send(model_card_id=model_card.model_card_id)
 
     def verify_dependencies(self):

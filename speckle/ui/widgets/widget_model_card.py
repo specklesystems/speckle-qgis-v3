@@ -141,6 +141,8 @@ class ModelCardWidget(QWidget):
     def show_notification_line(
         self, main_text: str, btn_dismiss: bool, btn_view_web: bool
     ):
+        if self.notification_line:
+            self._hide_notification_line()
 
         self.notification_line = ModelCardNotificationWidget(
             self.card_content, main_text, btn_dismiss, btn_view_web
