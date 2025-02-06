@@ -81,10 +81,7 @@ class SendOperation:
         ct: CancellationToken,
     ) -> SendOperationResult:
 
-        print("___EXECUTE")
-        print(ct)
         ct.throw_if_cancellation_requested()
-        print("___EXECUTE2")
 
         build_result: RootObjectBuilderResult = self.root_object_builder.build(
             objects, send_info, on_operation_progressed, ct
@@ -108,8 +105,8 @@ class SendOperation:
         on_operation_progressed: "IProgress[CardProgress]" = None,
         ct: "CancellationToken" = None,
     ):
-        # TODO
-        # ct.ThrowIfCancellationRequested()
+
+        ct.throw_if_cancellation_requested()
         # on_operation_progressed.report(CardProgress(status="Uploading...",progress=None))
 
         account: Account = self.account_service.get_account_with_server_url_fallback(
@@ -137,6 +134,8 @@ class SendOperation:
 
         # create a version in the project
         api_client: SpeckleClient = self.client_factory.create(account)
+
+        ct.throw_if_cancellation_requested()
 
         _ = api_client.version.create(
             CreateVersionInput(
