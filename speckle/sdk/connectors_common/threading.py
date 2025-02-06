@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import threading
 from typing import Callable
 
-from qgis.core import QgsTask, QgsApplication, Qgis, QgsMessageLog
+from qgis.core import QgsTask, QgsApplication
 from PyQt5.QtCore import QObject
 
 
@@ -64,12 +64,7 @@ class ThreadContext(ABC, QObject, metaclass=MetaQObject):
                     model_card_id=model_card_id,
                 )
                 task.taskTerminated.connect(lambda: self.task_terminated(task))
-
                 QgsApplication.taskManager().addTask(task)
-                # QgsMessageLog.logMessage("QgsTask created", "Speckle", level=Qgis.Info)
-                # print(
-                #    QgsApplication.taskManager().tasks()
-                # )  # weird way to trigger the task, otherwise it just doesn't run
 
             else:
                 return action()
