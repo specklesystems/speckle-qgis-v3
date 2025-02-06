@@ -2,6 +2,9 @@ from typing import Any, Dict, List, Optional
 from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage, QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.utils import CRSoffsetRotation
+from speckle.sdk.connectors_common.cancellation import (
+    CancellationManager,
+)
 from speckle.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
@@ -83,7 +86,7 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
     store: DocumentModelStore
     _service_provider: "IServiceProvider"
     _send_filters: List[ISendFilter]
-    _cancellation_manager: "CancellationManager"
+    cancellation_manager: CancellationManager
     _send_conversion_cache: "ISendConversionCache"
     _operation_progress_manager: "IOperationProgressManager"
     _logger: "ILogger[QGISSendBinding]"
@@ -102,7 +105,7 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         store: DocumentModelStore,
         _service_provider: "IServiceProvider",
         _send_filters: List[ISendFilter],
-        _cancellation_manager: "CancellationManager",
+        cancellation_manager: CancellationManager,
         send_conversion_cache: "ISendConversionCache",
         _operation_progress_manager: "IOperationProgressManager",
         _logger: "ILogger[QGISSendBinding]",
@@ -113,7 +116,7 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         self.store = store
         self._service_provider = _service_provider
         self._send_filters = _send_filters
-        self._cancellation_manager = _cancellation_manager
+        self.cancellation_manager = cancellation_manager
         self.send_conversion_cache = send_conversion_cache
         self._operation_progress_manager = _operation_progress_manager
         self._logger = _logger
@@ -164,8 +167,17 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         crs_offset_rotation = CRSoffsetRotation(qgis_project.crs(), 0, 0, 0)
         self.create_send_modules_signal.emit(qgis_project, crs_offset_rotation, layers)
 
+        # cancellation token
+        cancellation_token = self.cancellation_manager.init_cancellation_token_source(
+            f"speckle_{model_card_id}"
+        )
+
         self.send_operation_execute_signal.emit(
-            model_card_id, layers, model_card.get_send_info("QGIS"), None, None
+            model_card_id,
+            layers,
+            model_card.get_send_info("QGIS"),
+            None,
+            cancellation_token,
         )
 
     def cancel_send(self, model_card_id):

@@ -7,6 +7,7 @@ from speckle.sdk.connectors_common.builders import (
     IRootObjectBuilder,
     RootObjectBuilderResult,
 )
+from speckle.sdk.connectors_common.cancellation import CancellationToken
 from speckle.sdk.connectors_common.credentials import IAccountManager
 from speckle.ui.models import SendInfo
 from specklepy.core.api import operations
@@ -77,14 +78,17 @@ class SendOperation:
         objects: List[Any],
         send_info: SendInfo,
         on_operation_progressed: "IProgress[CardProgress]",
-        ct: "CancellationToken",
+        ct: CancellationToken,
     ) -> SendOperationResult:
+
+        ct.throw_if_cancellation_requested()
 
         build_result: RootObjectBuilderResult = self.root_object_builder.build(
             objects, send_info, on_operation_progressed, ct
         )
         build_result.root_object["version"] = 3
 
+        ct.throw_if_cancellation_requested()
         obj_id_and_converted_refs = self.send(
             build_result.root_object, send_info, on_operation_progressed, ct
         )
@@ -101,8 +105,8 @@ class SendOperation:
         on_operation_progressed: "IProgress[CardProgress]" = None,
         ct: "CancellationToken" = None,
     ):
-        # TODO
-        # ct.ThrowIfCancellationRequested()
+
+        ct.throw_if_cancellation_requested()
         # on_operation_progressed.report(CardProgress(status="Uploading...",progress=None))
 
         account: Account = self.account_service.get_account_with_server_url_fallback(
@@ -130,6 +134,8 @@ class SendOperation:
 
         # create a version in the project
         api_client: SpeckleClient = self.client_factory.create(account)
+
+        ct.throw_if_cancellation_requested()
 
         _ = api_client.version.create(
             CreateVersionInput(

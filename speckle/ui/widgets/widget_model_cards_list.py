@@ -40,6 +40,7 @@ class ModelCardsWidget(QWidget):
 
     remove_model_signal = pyqtSignal(ModelCard)
     send_model_signal = pyqtSignal(SenderModelCard)
+    cancel_operation_signal = pyqtSignal(str)
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
 
     child_cards: List[ModelCardWidget]
@@ -193,6 +194,9 @@ class ModelCardsWidget(QWidget):
                     # if widget is not connected yet
                     if widget.connected is False:
                         widget.send_model_signal.connect(self.send_model_signal.emit)
+                        widget.cancel_operation_signal.connect(
+                            self.cancel_operation_signal.emit
+                        )
                         widget.add_selection_filter_signal.connect(
                             self.add_selection_filter_signal.emit
                         )

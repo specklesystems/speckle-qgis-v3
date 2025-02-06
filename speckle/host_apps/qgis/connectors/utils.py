@@ -9,4 +9,4 @@ class QgisThreadContext(ThreadContext):
         raise NotImplementedError()
 
     def main_to_worker_async(self, action: Callable):
-        self.run_on_thread_async(action, False)
+        raise NotImplementedError()

@@ -17,8 +17,6 @@ from speckle.ui.utils.model_cards_widget_utils import UiModelCardsUtils
 from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
-    BACKGR_COLOR_SEMI_TRANSPARENT,
-    BACKGR_COLOR_SUCCESS_SEND,
     ZERO_MARGIN_PADDING,
     BACKGR_COLOR_WHITE,
     BACKGR_COLOR_TRANSPARENT,
@@ -26,14 +24,18 @@ from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR_LIGHT_GREY2,
 )
+from speckle.ui.widgets.utils.utils import create_text_for_widget, open_in_web
+from speckle.ui.widgets.widget_model_card_notification import (
+    ModelCardNotificationWidget,
+)
 from specklepy.core.api.models.current import Model
-import webbrowser
 
 
 class ModelCardWidget(QWidget):
     card_content: ModelCard = None
     send_model_btn: QPushButton = None
     send_model_signal = pyqtSignal(SenderModelCard)
+    cancel_operation_signal = pyqtSignal(str)
     remove_self_card_signal = pyqtSignal(ModelCard)
     shadow_effect = None
     close_btn: QPushButton = None
@@ -83,8 +85,8 @@ class ModelCardWidget(QWidget):
         )
 
         # create areas in the card
-        top_section = self.create_card_header(card_content)
-        bottom_section = self.create_send_filter_line(card_content)
+        top_section = self._create_card_header()
+        bottom_section = self._create_send_filter_line()
 
         content.layout.addWidget(top_section)
         content.layout.addWidget(bottom_section)
@@ -105,7 +107,7 @@ class ModelCardWidget(QWidget):
 
         item.setGraphicsEffect(self.shadow_effect)
 
-    def create_send_filter_line(self, card_content: SenderModelCard):
+    def _create_send_filter_line(self):
         line = QWidget()
         layout_line = QHBoxLayout(line)
         layout_line.setAlignment(Qt.AlignLeft)
@@ -117,103 +119,49 @@ class ModelCardWidget(QWidget):
             + "}"
         )
 
-        clickable_text = self.add_text("Selection:  ", color=SPECKLE_COLOR)
+        clickable_text = create_text_for_widget("Selection:  ", color=SPECKLE_COLOR)
         clickable_text.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         clickable_text.clicked.connect(
-            lambda: self.add_selection_filter_signal.emit(card_content)
+            lambda: self.add_selection_filter_signal.emit(self.card_content)
         )
         layout_line.addWidget(clickable_text)
 
-        self.selection_filter_text = self.add_text(
+        self.selection_filter_text = create_text_for_widget(
             self.summary_text, color="rgba(130,130,130,1)"
         )
         layout_line.addWidget(self.selection_filter_text)
 
         return line
 
-    def _create_notification_section(self):
-
-        # create a container that will be added to the main Stacked layout
-        content_notification_widget = QWidget()
-        content_notification_widget.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        content_notification_widget.setStyleSheet(
-            "QWidget {"
-            + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
-            + f"text-align: left;{BACKGR_COLOR_SEMI_TRANSPARENT}"
-            + "}"
-        )
-        content_notification_widget.layout = QVBoxLayout(content_notification_widget)
-        content_notification_widget.layout.setAlignment(Qt.AlignBottom)
-        content_notification_widget.layout.setContentsMargins(
-            0,
-            0,
-            0,
-            0,
-        )
-
-        # create a line widget
-        line = QWidget()
-        line.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        line.setStyleSheet(
-            "QWidget {"
-            + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
-            + f"text-align: left;{BACKGR_COLOR_SUCCESS_SEND}"
-            + "}"
-        )
-        layout_line = QHBoxLayout(line)
-        layout_line.setAlignment(Qt.AlignLeft)
-        layout_line.setContentsMargins(10, 5, 10, 5)
-
-        clickable_text = self.add_text("Version created!", color=SPECKLE_COLOR)
-        layout_line.addWidget(clickable_text)
-
-        # Add a spacer item to push the next button to the right
-        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        layout_line.addItem(spacer)
-
-        # Dismiss buttom
-        dismiss_btn = QPushButton("Dismiss")
-        dismiss_btn.clicked.connect(lambda: self._hide_notification_line())
-        dismiss_btn.setStyleSheet(
-            "QPushButton {"
-            + f"color:{SPECKLE_COLOR}; {ZERO_MARGIN_PADDING}"
-            + f"{BACKGR_COLOR_TRANSPARENT} height:15px;text-align: center; "
-            + " }"
-        )
-        dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        layout_line.addWidget(dismiss_btn)
-
-        # View in Web buttom
-        dismiss_btn = QPushButton("View")
-        dismiss_btn.clicked.connect(lambda: self.open_in_web(self.card_content))
-        dismiss_btn.setStyleSheet(
-            "QPushButton {"
-            + f"color:white; border-radius: 5px;{ZERO_MARGIN_PADDING}"
-            + f"{BACKGR_COLOR} height:15px; text-align: center; padding: 0px 10px;"
-            + "} QPushButton:hover { "
-            + f"{BACKGR_COLOR_LIGHT};"
-            + " }"
-        )
-        dismiss_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-        layout_line.addWidget(dismiss_btn)
-
-        # Add line widget to the container
-        content_notification_widget.layout.addWidget(line)
-
-        return content_notification_widget
-
-    def _hide_notification_line(self):
+    def hide_notification_line(self):
 
         self.layout.setCurrentWidget(self.main_content)
-        self.notification_line.resize(self.frameSize().width(), 0)
+        self.layout.removeWidget(self.notification_line)
+        self.notification_line = None
 
-    def show_notification_line(self):
+    def show_notification_line(
+        self, main_text: str, btn_dismiss: bool, btn_view_web: bool, btn_cancel: bool
+    ):
+        if self.notification_line:
+            self.hide_notification_line()
 
-        # for the first launch:
-        if not self.notification_line:
-            self.notification_line = self._create_notification_section()
-            self.layout.addWidget(self.notification_line)
+        self.notification_line = ModelCardNotificationWidget(
+            self.card_content, main_text, btn_dismiss, btn_view_web, btn_cancel, self
+        )
+        # connect buttons from the new notification widget
+        if btn_dismiss:
+            self.notification_line.dismiss_btn.clicked.connect(
+                lambda: self.hide_notification_line()
+            )
+        if btn_cancel:
+            self.notification_line.cancel_operation_signal_no_card.connect(
+                lambda: self.cancel_operation_signal.emit(
+                    self.card_content.model_card_id
+                )
+            )
+        self.layout.addWidget(self.notification_line)
 
+        # put notification widget on top
         self.layout.setCurrentWidget(self.notification_line)
         self.notification_line.resize(
             self.frameSize().width(), self.frameSize().height()
@@ -224,7 +172,7 @@ class ModelCardWidget(QWidget):
         # change text on the widget
         self.selection_filter_text.setText(selection_text)
 
-    def create_card_header(self, card_content: ModelCard):
+    def _create_card_header(self):
         top_line = QWidget()
         layout_top_line = QHBoxLayout(top_line)
         layout_top_line.setAlignment(Qt.AlignLeft)
@@ -236,17 +184,19 @@ class ModelCardWidget(QWidget):
             + "}"
         )
 
-        if isinstance(card_content, SenderModelCard):
-            layout_top_line.addWidget(self.add_send_btn())
+        if isinstance(self.card_content, SenderModelCard):
+            layout_top_line.addWidget(self._add_send_btn())
             self.send_model_btn.clicked.connect(
-                lambda: self.send_model_signal.emit(card_content)
+                lambda: self.send_model_signal.emit(self.card_content)
             )
 
         model: Model = self.ui_model_card_utils.get_model_by_id_from_client(
             self.card_content
         )
         layout_top_line.addWidget(
-            self.add_text(model.name, other_props="font-size: 14px;font-weight: bold;")
+            create_text_for_widget(
+                model.name, other_props="font-size: 14px;font-weight: bold;"
+            )
         )
 
         # Add a spacer item to push the next button to the right
@@ -254,18 +204,14 @@ class ModelCardWidget(QWidget):
         layout_top_line.addItem(spacer)
 
         # Add the new button on the right side
-        layout_top_line.addWidget(self.add_open_web_button())
-        layout_top_line.addWidget(self.add_close_button())
+        layout_top_line.addWidget(self._add_open_web_button())
+        layout_top_line.addWidget(self._add_close_button())
 
         return top_line
 
-    def open_in_web(self, model_card: ModelCard):
-        url = f"{model_card.server_url}/projects/{model_card.project_id}/models/{model_card.model_id}"
-        webbrowser.open(url, new=0, autoraise=True)
-
-    def add_open_web_button(self):
+    def _add_open_web_button(self):
         open_web_btn = QPushButton(" ↗ ")
-        open_web_btn.clicked.connect(lambda: self.open_in_web(self.card_content))
+        open_web_btn.clicked.connect(lambda: open_in_web(self.card_content))
         open_web_btn.setStyleSheet(
             "QPushButton {"
             + f"color:rgba(130,130,130,1); border-radius: 10px;{ZERO_MARGIN_PADDING}font-size: 24px;max-width:20px;"
@@ -278,7 +224,7 @@ class ModelCardWidget(QWidget):
         self.open_web_btn = open_web_btn
         return open_web_btn
 
-    def add_close_button(self):
+    def _add_close_button(self):
         close_btn = QPushButton(" x ")
         close_btn.clicked.connect(
             lambda: self.remove_self_card_signal.emit(self.card_content)
@@ -295,7 +241,7 @@ class ModelCardWidget(QWidget):
         self.close_btn = close_btn
         return close_btn
 
-    def add_send_btn(self):
+    def _add_send_btn(self):
 
         button_publish = QPushButton("↑")
         button_publish.setStyleSheet(
@@ -310,17 +256,3 @@ class ModelCardWidget(QWidget):
         self.send_model_btn = button_publish
 
         return button_publish
-
-    def add_text(self, content: str, color: str = "black", other_props=""):
-
-        # add label text (in a shape of QPushButton for easier styling)
-        text = QPushButton(content)
-
-        # reiterating callback, because QPushButton clicks are not propageted to the parent widget
-        text.setStyleSheet(
-            "QPushButton {"
-            + f"color:{color};border-radius: 7px;{ZERO_MARGIN_PADDING}"
-            + f" {BACKGR_COLOR_TRANSPARENT} height: 20px;text-align: left;{other_props}"
-            + "}"
-        )
-        return text

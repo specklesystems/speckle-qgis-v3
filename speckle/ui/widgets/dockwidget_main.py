@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from typing import List
-from speckle.host_apps.qgis.connectors.filters import QgisSelectionFilter
 from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.bindings import IBasicConnectorBinding, SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
@@ -24,6 +23,7 @@ from PyQt5.QtGui import QIcon, QPixmap, QCursor
 from PyQt5.QtWidgets import QHBoxLayout, QWidget
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
+
 from speckle.ui.widgets.widget_selection_filter import SelectionFilterWidget
 
 
@@ -43,8 +43,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     widget_selection_filter: SelectionFilterWidget = None
 
     send_model_signal = pyqtSignal(object)
+    cancel_operation_signal = pyqtSignal(str)
     add_model_signal = pyqtSignal(ModelCard)
     remove_model_signal = pyqtSignal(ModelCard)
+
+    activity_start_signal = pyqtSignal(str, str)
 
     def __init__(self, bridge=None, basic_binding: IBasicConnectorBinding = None):
         """Constructor."""
@@ -228,6 +231,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.widget_model_cards.send_model_signal.connect(
                 lambda model_card=model_card: self.send_model_signal.emit(model_card)
             )
+            # subscribe to all Cancel events from all future ModelCards
+            self.widget_model_cards.cancel_operation_signal.connect(
+                self.cancel_operation_signal.emit
+            )
             # subscribe to calling SelectionWidget from existing ModelCard
             self.widget_model_cards.add_selection_filter_signal.connect(
                 self._create_selection_filter_widget
@@ -359,6 +366,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         if self.widget_selection_filter:
             self.widget_selection_filter.change_selection_info(*args)
 
+    def add_activity_status(self, model_card_id: str, main_text: str):
+        model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
+        # enable Dismiss button for occasional situation, when the progress is stuck
+        model_card_widget.show_notification_line(main_text, True, False, True)
+
     def add_send_notification(
         self,
         command: str,
@@ -367,7 +379,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         send_conversion_results: List[SendOperationResult],
     ):
         model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
-        model_card_widget.show_notification_line()
+        model_card_widget.show_notification_line("Version created!", True, True, False)
 
     def resizeEvent(self, event):
         QtWidgets.QDockWidget.resizeEvent(self, event)
