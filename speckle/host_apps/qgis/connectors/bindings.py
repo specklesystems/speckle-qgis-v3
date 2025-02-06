@@ -4,7 +4,6 @@ from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.utils import CRSoffsetRotation
 from speckle.sdk.connectors_common.cancellation import (
     CancellationManager,
-    CancellationTokenSource,
 )
 from speckle.ui.bindings import (
     BasicConnectorBindingCommands,

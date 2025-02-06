@@ -23,8 +23,11 @@ class QgisSpeckleTask(QgsTask):
         self.thread_context = thread_context
 
     def run(self):
-        # print(f"Is main thread: {self.thread_context.is_main_thread()}")
-        self.action()
+        try:
+            self.action()
+        except Exception as e:
+            # ignore unhandled or cancellation exceptions
+            pass
         return True
 
     def finished(self, result):

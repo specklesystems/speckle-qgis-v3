@@ -10,6 +10,7 @@ from speckle.host_apps.qgis.connectors.host_app import (
 )
 from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage, QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
+from speckle.sdk.connectors_common.cancellation import CancellationToken
 from speckle.sdk.connectors_common.conversion import SendConversionResult
 from speckle.sdk.connectors_common.operations import ProxyKeys
 from speckle.sdk.converters_common.converters_common import IRootToSpeckleConverter
@@ -60,7 +61,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         layers_flat: List[LayerStorage],
         send_info: SendInfo,
         on_operation_progressed: Any,
-        ct: Any = None,
+        ct: CancellationToken = None,
     ) -> RootObjectBuilderResult:
         # TODO
 
@@ -144,12 +145,17 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         )
 
     def convert_vector_features(
-        self, vector_layer: QgsVectorLayer, layer_app_id: str, ct
+        self, vector_layer: QgsVectorLayer, layer_app_id: str, ct: CancellationToken
     ) -> List[Base]:
         converted_features: List[Base] = []
         self.color_unpacker.store_renderer_and_fields(vector_layer)
 
-        for feature in vector_layer.getFeatures():
+        for i, feature in enumerate(vector_layer.getFeatures()):
+
+            # trigger after every 100 features
+            if i % 100 == 0:
+                ct.throw_if_cancellation_requested()
+
             converted_feature: "QgisObject" = self.root_to_speckle_converter.convert(
                 {"target": feature, "layer_application_id": layer_app_id}
             )
