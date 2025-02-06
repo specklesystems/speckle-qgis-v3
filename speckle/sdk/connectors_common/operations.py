@@ -80,11 +80,14 @@ class SendOperation:
         ct: "CancellationToken",
     ) -> SendOperationResult:
 
+        ct.check_for_tasks_to_cancel()
+
         build_result: RootObjectBuilderResult = self.root_object_builder.build(
             objects, send_info, on_operation_progressed, ct
         )
         build_result.root_object["version"] = 3
 
+        ct.check_for_tasks_to_cancel()
         obj_id_and_converted_refs = self.send(
             build_result.root_object, send_info, on_operation_progressed, ct
         )

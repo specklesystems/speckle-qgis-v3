@@ -9,7 +9,7 @@ from qgis.core import (
 from PyQt5.QtCore import QObject
 
 
-class MyTask(QgsTask):
+class QgisSpeckleTask(QgsTask):
 
     action: Callable
 
@@ -60,7 +60,7 @@ class ThreadContext(ABC, QObject, metaclass=MetaQObject):
             if self.is_main_thread():
 
                 # QgsApplication.taskManager().cancelAll()
-                task = MyTask(
+                task = QgisSpeckleTask(
                     self,
                     action=action,
                     model_card_id=model_card_id,

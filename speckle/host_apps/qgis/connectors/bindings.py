@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional
 from speckle.host_apps.qgis.connectors.layer_utils import LayerStorage, QgisLayerUtils
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 from speckle.host_apps.qgis.converters.utils import CRSoffsetRotation
+from speckle.sdk.connectors_common.cancellation import CancellationTokenSource
 from speckle.ui.bindings import (
     BasicConnectorBindingCommands,
     IBasicConnectorBinding,
@@ -164,8 +165,15 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         crs_offset_rotation = CRSoffsetRotation(qgis_project.crs(), 0, 0, 0)
         self.create_send_modules_signal.emit(qgis_project, crs_offset_rotation, layers)
 
+        # cancellation token
+        cancellation_item = CancellationTokenSource()
+
         self.send_operation_execute_signal.emit(
-            model_card_id, layers, model_card.get_send_info("QGIS"), None, None
+            model_card_id,
+            layers,
+            model_card.get_send_info("QGIS"),
+            None,
+            cancellation_item.token,
         )
 
     def cancel_send(self, model_card_id):

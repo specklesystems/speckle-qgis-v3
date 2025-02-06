@@ -96,6 +96,8 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         # here will be iteration loop through layers and their features
         results: List[SendConversionResult] = []
         for lyr in unpacked_layers_to_convert:
+
+            ct.check_for_tasks_to_cancel()
             layer_app_id: str = get_speckle_app_id(lyr)
             layer_collection = self.layer_unpacker.collection_cache[layer_app_id]
 
@@ -107,7 +109,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
                 # right now, the entire layer will fail if 1 feature fails
                 try:
                     converted_features: List[Base] = self.convert_vector_features(
-                        lyr, layer_app_id
+                        lyr, layer_app_id, ct
                     )
                     layer_collection.elements.extend(converted_features)
 
@@ -142,7 +144,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         )
 
     def convert_vector_features(
-        self, vector_layer: QgsVectorLayer, layer_app_id: str
+        self, vector_layer: QgsVectorLayer, layer_app_id: str, ct
     ) -> List[Base]:
         converted_features: List[Base] = []
         self.color_unpacker.store_renderer_and_fields(vector_layer)
