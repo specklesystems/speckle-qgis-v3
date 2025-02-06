@@ -16,6 +16,9 @@ from speckle.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
 import webbrowser
 
+from qgis.core import QgsApplication
+
+
 SPECKLE_COLOR = (59, 130, 246)
 SPECKLE_COLOR_LIGHT = (69, 140, 255)
 
@@ -54,6 +57,7 @@ class SpeckleQGISv3Module:
         self.dockwidget.send_model_signal.connect(self._send_model)
         self.dockwidget.add_model_signal.connect(self.add_model_card_to_store)
         self.dockwidget.remove_model_signal.connect(self.remove_model_card_from_store)
+        self.dockwidget.cancel_operation_signal.connect(self._cancel_operation)
 
         # moved here from "connect_connector_module_signals", because it's
         # calling dockwidget and should only be accessed after dockwidget is created
@@ -116,6 +120,30 @@ class SpeckleQGISv3Module:
             version_id=send_operation_result.root_obj_id,
             send_conversion_results=send_operation_result.converted_references,
         )
+
+    def _cancel_operation(self, model_card_id: str):
+
+        # 1. cancel operations
+        # This will mark CalcellationTokenSource as Canceled. The actual operation will only be cancelled
+        # whenever "throw_if_cancellation_requested" is called
+        self.connector_module.send_binding.cancellation_manager.cancel_operation(
+            f"speckle_{model_card_id}"
+        )
+
+        # unnecessary, we are using our own CalcellationTokenSource instead of QgsTask
+        # might need to be revised later for more "native" implementation
+        r"""
+        print(QgsApplication.taskManager().tasks())
+        for task in QgsApplication.taskManager().tasks():
+            if task.description() == f"speckle_{model_card_id}":
+                task.cancel()  # this will mark the task as Cancelled
+        """
+
+        # 2. hide notification line
+        model_card_widget = self.dockwidget.widget_model_cards._find_card_widget(
+            model_card_id
+        )
+        model_card_widget.hide_notification_line()
 
     def _create_send_modules(self, *args):
 

@@ -3,6 +3,7 @@ from speckle.host_apps.qgis.converters.to_speckle.top_level import (
     CoreObjectsBaseToSpeckleTopLevelConverter,
 )
 from speckle.sdk.connectors_common.api import ClientFactory
+from speckle.sdk.connectors_common.cancellation import CancellationManager
 from speckle.sdk.connectors_common.credentials import AccountManager
 from speckle.sdk.connectors_common.operations import (
     AccountService,
@@ -56,7 +57,7 @@ class QgisConnectorModule(QObject):
             store=self.document_store,
             _service_provider=None,
             _send_filters=[],
-            _cancellation_manager=None,
+            cancellation_manager=CancellationManager(),
             send_conversion_cache=None,
             _operation_progress_manager=None,
             _logger=None,

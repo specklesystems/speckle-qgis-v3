@@ -24,7 +24,7 @@ class CancellationTokenSource:
         self.token = CancellationToken(self)
 
     def cancel(self):
-        pass
+        self.is_cancellation_requested = True
 
     def dispose(self):
         pass

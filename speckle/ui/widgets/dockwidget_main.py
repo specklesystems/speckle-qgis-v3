@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from typing import List
-from speckle.host_apps.qgis.connectors.filters import QgisSelectionFilter
 from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.bindings import IBasicConnectorBinding, SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
@@ -25,9 +24,6 @@ from PyQt5.QtWidgets import QHBoxLayout, QWidget
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 
-from qgis.core import (
-    QgsApplication,
-)
 from speckle.ui.widgets.widget_selection_filter import SelectionFilterWidget
 
 
@@ -47,7 +43,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     widget_selection_filter: SelectionFilterWidget = None
 
     send_model_signal = pyqtSignal(object)
-    cancel_operation_signal = pyqtSignal(object)
+    cancel_operation_signal = pyqtSignal(str)
     add_model_signal = pyqtSignal(ModelCard)
     remove_model_signal = pyqtSignal(ModelCard)
 
@@ -237,7 +233,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             )
             # subscribe to all Cancel events from all future ModelCards
             self.widget_model_cards.cancel_operation_signal.connect(
-                self._cancel_operation
+                self.cancel_operation_signal.emit
             )
             # subscribe to calling SelectionWidget from existing ModelCard
             self.widget_model_cards.add_selection_filter_signal.connect(
@@ -369,20 +365,6 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     def handle_change_selection_info(self, *args):
         if self.widget_selection_filter:
             self.widget_selection_filter.change_selection_info(*args)
-
-    def _cancel_operation(self, model_card_id: str):
-        model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
-        model_card_widget.hide_notification_line()
-
-        # actually cancel operations
-        print(QgsApplication.taskManager().tasks())
-        for task in QgsApplication.taskManager().tasks():
-            if task.description() == f"speckle_{model_card_id}":
-                task.cancel()
-                print(task.canCancel())
-                print(task.description())
-                print(task.progress())
-                print(task.isCanceled())
 
     def add_activity_status(self, model_card_id: str, main_text: str):
         model_card_widget = self.widget_model_cards._find_card_widget(model_card_id)
