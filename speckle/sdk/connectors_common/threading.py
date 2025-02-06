@@ -2,10 +2,7 @@ from abc import ABC, abstractmethod
 import threading
 from typing import Callable
 
-from qgis.core import (
-    QgsTask,
-    QgsApplication,
-)
+from qgis.core import QgsTask, QgsApplication, Qgis, QgsMessageLog
 from PyQt5.QtCore import QObject
 
 
@@ -28,6 +25,7 @@ class QgisSpeckleTask(QgsTask):
     def run(self):
         # print(f"Is main thread: {self.thread_context.is_main_thread()}")
         self.action()
+        return True
 
     def finished(self, result):
         return
@@ -65,15 +63,20 @@ class ThreadContext(ABC, QObject, metaclass=MetaQObject):
                     action=action,
                     model_card_id=model_card_id,
                 )
+                task.taskTerminated.connect(lambda: self.task_terminated(task))
 
                 QgsApplication.taskManager().addTask(task)
-                print("___________TASKS:")
-                print(
-                    QgsApplication.taskManager().tasks()
-                )  # weird way to trigger the task, otherwise it just doesn't run
+                # QgsMessageLog.logMessage("QgsTask created", "Speckle", level=Qgis.Info)
+                # print(
+                #    QgsApplication.taskManager().tasks()
+                # )  # weird way to trigger the task, otherwise it just doesn't run
 
             else:
                 return action()
+
+    def task_terminated(self, task: QgsTask):
+        # need to find a way to end Task without it emmiting failed signal to Qgis UI
+        pass
 
     @abstractmethod
     def worker_to_main_async(self, action: Callable):
