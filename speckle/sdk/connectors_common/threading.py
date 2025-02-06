@@ -67,6 +67,7 @@ class ThreadContext(ABC, QObject, metaclass=MetaQObject):
                 )
 
                 QgsApplication.taskManager().addTask(task)
+                print("___________TASKS:")
                 print(
                     QgsApplication.taskManager().tasks()
                 )  # weird way to trigger the task, otherwise it just doesn't run

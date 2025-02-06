@@ -7,6 +7,7 @@ from speckle.sdk.connectors_common.builders import (
     IRootObjectBuilder,
     RootObjectBuilderResult,
 )
+from speckle.sdk.connectors_common.cancellation import CancellationToken
 from speckle.sdk.connectors_common.credentials import IAccountManager
 from speckle.ui.models import SendInfo
 from specklepy.core.api import operations
@@ -77,17 +78,20 @@ class SendOperation:
         objects: List[Any],
         send_info: SendInfo,
         on_operation_progressed: "IProgress[CardProgress]",
-        ct: "CancellationToken",
+        ct: CancellationToken,
     ) -> SendOperationResult:
 
-        ct.check_for_tasks_to_cancel()
+        print("___EXECUTE")
+        print(ct)
+        ct.throw_if_cancellation_requested()
+        print("___EXECUTE2")
 
         build_result: RootObjectBuilderResult = self.root_object_builder.build(
             objects, send_info, on_operation_progressed, ct
         )
         build_result.root_object["version"] = 3
 
-        ct.check_for_tasks_to_cancel()
+        ct.throw_if_cancellation_requested()
         obj_id_and_converted_refs = self.send(
             build_result.root_object, send_info, on_operation_progressed, ct
         )

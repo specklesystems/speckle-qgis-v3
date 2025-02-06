@@ -65,7 +65,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         # TODO
 
         print("____BUILD")
-        print(layers_flat)
+        print(len(layers_flat))
 
         qgis_project = QgsProject.instance()
         root_collection: Collection = Collection(
@@ -97,7 +97,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         results: List[SendConversionResult] = []
         for lyr in unpacked_layers_to_convert:
 
-            ct.check_for_tasks_to_cancel()
+            ct.throw_if_cancellation_requested()
             layer_app_id: str = get_speckle_app_id(lyr)
             layer_collection = self.layer_unpacker.collection_cache[layer_app_id]
 
