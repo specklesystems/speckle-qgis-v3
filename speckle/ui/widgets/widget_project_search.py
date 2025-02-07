@@ -109,7 +109,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         text_box = QLineEdit()
         text_box.setMaxLength(20)
         text_box.setStyleSheet(
-            """QLineEdit { background-color: white; border-radius: 5px; color: black; height: 30px }"""
+            """QLineEdit { background-color: white; border: 1px solid lightgrey; border-radius: 5px; color: black; height: 30px }"""
         )
 
         text_box.textChanged.connect(

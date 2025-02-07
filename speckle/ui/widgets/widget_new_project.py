@@ -28,6 +28,7 @@ class NewProjectWidget(QWidget):
         None  # needs to be here, so it can be called on resize event
     )
     project_name: QLineEdit = None
+    workspace_widget: QLineEdit = None
 
     def __init__(
         self,
@@ -115,17 +116,36 @@ class NewProjectWidget(QWidget):
         label_main = self._create_widget_label(label_text)
         boxLayout.addWidget(label_main)
 
-        # add text
+        # add text 1
         label = self._create_text_widget("Project name:")
         boxLayout.addWidget(label)
 
-        # add text input
+        # add text input 1
         self.project_name = QLineEdit()
-        self.project_name.setMaxLength(20)
+        self.project_name.setMaxLength(40)
         self.project_name.setStyleSheet(
-            """QLineEdit { background-color: white; border-radius: 5px; color: black; height: 30px }"""
+            "QLineEdit { "
+            + f"{ZERO_MARGIN_PADDING}margin-left:{int(WIDGET_SIDE_BUFFER/6)};margin-right:{int(WIDGET_SIDE_BUFFER/6)};"
+            + "border: 1px solid lightgrey; height: 30px; border-radius: 5px; "
+            + "}"
         )
         boxLayout.addWidget(self.project_name)
+
+        # add text 2
+        label2 = self._create_text_widget("Workspaces:")
+        label2.setEnabled(False)
+        boxLayout.addWidget(label2)
+
+        # add text input 2
+        self.workspace_widget = QLineEdit()
+        self.workspace_widget.setStyleSheet(
+            "QLineEdit { "
+            + f"{ZERO_MARGIN_PADDING}margin-left:{int(WIDGET_SIDE_BUFFER/6)};margin-right:{int(WIDGET_SIDE_BUFFER/6)};"
+            + "border: 1px solid lightgrey; height: 30px; border-radius: 5px; "
+            + "}"
+        )
+        self.workspace_widget.setEnabled(False)
+        boxLayout.addWidget(self.workspace_widget)
 
         button_create = self._create_create_button()
         boxLayout.addWidget(button_create)
@@ -160,11 +180,11 @@ class NewProjectWidget(QWidget):
             )
 
             self._message_card.setGeometry(
-                int(1.5 * WIDGET_SIDE_BUFFER),
+                int(0.5 * WIDGET_SIDE_BUFFER),
                 int(
                     (self.parent.frameSize().height() - self._message_card.height()) / 2
                 ),
-                self.parent.frameSize().width() - 3 * WIDGET_SIDE_BUFFER,
+                self.parent.frameSize().width() - 1 * WIDGET_SIDE_BUFFER,
                 self._message_card.height(),
             )
         except RuntimeError as e:
