@@ -301,7 +301,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
                 self._open_select_accounts_widget
             )
 
-            # subscribe to select_account_signal signal
+            # subscribe to change_account_signal signal
             self.widget_project_search.ui_search_content.change_account_and_projects_signal.connect(
                 self._update_account_project_list
             )

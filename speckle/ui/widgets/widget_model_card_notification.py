@@ -1,4 +1,3 @@
-import webbrowser
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QCursor

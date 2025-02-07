@@ -82,10 +82,41 @@ class UiSearchUtils(QObject):
 
         content_list: List[List] = []
         projects_resource_collection: ResourceCollection[Project] = (
-            get_projects_from_client(self.speckle_client, self.cursor_projects)
+            get_projects_from_client(
+                speckle_client=self.speckle_client, cursor=self.cursor_projects
+            )
         )
-        projects_batch: List[Project] = projects_resource_collection.items
         self.cursor_projects = projects_resource_collection.cursor
+        content_list = self._create_project_content_list_from_resource_collection(
+            projects_resource_collection
+        )
+
+        return content_list
+
+    def get_new_projects_content_with_name_condition(self, name_include: str):
+
+        self.cursor_projects = None
+
+        projects_resource_collection: ResourceCollection[Project] = (
+            get_projects_from_client(
+                speckle_client=self.speckle_client,
+                cursor=self.cursor_projects,
+                filter_keyword=name_include,
+            )
+        )
+        self.cursor_projects = projects_resource_collection.cursor
+        content_list = self._create_project_content_list_from_resource_collection(
+            projects_resource_collection
+        )
+
+        return content_list
+
+    def _create_project_content_list_from_resource_collection(
+        self, projects_resource_collection: ResourceCollection[Project]
+    ):
+
+        projects_batch: List[Project] = projects_resource_collection.items
+        content_list: List[List] = []
 
         for project in projects_batch:
             # make sure to pass the actual project, not a reference to a variable

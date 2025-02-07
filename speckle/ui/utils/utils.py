@@ -1,10 +1,11 @@
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Optional
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import (
     Account,
     get_local_accounts,
 )
+from specklepy.core.api.inputs.user_inputs import UserProjectsFilter
 from specklepy.core.api.models.current import (
     Model,
     Project,
@@ -43,14 +44,18 @@ def get_authenticate_client_for_account(account: Account) -> SpeckleClient:
 
 
 def get_projects_from_client(
-    speckle_client: SpeckleClient, cursor=None
+    speckle_client: SpeckleClient, cursor=None, filter_keyword: Optional[str] = None
 ) -> ResourceCollection[Project]:
 
     results = []
     if speckle_client is not None:
         # possible GraphQLException
         results: ResourceCollection[Project] = speckle_client.active_user.get_projects(
-            limit=QUERY_BATCH_SIZE, cursor=cursor
+            limit=100 if filter_keyword else QUERY_BATCH_SIZE,
+            cursor=cursor,
+            filter=(
+                UserProjectsFilter(search=filter_keyword) if filter_keyword else None
+            ),
         )
 
         if not isinstance(results, ResourceCollection):
