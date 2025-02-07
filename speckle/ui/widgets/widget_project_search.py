@@ -2,6 +2,7 @@ from typing import Optional
 from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
+    WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
 )
 from speckle.ui.widgets.widget_cards_list_temporary import (
@@ -10,15 +11,13 @@ from speckle.ui.widgets.widget_cards_list_temporary import (
 from speckle.ui.utils.search_widget_utils import UiSearchUtils
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, QObject
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import (
     QHBoxLayout,
     QWidget,
     QLineEdit,
     QPushButton,
-    QSpacerItem,
-    QSizePolicy,
 )
 
 
@@ -26,7 +25,6 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
     ui_search_content: UiSearchUtils = None
     account_switch_btn: QPushButton = None
-    search_widget: QLineEdit = None
 
     def __init__(
         self,
@@ -86,7 +84,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         line.setStyleSheet(
             "QWidget {"
             + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
-            + "text-align: left;"
+            + f"margin-left:{int(WIDGET_SIDE_BUFFER/4)};margin-right:{int(WIDGET_SIDE_BUFFER/4)};text-align: left;"
             + "}"
         )
         layout_line = QHBoxLayout(line)
@@ -94,12 +92,8 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         layout_line.setContentsMargins(10, 0, 0, 0)
 
         # project search field
-        self.search_widget = self._create_search_widget()
-        layout_line.addWidget(self.search_widget)
-
-        # Add a spacer item to push the next button to the right
-        # spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        # layout_line.addItem(spacer)
+        search_widget = self._create_search_widget()
+        layout_line.addWidget(search_widget)
 
         # Account switch buttom
         self.account_switch_btn = self._create_account_switch_btn()
@@ -129,7 +123,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         account_switch_btn.setStyleSheet(
             "QPushButton {"
             + f"color:white; border-radius: 15px;{ZERO_MARGIN_PADDING}"
-            + f"{BACKGR_COLOR} height:15px; text-align: center; padding: 0px 10px;font-size:14px"
+            + f"{BACKGR_COLOR} height:30px; text-align: center; padding: 0px 10px;font-size:14px"
             + "} QPushButton:hover { "
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"

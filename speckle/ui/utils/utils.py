@@ -5,6 +5,7 @@ from specklepy.core.api.credentials import (
     Account,
     get_local_accounts,
 )
+from specklepy.core.api.inputs.project_inputs import ProjectModelsFilter
 from specklepy.core.api.inputs.user_inputs import UserProjectsFilter
 from specklepy.core.api.models.current import (
     Model,
@@ -70,14 +71,22 @@ def get_projects_from_client(
 
 
 def get_models_from_client(
-    speckle_client: SpeckleClient, project: Project, cursor=None
+    speckle_client: SpeckleClient,
+    project: Project,
+    cursor=None,
+    filter_keyword: Optional[str] = None,
 ) -> ResourceCollection[Project]:
 
     results = []
     if speckle_client is not None:
         # possible GraphQLException
         results: ProjectWithModels = speckle_client.project.get_with_models(
-            project_id=project.id, models_limit=QUERY_BATCH_SIZE, models_cursor=cursor
+            project_id=project.id,
+            models_limit=100 if filter_keyword else QUERY_BATCH_SIZE,
+            models_cursor=cursor,
+            models_filter=(
+                ProjectModelsFilter(search=filter_keyword) if filter_keyword else None
+            ),
         ).models
 
         if not isinstance(results, ResourceCollection):

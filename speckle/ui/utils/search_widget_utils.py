@@ -87,8 +87,10 @@ class UiSearchUtils(QObject):
             )
         )
         self.cursor_projects = projects_resource_collection.cursor
-        content_list = self._create_project_content_list_from_resource_collection(
-            projects_resource_collection
+        content_list: List[List] = (
+            self._create_project_content_list_from_resource_collection(
+                projects_resource_collection
+            )
         )
 
         return content_list
@@ -105,8 +107,10 @@ class UiSearchUtils(QObject):
             )
         )
         self.cursor_projects = projects_resource_collection.cursor
-        content_list = self._create_project_content_list_from_resource_collection(
-            projects_resource_collection
+        content_list: List[List] = (
+            self._create_project_content_list_from_resource_collection(
+                projects_resource_collection
+            )
         )
 
         return content_list
@@ -142,12 +146,44 @@ class UiSearchUtils(QObject):
         if clear_cursor:
             self.cursor_models = None
 
-        content_list: List[List] = []
         models_resource_collection: ResourceCollection[Model] = get_models_from_client(
             self.speckle_client, project, self.cursor_models
         )
-        models_first: List[Model] = models_resource_collection.items
         self.cursor_models = models_resource_collection.cursor
+        content_list: List[List] = (
+            self._create_model_content_list_from_resource_collection(
+                models_resource_collection, project
+            )
+        )
+
+        return content_list
+
+    def get_new_models_content_with_name_condition(
+        self, project: Project, name_include: str
+    ) -> List[List]:
+
+        self.cursor_models = None
+
+        models_resource_collection: ResourceCollection[Model] = get_models_from_client(
+            speckle_client=self.speckle_client,
+            project=project,
+            cursor=self.cursor_models,
+            filter_keyword=name_include,
+        )
+        self.cursor_models = models_resource_collection.cursor
+        content_list: List[List] = (
+            self._create_model_content_list_from_resource_collection(
+                models_resource_collection, project
+            )
+        )
+
+        return content_list
+
+    def _create_model_content_list_from_resource_collection(
+        self, models_resource_collection: ResourceCollection[Model], project: Project
+    ):
+        models_first: List[Model] = models_resource_collection.items
+        content_list: List[List] = []
 
         for model in models_first:
 
