@@ -32,6 +32,7 @@ class UiSearchUtils(QObject):
     add_models_search_signal = pyqtSignal(Project)
     select_account_signal = pyqtSignal()
     new_project_widget_signal = pyqtSignal()
+    new_model_widget_signal = pyqtSignal()
     change_account_and_projects_signal = pyqtSignal()
 
     def __init__(self):

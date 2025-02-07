@@ -21,23 +21,23 @@ from PyQt5.QtWidgets import (
 )
 
 
-class NewProjectWidget(QWidget):
+class NewModelWidget(QWidget):
 
     ui_search_content: UiSearchUtils = None
     _message_card: QWidget = (
         None  # needs to be here, so it can be called on resize event
     )
-    project_name_widget: QLineEdit = None
+    model_name_widget: QLineEdit = None
     workspace_widget: QLineEdit = None
 
     def __init__(
         self,
         *,
         parent=None,
-        label_text: str = "Create new project",
+        label_text: str = "Create new model",
         ui_search_content: UiSearchUtils = None,
     ):
-        super(NewProjectWidget, self).__init__(parent)
+        super(NewModelWidget, self).__init__(parent)
         self.parent = parent
         self.ui_search_content = ui_search_content
 
@@ -116,36 +116,20 @@ class NewProjectWidget(QWidget):
         label_main = self._create_widget_label(label_text)
         boxLayout.addWidget(label_main)
 
-        # add text 1
-        label = self._create_text_widget("Project name:")
+        # add text
+        label = self._create_text_widget("Model name:")
         boxLayout.addWidget(label)
 
-        # add text input 1
-        self.project_name_widget = QLineEdit()
-        self.project_name_widget.setMaxLength(40)
-        self.project_name_widget.setStyleSheet(
+        # add text input
+        self.model_name_widget = QLineEdit()
+        self.model_name_widget.setMaxLength(40)
+        self.model_name_widget.setStyleSheet(
             "QLineEdit { "
             + f"{ZERO_MARGIN_PADDING}margin-left:{int(WIDGET_SIDE_BUFFER/6)};margin-right:{int(WIDGET_SIDE_BUFFER/6)};"
             + "border: 1px solid lightgrey; height: 30px; border-radius: 5px; "
             + "}"
         )
-        boxLayout.addWidget(self.project_name_widget)
-
-        # add text 2
-        label2 = self._create_text_widget("Workspaces:")
-        label2.setEnabled(False)
-        boxLayout.addWidget(label2)
-
-        # add text input 2
-        self.workspace_widget = QLineEdit()
-        self.workspace_widget.setStyleSheet(
-            "QLineEdit { "
-            + f"{ZERO_MARGIN_PADDING}margin-left:{int(WIDGET_SIDE_BUFFER/6)};margin-right:{int(WIDGET_SIDE_BUFFER/6)};"
-            + "border: 1px solid lightgrey; height: 30px; border-radius: 5px; "
-            + "}"
-        )
-        self.workspace_widget.setEnabled(False)
-        boxLayout.addWidget(self.workspace_widget)
+        boxLayout.addWidget(self.model_name_widget)
 
         button_create = self._create_create_button()
         boxLayout.addWidget(button_create)
@@ -155,7 +139,7 @@ class NewProjectWidget(QWidget):
     def _create_create_button(self) -> QPushButton:
 
         button_publish = QPushButton("Create")
-        button_publish.clicked.connect(self._create_project_and_exit_widget)
+        button_publish.clicked.connect(self._create_model_and_exit_widget)
         button_publish.setStyleSheet(
             "QPushButton {"
             + f"color:white;border-radius: 7px;margin:5px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
@@ -165,9 +149,9 @@ class NewProjectWidget(QWidget):
         )
         return button_publish
 
-    def _create_project_and_exit_widget(self):
-
-        self.ui_search_content.create_new_project(self.project_name_widget.text(), None)
+    def _create_model_and_exit_widget(self):
+        return
+        self.ui_search_content.create_new_project(self.model_name_widget.text(), None)
         # the next signal will trigger closing the widget and refreshing project list
         self.ui_search_content.change_account_and_projects_signal.emit()
 

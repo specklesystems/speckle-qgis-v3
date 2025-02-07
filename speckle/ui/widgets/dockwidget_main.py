@@ -8,6 +8,7 @@ from speckle.ui.widgets.widget_account_search import AccountSearchWidget
 from speckle.ui.widgets.widget_model_card import ModelCardWidget
 from speckle.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.ui.widgets.widget_model_search import ModelSearchWidget
+from speckle.ui.widgets.widget_new_model import NewModelWidget
 from speckle.ui.widgets.widget_new_project import NewProjectWidget
 from speckle.ui.widgets.widget_no_document import NoDocumentWidget
 from speckle.ui.widgets.widget_no_model_cards import NoModelCardsWidget
@@ -41,6 +42,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     widget_model_search: ModelSearchWidget = None
     widget_account_search: AccountSearchWidget = None
     widget_new_project: NewProjectWidget = None
+    widget_new_model: NewModelWidget = None
     widget_model_cards: ModelCardsWidget = None
     widget_selection_filter: SelectionFilterWidget = None
 
@@ -163,6 +165,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         if self.widget_new_project:
             self._remove_widget_new_project()
 
+        if self.widget_new_model:
+            self._remove_widget_new_model()
+
         if self.widget_selection_filter:
             self.remove_widget_selection_filter()
 
@@ -186,6 +191,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         elif self.widget_new_project == widget:
             self._remove_widget_new_project()
 
+        elif self.widget_new_model == widget:
+            self._remove_widget_new_model()
+
         elif self.widget_selection_filter == widget:
             self.remove_widget_selection_filter()
 
@@ -205,6 +213,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         if self.widget_new_project:
             self._remove_widget_new_project()
 
+        if self.widget_new_model:
+            self._remove_widget_new_model()
+
     def _remove_widget_project_search(self):
         self.widget_project_search.setParent(None)
         self.widget_project_search = None
@@ -220,6 +231,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     def _remove_widget_new_project(self):
         self.widget_new_project.setParent(None)
         self.widget_new_project = None
+
+    def _remove_widget_new_model(self):
+        self.widget_new_model.setParent(None)
+        self.widget_new_model = None
 
     def remove_widget_selection_filter(self):
         self.widget_selection_filter.setParent(None)
@@ -348,6 +363,18 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_new_project)
 
+    def _open_new_model_widget(self):
+        if not self.widget_new_model:
+            self.widget_new_model = NewModelWidget(
+                parent=self,
+                ui_search_content=self.widget_project_search.ui_search_content,
+            )
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_new_model)
+
+            # subscribe to close-on-background-click event
+            self._subscribe_to_close_on_background_click(self.widget_new_model)
+
     def _open_select_accounts_widget(self):
         if not self.widget_account_search:
             self.widget_account_search = AccountSearchWidget(
@@ -373,6 +400,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_model_search)
+
+            # subscribe to new_model_widget_signal signal
+            self.widget_model_search.ui_search_content.new_model_widget_signal.connect(
+                self._open_new_model_widget
+            )
 
     def _create_selection_filter_widget(self, model_card: SenderModelCard):
 
@@ -458,6 +490,12 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
         if self.widget_new_project:
             self.widget_new_project.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
+
+        if self.widget_new_model:
+            self.widget_new_model.resize(
                 self.frameSize().width(),
                 self.frameSize().height(),
             )
