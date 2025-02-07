@@ -95,6 +95,10 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         search_widget = self._create_search_widget()
         layout_line.addWidget(search_widget)
 
+        # New project buttom
+        new_project_btn = self._create_new_project_btn()
+        layout_line.addWidget(new_project_btn)
+
         # Account switch buttom
         self.account_switch_btn = self._create_account_switch_btn()
         layout_line.addWidget(self.account_switch_btn)
@@ -112,6 +116,27 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             lambda input_text: self.refresh_projects(input_text)
         )
         return text_box
+
+    def _create_new_project_btn(self):
+
+        new_item_btn = QPushButton("+")
+        new_item_btn.clicked.connect(
+            lambda: self.ui_search_content.new_project_widget_signal.emit()
+        )
+        new_item_btn.setStyleSheet(
+            "QPushButton {"
+            + f"color:white; border-radius: 5px;{ZERO_MARGIN_PADDING}"
+            + f"{BACKGR_COLOR} height:30px; text-align: center; padding: 0px 10px;font-size:14px"
+            + "} QPushButton:hover { "
+            + f"{BACKGR_COLOR_LIGHT};"
+            + " }"
+        )
+        new_item_btn.setFixedHeight(30)
+        new_item_btn.setFixedWidth(30)
+
+        new_item_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+
+        return new_item_btn
 
     def _create_account_switch_btn(self):
 

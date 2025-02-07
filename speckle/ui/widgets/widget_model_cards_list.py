@@ -51,7 +51,7 @@ class ModelCardsWidget(QWidget):
         parent=None,
     ):
         super(ModelCardsWidget, self).__init__(parent=parent)
-        self.parentWidget: Any = parent
+        self.parent: Any = parent
         self.ui_model_card_utils = UiModelCardsUtils()
 
         self.child_cards: List[ModelCardWidget] = []
@@ -322,11 +322,11 @@ class ModelCardsWidget(QWidget):
         QtWidgets.QWidget.resizeEvent(self, event)
         try:
             self.background.resize(
-                self.parentWidget.frameSize().width(),
-                self.parentWidget.frameSize().height(),
+                self.parent.frameSize().width(),
+                self.parent.frameSize().height(),
             )
             self.cards_list_widget.resize(
-                self.parentWidget.frameSize().width() - int(0.5 * WIDGET_SIDE_BUFFER),
+                self.parent.frameSize().width() - int(0.5 * WIDGET_SIDE_BUFFER),
                 self.cards_list_widget.height(),
             )
         except RuntimeError as e:

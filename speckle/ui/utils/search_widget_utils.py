@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, List
+from typing import Any, List, Optional
 from speckle.ui.models import SenderModelCard
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
@@ -10,6 +10,7 @@ from specklepy.core.api.models.current import (
 )
 from specklepy.core.api.resources.current.project_resource import ProjectResource
 from speckle.ui.utils.utils import (
+    create_new_project_query,
     get_accounts,
     get_authenticate_client_for_account,
     get_models_from_client,
@@ -30,6 +31,7 @@ class UiSearchUtils(QObject):
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
     add_models_search_signal = pyqtSignal(Project)
     select_account_signal = pyqtSignal()
+    new_project_widget_signal = pyqtSignal()
     change_account_and_projects_signal = pyqtSignal()
 
     def __init__(self):
@@ -74,6 +76,9 @@ class UiSearchUtils(QObject):
             return name[0]
 
         return "X"
+
+    def create_new_project(self, name: str, workspace_id: Optional[str] = None):
+        create_new_project_query(self.speckle_client, name, workspace_id)
 
     def get_new_projects_content(self, clear_cursor=False):
 

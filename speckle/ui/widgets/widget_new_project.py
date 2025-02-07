@@ -1,52 +1,44 @@
+from speckle.ui.utils.search_widget_utils import UiSearchUtils
+from speckle.ui.widgets.background_widget import BackgroundWidget
+from speckle.ui.widgets.utils.global_resources import (
+    BACKGR_COLOR,
+    BACKGR_COLOR_LIGHT,
+    BACKGR_COLOR_WHITE,
+    WIDGET_SIDE_BUFFER,
+    ZERO_MARGIN_PADDING,
+)
+
 from PyQt5.QtGui import QColor
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QStackedLayout,
     QPushButton,
     QLabel,
+    QLineEdit,
     QGraphicsDropShadowEffect,
 )
 
-from speckle.host_apps.qgis.connectors.filters import QgisSelectionFilter
-from speckle.ui.bindings import SelectionInfo
-from speckle.ui.models import ModelCard, SenderModelCard
-from speckle.ui.widgets.background_widget import BackgroundWidget
-from speckle.ui.widgets.utils.global_resources import (
-    WIDGET_SIDE_BUFFER,
-    BACKGR_COLOR,
-    BACKGR_COLOR_LIGHT,
-    BACKGR_COLOR_WHITE,
-    ZERO_MARGIN_PADDING,
-)
 
+class NewProjectWidget(QWidget):
 
-class SelectionFilterWidget(QWidget):
-
-    add_model_card_signal = pyqtSignal(ModelCard)
-    background: BackgroundWidget = None
-    _message_card: QWidget
-    _model_card: SenderModelCard = None
-    _selection_info: SelectionInfo
-    _selection_info_label: QLabel
-    _shadow_effect = None
+    ui_search_content: UiSearchUtils = None
+    _message_card: QWidget = (
+        None  # needs to be here, so it can be called on resize event
+    )
+    project_name: QLineEdit = None
 
     def __init__(
         self,
+        *,
         parent=None,
-        model_card: SenderModelCard = None,
-        label_text: str = "3/3 Select objects",
-        selection_info: SelectionInfo = None,
+        label_text: str = "Create new project",
+        ui_search_content: UiSearchUtils = None,
     ):
-        super(SelectionFilterWidget, self).__init__(parent)
+        super(NewProjectWidget, self).__init__(parent)
         self.parent = parent
-        self._selection_info = selection_info
-
-        # update model card selection filter
-        selection_filter = QgisSelectionFilter(selection_info.selected_object_ids)
-        model_card.send_filter = selection_filter
-        self._model_card = model_card
+        self.ui_search_content = ui_search_content
 
         # align with the parent widget size
         self.resize(
@@ -124,33 +116,26 @@ class SelectionFilterWidget(QWidget):
         boxLayout.addWidget(label_main)
 
         # add text
-        label = self._create_text_widget("Selection:")
+        label = self._create_text_widget("Project name:")
         boxLayout.addWidget(label)
 
-        # TODO: replace later with responsive item (to SelectionFilter)
-        self._selection_info_label: QLabel = self._create_text_widget(
-            (
-                "No layers selected, go ahead and select some!"
-                if not self._selection_info
-                else self._selection_info.summary
-            ),
-            "color: blue;",
+        # add text input
+        self.project_name = QLineEdit()
+        self.project_name.setMaxLength(20)
+        self.project_name.setStyleSheet(
+            """QLineEdit { background-color: white; border-radius: 5px; color: black; height: 30px }"""
         )
+        boxLayout.addWidget(self.project_name)
 
-        boxLayout.addWidget(self._selection_info_label)
-
-        # add publish / load buttons
-        button_publish = self._create_publish_button()
-        boxLayout.addWidget(button_publish)
+        button_create = self._create_create_button()
+        boxLayout.addWidget(button_create)
 
         self._add_drop_shadow(self._message_card)
 
-    def _create_publish_button(self) -> QPushButton:
+    def _create_create_button(self) -> QPushButton:
 
-        button_publish = QPushButton("Publish")
-        button_publish.clicked.connect(
-            lambda: self.add_model_card_signal.emit(self._model_card)
-        )
+        button_publish = QPushButton("Create")
+        button_publish.clicked.connect(self._create_project_and_exit_widget)
         button_publish.setStyleSheet(
             "QPushButton {"
             + f"color:white;border-radius: 7px;margin:5px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
@@ -160,14 +145,11 @@ class SelectionFilterWidget(QWidget):
         )
         return button_publish
 
-    def change_selection_info(self, selection_info: SelectionInfo):
-        # function accessed from the parent dockwidget
-        # change text on the widget
-        self._selection_info_label.setText(selection_info.summary)
+    def _create_project_and_exit_widget(self):
 
-        # change selection info that will be passed to ModelCard
-        selection_filter = QgisSelectionFilter(selection_info.selected_object_ids)
-        self._model_card.send_filter = selection_filter
+        self.ui_search_content.create_new_project(self.project_name.text(), None)
+        # the next signal will trigger closing the widget and refreshing project list
+        self.ui_search_content.change_account_and_projects_signal.emit()
 
     def resizeEvent(self, event=None):
         QWidget.resizeEvent(self, event)

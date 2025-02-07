@@ -32,7 +32,7 @@ class CardsListTemporaryWidget(QWidget):
         cards_content_list: List[List],
     ):
         super(CardsListTemporaryWidget, self).__init__(parent)
-        self.parentWidget: "SpeckleQGISv3Dialog" = parent
+        self.parent: "SpeckleQGISv3Dialog" = parent
 
         # align with the parent widget size
         self.resize(
@@ -211,11 +211,11 @@ class CardsListTemporaryWidget(QWidget):
         QtWidgets.QWidget.resizeEvent(self, event)
         try:
             self.background.resize(
-                self.parentWidget.frameSize().width(),
-                self.parentWidget.frameSize().height(),
+                self.parent.frameSize().width(),
+                self.parent.frameSize().height(),
             )
             self.cards_list_widget.resize(
-                self.parentWidget.frameSize().width() - 3 * WIDGET_SIDE_BUFFER,
+                self.parent.frameSize().width() - 3 * WIDGET_SIDE_BUFFER,
                 self.cards_list_widget.height(),
             )
         except RuntimeError as e:

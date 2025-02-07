@@ -21,7 +21,7 @@ class BackgroundWidget(QWidget):
         ignore_close_on_click=False,
     ):
         super(BackgroundWidget, self).__init__(parent)
-        self.parentWidget = parent
+        self.parent = parent
         self.ignore_close_on_click = ignore_close_on_click
 
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
@@ -43,12 +43,12 @@ class BackgroundWidget(QWidget):
             return
 
         self.setGeometry(0, 0, 0, 0)
-        self.remove_current_widget_signal.emit(self.parentWidget)
+        self.remove_current_widget_signal.emit(self.parent)
 
     def show(self):
         self.setGeometry(
             0,
             0,
-            self.parentWidget.parentWidget.frameSize().width(),
-            self.parentWidget.parentWidget.frameSize().height(),
+            self.parent.parent.frameSize().width(),
+            self.parent.parent.frameSize().height(),
         )  # top left corner x, y, width, height

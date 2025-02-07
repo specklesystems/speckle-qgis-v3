@@ -27,7 +27,7 @@ class NoModelCardsWidget(QWidget):
 
     def __init__(self, parent=None):
         super(NoModelCardsWidget, self).__init__(parent)
-        self.parentWidget: "SpeckleQGISv3Dialog" = parent
+        self.parent: "SpeckleQGISv3Dialog" = parent
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, LABEL_HEIGHT, 0, 0)

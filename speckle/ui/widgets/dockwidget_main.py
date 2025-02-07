@@ -8,6 +8,7 @@ from speckle.ui.widgets.widget_account_search import AccountSearchWidget
 from speckle.ui.widgets.widget_model_card import ModelCardWidget
 from speckle.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.ui.widgets.widget_model_search import ModelSearchWidget
+from speckle.ui.widgets.widget_new_project import NewProjectWidget
 from speckle.ui.widgets.widget_no_document import NoDocumentWidget
 from speckle.ui.widgets.widget_no_model_cards import NoModelCardsWidget
 from speckle.ui.widgets.widget_project_search import ProjectSearchWidget
@@ -39,6 +40,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     widget_project_search: ProjectSearchWidget = None
     widget_model_search: ModelSearchWidget = None
     widget_account_search: AccountSearchWidget = None
+    widget_new_project: NewProjectWidget = None
     widget_model_cards: ModelCardsWidget = None
     widget_selection_filter: SelectionFilterWidget = None
 
@@ -158,6 +160,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         if self.widget_account_search:
             self._remove_widget_account_search()
 
+        if self.widget_new_project:
+            self._remove_widget_new_project()
+
         if self.widget_selection_filter:
             self.remove_widget_selection_filter()
 
@@ -178,6 +183,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         elif self.widget_account_search == widget:
             self._remove_widget_account_search()
 
+        elif self.widget_new_project == widget:
+            self._remove_widget_new_project()
+
         elif self.widget_selection_filter == widget:
             self.remove_widget_selection_filter()
 
@@ -194,6 +202,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         if self.widget_account_search:
             self._remove_widget_account_search()
 
+        if self.widget_new_project:
+            self._remove_widget_new_project()
+
     def _remove_widget_project_search(self):
         self.widget_project_search.setParent(None)
         self.widget_project_search = None
@@ -205,6 +216,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     def _remove_widget_account_search(self):
         self.widget_account_search.setParent(None)
         self.widget_account_search = None
+
+    def _remove_widget_new_project(self):
+        self.widget_new_project.setParent(None)
+        self.widget_new_project = None
 
     def remove_widget_selection_filter(self):
         self.widget_selection_filter.setParent(None)
@@ -296,6 +311,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
                 self._open_select_models_widget
             )
 
+            # subscribe to new_project_widget_signal signal
+            self.widget_project_search.ui_search_content.new_project_widget_signal.connect(
+                self._open_new_project_widget
+            )
+
             # subscribe to select_account_signal signal
             self.widget_project_search.ui_search_content.select_account_signal.connect(
                 self._open_select_accounts_widget
@@ -307,8 +327,26 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             )
 
     def _update_account_project_list(self):
-        self._remove_widget_account_search()
+
+        # can be called from CreateAccount or NewProject widgets
+        if self.widget_account_search:
+            self._remove_widget_account_search()
+        if self.widget_new_project:
+            self._remove_widget_new_project()
+
         self.widget_project_search.refresh_projects()
+
+    def _open_new_project_widget(self):
+        if not self.widget_new_project:
+            self.widget_new_project = NewProjectWidget(
+                parent=self,
+                ui_search_content=self.widget_project_search.ui_search_content,
+            )
+            # add widgets to the layout
+            self.layout().addWidget(self.widget_new_project)
+
+            # subscribe to close-on-background-click event
+            self._subscribe_to_close_on_background_click(self.widget_new_project)
 
     def _open_select_accounts_widget(self):
         if not self.widget_account_search:
@@ -414,6 +452,12 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
         if self.widget_selection_filter:
             self.widget_selection_filter.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
+            )
+
+        if self.widget_new_project:
+            self.widget_new_project.resize(
                 self.frameSize().width(),
                 self.frameSize().height(),
             )

@@ -5,7 +5,10 @@ from specklepy.core.api.credentials import (
     Account,
     get_local_accounts,
 )
-from specklepy.core.api.inputs.project_inputs import ProjectModelsFilter
+from specklepy.core.api.inputs.project_inputs import (
+    ProjectCreateInput,
+    ProjectModelsFilter,
+)
 from specklepy.core.api.inputs.user_inputs import UserProjectsFilter
 from specklepy.core.api.models.current import (
     Model,
@@ -108,6 +111,30 @@ def get_project_by_id_from_client(
     if speckle_client is not None:
         # possible GraphQLException
         result: Project = speckle_client.project.get(project_id=project_id)
+
+        if not isinstance(result, Project):
+            # TODO: handle
+            pass
+
+    else:
+        # TODO add a warning
+        pass
+
+    return result
+
+
+def create_new_project_query(
+    speckle_client: SpeckleClient, project_name: str, workspace_id: str
+) -> Project:
+
+    result = None
+    if speckle_client is not None:
+        # possible GraphQLException
+        result: Project = speckle_client.project.create(
+            input=ProjectCreateInput(
+                name=project_name, description=None, visibility=None
+            )
+        )
 
         if not isinstance(result, Project):
             # TODO: handle
