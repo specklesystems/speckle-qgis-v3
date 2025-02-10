@@ -283,6 +283,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         # actually add a new widget
         self._add_new_model_card_widget(model_card)
 
+        # send data immediately
+        self.send_model_signal.emit(model_card)
+
     def _add_new_model_card_widget(self, model_card: ModelCard):
 
         model_card_widget = self.widget_model_cards.add_new_card(model_card)
@@ -338,10 +341,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
             # subscribe to change_account_signal signal
             self.widget_project_search.ui_search_content.change_account_and_projects_signal.connect(
-                self._update_account_project_list
+                self._update_project_list
             )
 
-    def _update_account_project_list(self):
+    def _update_project_list(self):
 
         # can be called from CreateAccount or NewProject widgets
         if self.widget_account_search:
@@ -350,6 +353,13 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self._remove_widget_new_project()
 
         self.widget_project_search.refresh_projects()
+
+    def _update_model_list(self):
+        # can be called from NewModelWidget
+        if self.widget_new_model:
+            self._remove_widget_new_model()
+
+        self.widget_model_search.refresh_models()
 
     def _open_new_project_widget(self):
         if not self.widget_new_project:
@@ -360,17 +370,33 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             # add widgets to the layout
             self.layout().addWidget(self.widget_new_project)
 
+            # connect clear_project_search_bar_signal. Called when New project is created
+            self.widget_new_project.ui_search_content.clear_project_search_bar_signal.connect(
+                self.widget_project_search.clear_search_bar
+            )
+
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_new_project)
 
-    def _open_new_model_widget(self):
+    def _open_new_model_widget(self, project_id: str):
         if not self.widget_new_model:
             self.widget_new_model = NewModelWidget(
                 parent=self,
+                project_id=project_id,
                 ui_search_content=self.widget_project_search.ui_search_content,
             )
             # add widgets to the layout
             self.layout().addWidget(self.widget_new_model)
+
+            # connect clear_model_search_bar_signal. Called when New model is created
+            self.widget_new_model.ui_search_content.clear_model_search_bar_signal.connect(
+                self.widget_model_search.clear_search_bar
+            )
+
+            # subscribe to NewModelCreated event
+            self.widget_new_model.ui_search_content.refresh_models_signal.connect(
+                self._update_model_list
+            )
 
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_new_model)

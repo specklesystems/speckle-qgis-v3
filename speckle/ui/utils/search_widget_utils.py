@@ -11,6 +11,7 @@ from specklepy.core.api.models.current import (
 from specklepy.core.api.resources.current.project_resource import ProjectResource
 from speckle.ui.utils.utils import (
     create_new_project_query,
+    create_new_model_query,
     get_accounts,
     get_authenticate_client_for_account,
     get_models_from_client,
@@ -32,8 +33,12 @@ class UiSearchUtils(QObject):
     add_models_search_signal = pyqtSignal(Project)
     select_account_signal = pyqtSignal()
     new_project_widget_signal = pyqtSignal()
-    new_model_widget_signal = pyqtSignal()
+    new_model_widget_signal = pyqtSignal(str)
     change_account_and_projects_signal = pyqtSignal()
+    refresh_models_signal = pyqtSignal()
+
+    clear_project_search_bar_signal = pyqtSignal()
+    clear_model_search_bar_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -81,6 +86,9 @@ class UiSearchUtils(QObject):
     def create_new_project(self, name: str, workspace_id: Optional[str] = None):
         create_new_project_query(self.speckle_client, name, workspace_id)
 
+    def create_new_model(self, project_id: str, model_name: str):
+        create_new_model_query(self.speckle_client, project_id, model_name)
+
     def get_new_projects_content(self, clear_cursor=False):
 
         if clear_cursor:
@@ -101,7 +109,7 @@ class UiSearchUtils(QObject):
 
         return content_list
 
-    def get_new_projects_content_with_name_condition(self, name_include: str):
+    def get_new_projects_content_with_name_condition(self, name_filter: str):
 
         self.cursor_projects = None
 
@@ -109,7 +117,7 @@ class UiSearchUtils(QObject):
             get_projects_from_client(
                 speckle_client=self.speckle_client,
                 cursor=self.cursor_projects,
-                filter_keyword=name_include,
+                filter_keyword=name_filter,
             )
         )
         self.cursor_projects = projects_resource_collection.cursor
@@ -165,7 +173,7 @@ class UiSearchUtils(QObject):
         return content_list
 
     def get_new_models_content_with_name_condition(
-        self, project: Project, name_include: str
+        self, project: Project, name_filter: str
     ) -> List[List]:
 
         self.cursor_models = None
@@ -174,7 +182,7 @@ class UiSearchUtils(QObject):
             speckle_client=self.speckle_client,
             project=project,
             cursor=self.cursor_models,
-            filter_keyword=name_include,
+            filter_keyword=name_filter,
         )
         self.cursor_models = models_resource_collection.cursor
         content_list: List[List] = (

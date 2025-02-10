@@ -24,6 +24,7 @@ from PyQt5.QtWidgets import (
 class NewModelWidget(QWidget):
 
     ui_search_content: UiSearchUtils = None
+    project_id: str
     _message_card: QWidget = (
         None  # needs to be here, so it can be called on resize event
     )
@@ -34,11 +35,13 @@ class NewModelWidget(QWidget):
         self,
         *,
         parent=None,
+        project_id: str = None,
         label_text: str = "Create new model",
         ui_search_content: UiSearchUtils = None,
     ):
         super(NewModelWidget, self).__init__(parent)
         self.parent = parent
+        self.project_id = project_id
         self.ui_search_content = ui_search_content
 
         # align with the parent widget size
@@ -150,10 +153,16 @@ class NewModelWidget(QWidget):
         return button_publish
 
     def _create_model_and_exit_widget(self):
-        return
-        self.ui_search_content.create_new_project(self.model_name_widget.text(), None)
-        # the next signal will trigger closing the widget and refreshing project list
-        self.ui_search_content.change_account_and_projects_signal.emit()
+
+        self.ui_search_content.create_new_model(
+            self.project_id, self.model_name_widget.text()
+        )
+
+        # the next signal will trigger closing the widget and refreshing model list
+        self.ui_search_content.refresh_models_signal.emit()
+
+        # clear text search bar
+        self.ui_search_content.clear_model_search_bar_signal.emit()
 
     def resizeEvent(self, event=None):
         QWidget.resizeEvent(self, event)

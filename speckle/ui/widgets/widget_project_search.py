@@ -25,6 +25,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
     ui_search_content: UiSearchUtils = None
     account_switch_btn: QPushButton = None
+    search_widget: QLineEdit = None
 
     def __init__(
         self,
@@ -51,9 +52,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         self._add_search_and_account_switch_line()
         self._add_projects(clear_cursor=True)
 
-    def _add_projects(self, clear_cursor=False, name_include: Optional[str] = None):
+    def _add_projects(self, clear_cursor=False, name_filter: Optional[str] = None):
 
-        if name_include is None:
+        if name_filter is None:
             # just get the projects in batches
             new_project_cards: list = self.ui_search_content.get_new_projects_content(
                 clear_cursor=clear_cursor
@@ -62,7 +63,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             # get the projects that match the name condition
             new_project_cards: list = (
                 self.ui_search_content.get_new_projects_content_with_name_condition(
-                    name_include=name_include
+                    name_filter=name_filter
                 )
             )
 
@@ -73,9 +74,12 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         # adjust size of new widget:
         self.resizeEvent()
 
-    def refresh_projects(self, name_include: Optional[str] = None):
+    def refresh_projects(self, name_filter: Optional[str] = None):
         self._remove_all_cards()
-        self._add_projects(clear_cursor=True, name_include=name_include)
+        self._add_projects(clear_cursor=True, name_filter=name_filter)
+
+    def clear_search_bar(self):
+        self.search_widget.setText("")
 
     def _add_search_and_account_switch_line(self):
 
@@ -94,6 +98,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         # project search field
         search_widget = self._create_search_widget()
         layout_line.addWidget(search_widget)
+        self.search_widget = search_widget
 
         # New project buttom
         new_project_btn = self._create_new_project_btn()

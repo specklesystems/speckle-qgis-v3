@@ -5,6 +5,7 @@ from specklepy.core.api.credentials import (
     Account,
     get_local_accounts,
 )
+from specklepy.core.api.inputs.model_inputs import CreateModelInput
 from specklepy.core.api.inputs.project_inputs import (
     ProjectCreateInput,
     ProjectModelsFilter,
@@ -133,6 +134,30 @@ def create_new_project_query(
         result: Project = speckle_client.project.create(
             input=ProjectCreateInput(
                 name=project_name, description=None, visibility=None
+            )
+        )
+
+        if not isinstance(result, Project):
+            # TODO: handle
+            pass
+
+    else:
+        # TODO add a warning
+        pass
+
+    return result
+
+
+def create_new_model_query(
+    speckle_client: SpeckleClient, project_id: str, model_name: str
+) -> Project:
+
+    result = None
+    if speckle_client is not None:
+        # possible GraphQLException
+        result: Project = speckle_client.model.create(
+            input=CreateModelInput(
+                name=model_name, description=None, projectId=project_id
             )
         )
 

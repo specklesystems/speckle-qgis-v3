@@ -168,8 +168,12 @@ class NewProjectWidget(QWidget):
     def _create_project_and_exit_widget(self):
 
         self.ui_search_content.create_new_project(self.project_name_widget.text(), None)
+
         # the next signal will trigger closing the widget and refreshing project list
         self.ui_search_content.change_account_and_projects_signal.emit()
+
+        # clear text search bar
+        self.ui_search_content.clear_project_search_bar_signal.emit()
 
     def resizeEvent(self, event=None):
         QWidget.resizeEvent(self, event)
