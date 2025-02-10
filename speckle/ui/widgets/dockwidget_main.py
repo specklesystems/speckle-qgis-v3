@@ -370,6 +370,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             # add widgets to the layout
             self.layout().addWidget(self.widget_new_project)
 
+            # connect clear_project_search_bar_signal. Called when New project is created
+            self.widget_new_project.ui_search_content.clear_project_search_bar_signal.connect(
+                self.widget_project_search.clear_search_bar
+            )
+
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_new_project)
 
@@ -382,6 +387,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             )
             # add widgets to the layout
             self.layout().addWidget(self.widget_new_model)
+
+            # connect clear_model_search_bar_signal. Called when New model is created
+            self.widget_new_model.ui_search_content.clear_model_search_bar_signal.connect(
+                self.widget_model_search.clear_search_bar
+            )
 
             # subscribe to NewModelCreated event
             self.widget_new_model.ui_search_content.refresh_models_signal.connect(

@@ -157,8 +157,12 @@ class NewModelWidget(QWidget):
         self.ui_search_content.create_new_model(
             self.project_id, self.model_name_widget.text()
         )
+
         # the next signal will trigger closing the widget and refreshing model list
         self.ui_search_content.refresh_models_signal.emit()
+
+        # clear text search bar
+        self.ui_search_content.clear_model_search_bar_signal.emit()
 
     def resizeEvent(self, event=None):
         QWidget.resizeEvent(self, event)

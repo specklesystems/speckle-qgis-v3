@@ -27,6 +27,7 @@ class ModelSearchWidget(CardsListTemporaryWidget):
 
     ui_search_content: UiSearchUtils = None
     _project: Project = None
+    search_widget: QLineEdit = None
 
     def __init__(
         self,
@@ -73,6 +74,9 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         # adjust size of new widget:
         self.resizeEvent()
 
+    def clear_search_bar(self):
+        self.search_widget.setText("")
+
     def refresh_models(self, name_filter: Optional[str] = None):
         self._remove_all_cards()
         self._add_models(clear_cursor=True, name_filter=name_filter)
@@ -94,6 +98,7 @@ class ModelSearchWidget(CardsListTemporaryWidget):
         # model search field
         search_widget = self._create_search_widget()
         layout_line.addWidget(search_widget)
+        self.search_widget = search_widget
 
         # New model buttom
         new_model_btn = self._create_new_model_btn()

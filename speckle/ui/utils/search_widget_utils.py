@@ -37,6 +37,9 @@ class UiSearchUtils(QObject):
     change_account_and_projects_signal = pyqtSignal()
     refresh_models_signal = pyqtSignal()
 
+    clear_project_search_bar_signal = pyqtSignal()
+    clear_model_search_bar_signal = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         accounts: List[Account] = get_accounts()

@@ -25,6 +25,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
     ui_search_content: UiSearchUtils = None
     account_switch_btn: QPushButton = None
+    search_widget: QLineEdit = None
 
     def __init__(
         self,
@@ -77,6 +78,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         self._remove_all_cards()
         self._add_projects(clear_cursor=True, name_filter=name_filter)
 
+    def clear_search_bar(self):
+        self.search_widget.setText("")
+
     def _add_search_and_account_switch_line(self):
 
         # create a line widget
@@ -94,6 +98,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         # project search field
         search_widget = self._create_search_widget()
         layout_line.addWidget(search_widget)
+        self.search_widget = search_widget
 
         # New project buttom
         new_project_btn = self._create_new_project_btn()
