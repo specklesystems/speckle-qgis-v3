@@ -338,10 +338,10 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
 
             # subscribe to change_account_signal signal
             self.widget_project_search.ui_search_content.change_account_and_projects_signal.connect(
-                self._update_account_project_list
+                self._update_project_list
             )
 
-    def _update_account_project_list(self):
+    def _update_project_list(self):
 
         # can be called from CreateAccount or NewProject widgets
         if self.widget_account_search:
@@ -350,6 +350,13 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self._remove_widget_new_project()
 
         self.widget_project_search.refresh_projects()
+
+    def _update_model_list(self):
+        # can be called from NewModelWidget
+        if self.widget_new_model:
+            self._remove_widget_new_model()
+
+        self.widget_model_search.refresh_models()
 
     def _open_new_project_widget(self):
         if not self.widget_new_project:
@@ -372,6 +379,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             )
             # add widgets to the layout
             self.layout().addWidget(self.widget_new_model)
+
+            # subscribe to NewModelCreated event
+            self.widget_new_model.ui_search_content.refresh_models_signal.connect(
+                self._update_model_list
+            )
 
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_new_model)

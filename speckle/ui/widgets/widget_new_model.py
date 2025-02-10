@@ -157,8 +157,8 @@ class NewModelWidget(QWidget):
         self.ui_search_content.create_new_model(
             self.project_id, self.model_name_widget.text()
         )
-        # the next signal will trigger closing the widget and refreshing project list
-        # self.ui_search_content.change_account_and_projects_signal.emit()
+        # the next signal will trigger closing the widget and refreshing model list
+        self.ui_search_content.refresh_models_signal.emit()
 
     def resizeEvent(self, event=None):
         QWidget.resizeEvent(self, event)

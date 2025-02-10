@@ -35,6 +35,7 @@ class UiSearchUtils(QObject):
     new_project_widget_signal = pyqtSignal()
     new_model_widget_signal = pyqtSignal(str)
     change_account_and_projects_signal = pyqtSignal()
+    refresh_models_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -105,7 +106,7 @@ class UiSearchUtils(QObject):
 
         return content_list
 
-    def get_new_projects_content_with_name_condition(self, name_include: str):
+    def get_new_projects_content_with_name_condition(self, name_filter: str):
 
         self.cursor_projects = None
 
@@ -113,7 +114,7 @@ class UiSearchUtils(QObject):
             get_projects_from_client(
                 speckle_client=self.speckle_client,
                 cursor=self.cursor_projects,
-                filter_keyword=name_include,
+                filter_keyword=name_filter,
             )
         )
         self.cursor_projects = projects_resource_collection.cursor
@@ -169,7 +170,7 @@ class UiSearchUtils(QObject):
         return content_list
 
     def get_new_models_content_with_name_condition(
-        self, project: Project, name_include: str
+        self, project: Project, name_filter: str
     ) -> List[List]:
 
         self.cursor_models = None
@@ -178,7 +179,7 @@ class UiSearchUtils(QObject):
             speckle_client=self.speckle_client,
             project=project,
             cursor=self.cursor_models,
-            filter_keyword=name_include,
+            filter_keyword=name_filter,
         )
         self.cursor_models = models_resource_collection.cursor
         content_list: List[List] = (
