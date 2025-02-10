@@ -283,6 +283,9 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         # actually add a new widget
         self._add_new_model_card_widget(model_card)
 
+        # send data immediately
+        self.send_model_signal.emit(model_card)
+
     def _add_new_model_card_widget(self, model_card: ModelCard):
 
         model_card_widget = self.widget_model_cards.add_new_card(model_card)
