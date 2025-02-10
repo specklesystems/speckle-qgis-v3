@@ -39,7 +39,7 @@ class BackgroundWidget(QWidget):
 
     def mouseReleaseEvent(self, event):
         if self.ignore_close_on_click:
-            # don't clise the widget on MouseClick outside the background
+            # don't close the widget on MouseClick outside the background
             return
 
         self.setGeometry(0, 0, 0, 0)
