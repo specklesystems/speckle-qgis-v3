@@ -117,7 +117,9 @@ class ModelSearchWidget(CardsListTemporaryWidget):
 
         new_item_btn = QPushButton("+")
         new_item_btn.clicked.connect(
-            lambda: self.ui_search_content.new_model_widget_signal.emit()
+            lambda: self.ui_search_content.new_model_widget_signal.emit(
+                self._project.id
+            )
         )
         new_item_btn.setStyleSheet(
             "QPushButton {"

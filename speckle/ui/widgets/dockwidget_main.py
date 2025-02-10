@@ -363,10 +363,11 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_new_project)
 
-    def _open_new_model_widget(self):
+    def _open_new_model_widget(self, project_id: str):
         if not self.widget_new_model:
             self.widget_new_model = NewModelWidget(
                 parent=self,
+                project_id=project_id,
                 ui_search_content=self.widget_project_search.ui_search_content,
             )
             # add widgets to the layout

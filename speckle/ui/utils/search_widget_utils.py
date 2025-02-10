@@ -11,6 +11,7 @@ from specklepy.core.api.models.current import (
 from specklepy.core.api.resources.current.project_resource import ProjectResource
 from speckle.ui.utils.utils import (
     create_new_project_query,
+    create_new_model_query,
     get_accounts,
     get_authenticate_client_for_account,
     get_models_from_client,
@@ -32,7 +33,7 @@ class UiSearchUtils(QObject):
     add_models_search_signal = pyqtSignal(Project)
     select_account_signal = pyqtSignal()
     new_project_widget_signal = pyqtSignal()
-    new_model_widget_signal = pyqtSignal()
+    new_model_widget_signal = pyqtSignal(str)
     change_account_and_projects_signal = pyqtSignal()
 
     def __init__(self):
@@ -80,6 +81,9 @@ class UiSearchUtils(QObject):
 
     def create_new_project(self, name: str, workspace_id: Optional[str] = None):
         create_new_project_query(self.speckle_client, name, workspace_id)
+
+    def create_new_model(self, project_id: str, model_name: str):
+        create_new_model_query(self.speckle_client, project_id, model_name)
 
     def get_new_projects_content(self, clear_cursor=False):
 
