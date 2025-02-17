@@ -16,25 +16,15 @@ from speckle.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
 import webbrowser
 
-from qgis.core import QgsApplication
-
-
-SPECKLE_COLOR = (59, 130, 246)
-SPECKLE_COLOR_LIGHT = (69, 140, 255)
-
 
 class SpeckleQGISv3Module:
     """Speckle Connector Plugin for QGIS"""
 
     connector_module: QgisConnectorModule
     converter_module: QgisConverterModule
-    speckle_version: str
-    theads_total: int
 
     def __init__(self, iface):
 
-        self.speckle_version = "3.0.0"
-        self.theads_total = 0
         self.instantiate_module_dependencies(iface)
 
     def create_dockwidget(self):
