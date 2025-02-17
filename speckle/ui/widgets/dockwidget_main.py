@@ -105,6 +105,12 @@ class SpeckleQGISv3Dialog(QDockWidget):
 
     def _create_header(self, plugin):
         try:
+            header_widget = QWidget()
+            header_widget.setStyleSheet(f"{BACKGR_COLOR}")
+            header_widget.layout = QHBoxLayout(header_widget)
+            header_widget.layout.setContentsMargins(0, 0, 10, 0)
+            header_widget.layout.setAlignment(QtCore.Qt.AlignVCenter)
+
             exitIcon = QPixmap(ICON_LOGO)
             exitActIcon = QIcon(exitIcon)
 
@@ -143,14 +149,8 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 "text-align: left;"
             )
 
-            header_widget = QWidget()
-            header_widget.setStyleSheet(f"{BACKGR_COLOR}")
-
-            header_widget.layout = QHBoxLayout(header_widget)
-            header_widget.layout.setAlignment(QtCore.Qt.AlignVCenter)
             header_widget.layout.addWidget(text_label)  # , alignment=Qt.AlignCenter)
             header_widget.layout.addWidget(version_label)
-            header_widget.layout.setContentsMargins(0, 0, 10, 0)
 
             self.labelWidget = text_label
             self.labelWidget.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
