@@ -47,7 +47,7 @@ class SpeckleQGIS(SpeckleQGISv3Module):
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr("&SpeckleQGIS")
+        self.menu = self.tr("&Speckle (Beta)")
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -71,7 +71,7 @@ class SpeckleQGIS(SpeckleQGISv3Module):
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate("SpeckleQGIS", message)
+        return QCoreApplication.translate("Speckle (Beta)", message)
 
     def add_action(
         self,
@@ -148,11 +148,11 @@ class SpeckleQGIS(SpeckleQGISv3Module):
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
-        icon_path = ":/plugins/speckle-qgis-v3/icon.png"
+        path = os.path.dirname(os.path.abspath(__file__))
+        icon_path = f"{path}/icon.png"
         self.add_action(
             icon_path,
-            text=self.tr("SpeckleQGIS"),
+            text=self.tr("Speckle Beta"),  # special characters/brackets are ignored
             callback=self.run,
             parent=self.iface.mainWindow(),
         )

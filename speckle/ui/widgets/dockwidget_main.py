@@ -106,7 +106,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
     def _create_header(self, plugin):
         try:
             header_widget = QWidget()
-            header_widget.setStyleSheet(f"{BACKGR_COLOR}")
+            header_widget.setStyleSheet(f"{BACKGR_COLOR}{ZERO_MARGIN_PADDING}")
             header_widget.layout = QHBoxLayout(header_widget)
             header_widget.layout.setContentsMargins(0, 0, 10, 0)
             header_widget.layout.setAlignment(QtCore.Qt.AlignVCenter)
@@ -120,10 +120,8 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 "border: 0px;"
                 "color: white;"
                 f"{BACKGR_COLOR}"
-                "padding: 10px;"
                 "padding-left: 20px;"
                 "font-size: 15px;"
-                "height: 30px;"
                 "text-align: left;"
             )
             text_label.setIcon(exitActIcon)
@@ -175,7 +173,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             close_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
             header_widget.layout.addWidget(close_btn)
 
-            self.setWindowTitle("SpeckleQGIS")
+            self.setWindowTitle("Speckle (Beta)")
 
             return header_widget
 
