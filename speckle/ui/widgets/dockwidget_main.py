@@ -26,6 +26,8 @@ from PyQt5.QtGui import QIcon, QPixmap, QCursor
 from PyQt5.QtWidgets import (
     QDockWidget,
     QHBoxLayout,
+    QVBoxLayout,
+    QStackedLayout,
     QWidget,
     QPushButton,
     QSpacerItem,
@@ -46,6 +48,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
     basic_binding: IBasicConnectorBinding
 
     header_widget: QWidget = None
+    main_widget: QWidget = None
     widget_no_document: NoDocumentWidget = None
     widget_no_model_cards: NoModelCardsWidget = None
     widget_project_search: ProjectSearchWidget = None
@@ -77,10 +80,21 @@ class SpeckleQGISv3Dialog(QDockWidget):
         self.bridge = bridge
 
     def runSetup(self, plugin):
-        self._add_label(plugin)
-        self._add_start_widget(plugin)
+        self.layout = QVBoxLayout(self)
 
-    def _add_label(self, plugin):
+        # create and add header widget
+        self.header_widget = self._create_header(plugin)
+        self.layout.addWidget(self.header_widget)
+
+        # cerate and add main widget
+        return
+        self.main_widget = QWidget()
+        self.main_widget.layout = QStackedLayout(self.main_widget)
+        self.layout.addWidget(self.main_widget)
+
+        # self._add_start_widget(plugin)
+
+    def _create_header(self, plugin):
         try:
             exitIcon = QPixmap(ICON_LOGO)
             exitActIcon = QIcon(exitIcon)
@@ -91,7 +105,6 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 "border: 0px;"
                 "color: white;"
                 f"{BACKGR_COLOR}"
-                "top-margin: 40 px;"
                 "padding: 10px;"
                 "padding-left: 20px;"
                 "font-size: 15px;"
@@ -115,7 +128,6 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 "border: 0px;"
                 "color: white;"
                 f"{BACKGR_COLOR}"
-                "padding-top: 15px;"
                 "padding-left: 0px;"
                 "margin-left: 0px;"
                 "font-size: 10px;"
@@ -123,9 +135,10 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 "text-align: left;"
             )
 
-            widget = QWidget()
-            widget.setStyleSheet(f"{BACKGR_COLOR}")
-            boxLayout = QHBoxLayout(widget)
+            header_widget = QWidget()
+            header_widget.setStyleSheet(f"{BACKGR_COLOR}")
+
+            boxLayout = QHBoxLayout(header_widget)
             boxLayout.setAlignment(QtCore.Qt.AlignVCenter)
             boxLayout.addWidget(text_label)  # , alignment=Qt.AlignCenter)
             boxLayout.addWidget(version_label)
@@ -155,10 +168,8 @@ class SpeckleQGISv3Dialog(QDockWidget):
             boxLayout.addWidget(close_btn)
 
             self.setWindowTitle("SpeckleQGIS")
-            # self.setTitleBarWidget(widget)
-            self.layout().addWidget(widget)
 
-            self.header_widget = widget
+            return header_widget
 
         except Exception as e:
             print(e)
@@ -170,11 +181,11 @@ class SpeckleQGISv3Dialog(QDockWidget):
 
         if not document_open:
             no_document_widget = NoDocumentWidget(parent=self)
-            self.layout().addWidget(no_document_widget)
+            self.main_widget.layout.addWidget(no_document_widget)
             self.widget_no_document = no_document_widget
         else:
             no_model_cards_widget = NoModelCardsWidget(parent=self)
-            self.layout().addWidget(no_model_cards_widget)
+            self.main_widget.layout.addWidget(no_model_cards_widget)
             self.widget_no_model_cards = no_model_cards_widget
 
             self.widget_no_model_cards.add_projects_search_signal.connect(
@@ -315,7 +326,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 self._remove_widget_model_cards
             )
             # add widgets to the layout
-            self.layout().addWidget(self.widget_model_cards)
+            self.main_widget.layout.addWidget(self.widget_model_cards)
 
         # actually add a new widget
         self._add_new_model_card_widget(model_card)
@@ -352,7 +363,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
         if not self.widget_project_search:
             self.widget_project_search = ProjectSearchWidget(parent=self)
             # add widgets to the layout
-            self.layout().addWidget(self.widget_project_search)
+            self.main_widget.layout.addWidget(self.widget_project_search)
 
             self.widget_project_search.ui_search_content.add_selection_filter_signal.connect(
                 self._create_selection_filter_widget
@@ -405,7 +416,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 ui_search_content=self.widget_project_search.ui_search_content,
             )
             # add widgets to the layout
-            self.layout().addWidget(self.widget_new_project)
+            self.main_widget.layout.addWidget(self.widget_new_project)
 
             # connect clear_project_search_bar_signal. Called when New project is created
             self.widget_new_project.ui_search_content.clear_project_search_bar_signal.connect(
@@ -423,7 +434,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 ui_search_content=self.widget_project_search.ui_search_content,
             )
             # add widgets to the layout
-            self.layout().addWidget(self.widget_new_model)
+            self.main_widget.layout.addWidget(self.widget_new_model)
 
             # connect clear_model_search_bar_signal. Called when New model is created
             self.widget_new_model.ui_search_content.clear_model_search_bar_signal.connect(
@@ -445,7 +456,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 ui_search_content=self.widget_project_search.ui_search_content,
             )
             # add widgets to the layout
-            self.layout().addWidget(self.widget_account_search)
+            self.main_widget.layout.addWidget(self.widget_account_search)
 
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_account_search)
@@ -459,7 +470,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 ui_search_content=self.widget_project_search.ui_search_content,
             )
             # add widgets to the layout
-            self.layout().addWidget(self.widget_model_search)
+            self.main_widget.layout.addWidget(self.widget_model_search)
 
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_model_search)
@@ -486,7 +497,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             )
 
             # add widgets to the layout
-            self.layout().addWidget(self.widget_selection_filter)
+            self.main_widget.layout.addWidget(self.widget_selection_filter)
 
             self.widget_selection_filter.add_model_card_signal.connect(
                 self._create_or_add_model_cards_widget
@@ -517,12 +528,19 @@ class SpeckleQGISv3Dialog(QDockWidget):
     def resizeEvent(self, event):
         QDockWidget.resizeEvent(self, event)
 
-        self.header_widget.resize(
-            self.frameSize().width(),
-            LABEL_HEIGHT,
-        )
-
         # handle resize of child elements
+        if self.header_widget:
+            self.header_widget.resize(
+                self.frameSize().width(),
+                LABEL_HEIGHT,
+            )
+
+        if self.main_widget:
+            self.main_widget.resize(
+                self.frameSize().width(),
+                self.frameSize().height() - LABEL_HEIGHT,
+            )
+
         if self.widget_no_document:
             self.widget_no_document.resize(
                 self.frameSize().width(),
