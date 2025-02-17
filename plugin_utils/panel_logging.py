@@ -1,23 +1,22 @@
 """Logging Utility Module for Speckle QGIS"""
 
-import inspect
-from typing import Union
 import webbrowser
 
 
-def logToUser(
-    msg: Union[str, Exception],
-    func=None,
+def display_and_log(
+    msg: str,
+    func=None,  # name of the function from where logging was called
     level: int = 2,
-    plugin=None,
+    dockwidget=None,
     url="",
     blue=False,
     report=False,
 ):
-    from speckle.ui.widgets.utils.logger import logToUser as logToUser_UI
 
-    msg = str(msg)
-    logToUser_UI(msg, func, level, plugin, url, blue, report)
+    # display in Speckle UI: TODO
+    # log_to_user(msg, func, level, dockwidget, url, blue, report)
+
+    # display in QGIS message panel
     logger.writeToLog(msg.replace("\n", ". ") + " " + url, level, func)
 
 
@@ -42,13 +41,8 @@ class Logging:
                 level = Qgis.Critical
             # return
             QgsMessageLog.logMessage(message, "Speckle", level=level)
-        except ImportError or ModuleNotFoundError:
-            pass
-        except Exception as e:
-            try:
-                logToUser(e, level=2, func=inspect.stack()[0][3])
-            except:
-                pass
+        except ImportError or ModuleNotFoundError as e:
+            print(e)
 
     def btnClicked(url):
         try:

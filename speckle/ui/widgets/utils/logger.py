@@ -1,7 +1,7 @@
 from speckle.ui.widgets.utils.utils import splitTextIntoLines
 
 
-def logToUser(
+def log_to_user(
     msg: str, func=None, level: int = 2, plugin=None, url="", blue=False, report=False
 ):
     msg = str(msg)
@@ -18,9 +18,10 @@ def logToUser(
 
         new_msg = splitTextIntoLines(msg)
 
+        # TODO: emit signal to dockwidget, create and display Log widget
+
     except Exception as e:
         print(e)
-        return
 
 
 def addLevelSymbol(msg: str, level: int):
