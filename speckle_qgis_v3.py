@@ -162,7 +162,7 @@ class SpeckleQGIS(SpeckleQGISv3Module):
 
         # disconnects
         if self.dockwidget:
-            self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
+            self.dockwidget.close_plugin_signal.disconnect(self.onClosePlugin)
 
         self.pluginIsActive = False
         self.dockwidget.close()
@@ -193,6 +193,9 @@ class SpeckleQGIS(SpeckleQGISv3Module):
         # show the dockwidget
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
         self.verify_dependencies()
+
+        # connect to close click event in dockwidget
+        self.dockwidget.close_plugin_signal.connect(self.onClosePlugin)
 
     def reloadUI(self):
         return

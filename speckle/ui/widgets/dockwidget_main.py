@@ -15,26 +15,37 @@ from speckle.ui.widgets.widget_no_model_cards import NoModelCardsWidget
 from speckle.ui.widgets.widget_project_search import ProjectSearchWidget
 
 from speckle.ui.widgets.utils.global_resources import (
+    BACKGR_COLOR_LIGHT_GREY2,
     ICON_LOGO,
     BACKGR_COLOR,
+    LABEL_HEIGHT,
+    ZERO_MARGIN_PADDING,
 )
 
-from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon, QPixmap, QCursor
-from PyQt5.QtWidgets import QHBoxLayout, QWidget
+from PyQt5.QtWidgets import (
+    QDockWidget,
+    QHBoxLayout,
+    QWidget,
+    QPushButton,
+    QSpacerItem,
+    QSizePolicy,
+)
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 
 from speckle.ui.widgets.widget_selection_filter import SelectionFilterWidget
 
 
-class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
+class SpeckleQGISv3Dialog(QDockWidget):
     """Dockwidget (UI module) handles all Speckle UI events, including
     receiving and responding to the signals from child widgets.
     SpeckleModule is set as .bridge, so we have access to all other Speckle modules."""
 
     bridge: "QgisConnectorModule"
     basic_binding: IBasicConnectorBinding
+
+    header_widget: QWidget = None
     widget_no_document: NoDocumentWidget = None
     widget_no_model_cards: NoModelCardsWidget = None
     widget_project_search: ProjectSearchWidget = None
@@ -45,6 +56,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
     widget_model_cards: ModelCardsWidget = None
     widget_selection_filter: SelectionFilterWidget = None
 
+    close_plugin_signal = pyqtSignal()
     send_model_signal = pyqtSignal(object)
     cancel_operation_signal = pyqtSignal(str)
     add_model_signal = pyqtSignal(ModelCard)
@@ -74,7 +86,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             exitActIcon = QIcon(exitIcon)
 
             # create a label
-            text_label = QtWidgets.QPushButton("Speckle (Beta) for QGIS")
+            text_label = QPushButton("Speckle (Beta) for QGIS")
             text_label.setStyleSheet(
                 "border: 0px;"
                 "color: white;"
@@ -98,7 +110,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             except:
                 pass
 
-            version_label = QtWidgets.QPushButton(version)
+            version_label = QPushButton(version)
             version_label.setStyleSheet(
                 "border: 0px;"
                 "color: white;"
@@ -114,14 +126,40 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             widget = QWidget()
             widget.setStyleSheet(f"{BACKGR_COLOR}")
             boxLayout = QHBoxLayout(widget)
+            boxLayout.setAlignment(QtCore.Qt.AlignVCenter)
             boxLayout.addWidget(text_label)  # , alignment=Qt.AlignCenter)
             boxLayout.addWidget(version_label)
-            boxLayout.setContentsMargins(0, 0, 0, 0)
-            self.setWindowTitle("SpeckleQGIS")
-            self.setTitleBarWidget(widget)
+            boxLayout.setContentsMargins(0, 0, 10, 0)
+
             self.labelWidget = text_label
             self.labelWidget.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
             self.labelWidget.clicked.connect(self._on_click_logo)
+
+            # Add a spacer item to push the next button to the right
+            spacer = QSpacerItem(10, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+            boxLayout.addItem(spacer)
+
+            # close button
+            close_btn = QPushButton("x")
+            close_btn.clicked.connect(self.close_plugin_signal.emit)
+            close_btn.setStyleSheet(
+                "QPushButton {"
+                + f"color:rgba(255,255,255,1); border-radius: 0px;{ZERO_MARGIN_PADDING}font-size: 12px;"
+                + "background-color: rgba(240,240,240,0); height:20px;text-align: center; "
+                + "} QPushButton:hover { "
+                + "color:rgba(155,155,155,1);"
+                + " }"
+            )
+
+            close_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+            boxLayout.addWidget(close_btn)
+
+            self.setWindowTitle("SpeckleQGIS")
+            # self.setTitleBarWidget(widget)
+            self.layout().addWidget(widget)
+
+            self.header_widget = widget
+
         except Exception as e:
             print(e)
 
@@ -477,7 +515,12 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
         model_card_widget.show_notification_line("Version created!", True, True, False)
 
     def resizeEvent(self, event):
-        QtWidgets.QDockWidget.resizeEvent(self, event)
+        QDockWidget.resizeEvent(self, event)
+
+        self.header_widget.resize(
+            self.frameSize().width(),
+            LABEL_HEIGHT,
+        )
 
         # handle resize of child elements
         if self.widget_no_document:
@@ -532,7 +575,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             )
 
     def closeEvent(self, event):
-        self.closingPlugin.emit()
+        self.close_plugin_signal.emit()
         event.accept()
 
     def _on_click_logo(self):
