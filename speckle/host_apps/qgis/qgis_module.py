@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any, List
-from plugin_utils.panel_logging import logToUser
+from plugin_utils.panel_logging import display_and_log
 
 from speckle.host_apps.qgis.connectors.qgis_connector_module import (
     QgisConnectorModule,
@@ -185,11 +185,14 @@ class SpeckleQGISv3Module:
             urllib3.__version__.startswith("1.24.")
             and requests.__version__.startswith("2.23.")
         ):
-            logToUser(
-                "Dependencies versioning error.\nClick here for details.",
+            display_and_log(
+                "Dependencies versioning error.",  # \nClick here for details.",
                 url="dependencies_error",
                 level=2,
-                plugin=self.dockwidget,
+                dockwidget=self.dockwidget,
+            )
+            raise ImportError(
+                f"Incompatible versions of dependencies: 'urllib3=={urllib3.__version__}' and 'requests=={requests.__version__}'"
             )
 
     def reloadUI(self):
