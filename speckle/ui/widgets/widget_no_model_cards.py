@@ -40,7 +40,7 @@ class NoModelCardsWidget(QWidget):
         self.resize(
             parent.frameSize().width(),
             parent.frameSize().height(),
-        )  # top left corner x, y, width, height
+        )
 
         self._message_card = QWidget()
         self._message_card.setStyleSheet(

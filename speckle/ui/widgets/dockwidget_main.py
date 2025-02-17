@@ -47,6 +47,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
     bridge: "QgisConnectorModule"
     basic_binding: IBasicConnectorBinding
 
+    placeholder_widget: QWidget = None
     header_widget: QWidget = None
     main_widget: QWidget = None
     widget_no_document: NoDocumentWidget = None
@@ -80,19 +81,27 @@ class SpeckleQGISv3Dialog(QDockWidget):
         self.bridge = bridge
 
     def runSetup(self, plugin):
-        self.layout = QVBoxLayout(self)
+        self.placeholder_widget = QWidget()
+        self.placeholder_widget.layout = QVBoxLayout(self.placeholder_widget)
+        self.placeholder_widget.layout.setContentsMargins(0, 0, 0, 0)
+
+        self.placeholder_widget.setStyleSheet(f"{ZERO_MARGIN_PADDING}")
+        self.layout().addWidget(self.placeholder_widget)
 
         # create and add header widget
         self.header_widget = self._create_header(plugin)
-        self.layout.addWidget(self.header_widget)
+        self.placeholder_widget.layout.addWidget(self.header_widget)
 
         # cerate and add main widget
-        return
         self.main_widget = QWidget()
         self.main_widget.layout = QStackedLayout(self.main_widget)
-        self.layout.addWidget(self.main_widget)
+        self.main_widget.layout.setStackingMode(QStackedLayout.StackAll)
+        self.main_widget.layout.setContentsMargins(0, 0, 0, 0)
+        self.main_widget.setStyleSheet(f"{ZERO_MARGIN_PADDING}")
+        self.placeholder_widget.layout.addWidget(self.main_widget)
 
-        # self._add_start_widget(plugin)
+        # add first widget to main
+        self._add_start_widget(plugin)
 
     def _create_header(self, plugin):
         try:
@@ -114,7 +123,6 @@ class SpeckleQGISv3Dialog(QDockWidget):
             text_label.setIcon(exitActIcon)
             text_label.setIconSize(QtCore.QSize(300, 93))
             text_label.setMinimumSize(QtCore.QSize(100, 40))
-            text_label.setMaximumWidth(200)
 
             version = ""
             try:
@@ -138,11 +146,11 @@ class SpeckleQGISv3Dialog(QDockWidget):
             header_widget = QWidget()
             header_widget.setStyleSheet(f"{BACKGR_COLOR}")
 
-            boxLayout = QHBoxLayout(header_widget)
-            boxLayout.setAlignment(QtCore.Qt.AlignVCenter)
-            boxLayout.addWidget(text_label)  # , alignment=Qt.AlignCenter)
-            boxLayout.addWidget(version_label)
-            boxLayout.setContentsMargins(0, 0, 10, 0)
+            header_widget.layout = QHBoxLayout(header_widget)
+            header_widget.layout.setAlignment(QtCore.Qt.AlignVCenter)
+            header_widget.layout.addWidget(text_label)  # , alignment=Qt.AlignCenter)
+            header_widget.layout.addWidget(version_label)
+            header_widget.layout.setContentsMargins(0, 0, 10, 0)
 
             self.labelWidget = text_label
             self.labelWidget.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
@@ -150,7 +158,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
 
             # Add a spacer item to push the next button to the right
             spacer = QSpacerItem(10, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-            boxLayout.addItem(spacer)
+            header_widget.layout.addItem(spacer)
 
             # close button
             close_btn = QPushButton("x")
@@ -165,7 +173,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             )
 
             close_btn.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
-            boxLayout.addWidget(close_btn)
+            header_widget.layout.addWidget(close_btn)
 
             self.setWindowTitle("SpeckleQGIS")
 
@@ -183,10 +191,12 @@ class SpeckleQGISv3Dialog(QDockWidget):
             no_document_widget = NoDocumentWidget(parent=self)
             self.main_widget.layout.addWidget(no_document_widget)
             self.widget_no_document = no_document_widget
+            self.main_widget.layout.setCurrentWidget(self.widget_no_document)
         else:
             no_model_cards_widget = NoModelCardsWidget(parent=self)
             self.main_widget.layout.addWidget(no_model_cards_widget)
             self.widget_no_model_cards = no_model_cards_widget
+            self.main_widget.layout.setCurrentWidget(self.widget_no_model_cards)
 
             self.widget_no_model_cards.add_projects_search_signal.connect(
                 self._open_select_projects_widget
@@ -327,6 +337,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             )
             # add widgets to the layout
             self.main_widget.layout.addWidget(self.widget_model_cards)
+            self.main_widget.layout.setCurrentWidget(self.widget_model_cards)
 
         # actually add a new widget
         self._add_new_model_card_widget(model_card)
@@ -364,6 +375,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             self.widget_project_search = ProjectSearchWidget(parent=self)
             # add widgets to the layout
             self.main_widget.layout.addWidget(self.widget_project_search)
+            self.main_widget.layout.setCurrentWidget(self.widget_project_search)
 
             self.widget_project_search.ui_search_content.add_selection_filter_signal.connect(
                 self._create_selection_filter_widget
@@ -417,6 +429,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             )
             # add widgets to the layout
             self.main_widget.layout.addWidget(self.widget_new_project)
+            self.main_widget.layout.setCurrentWidget(self.widget_new_project)
 
             # connect clear_project_search_bar_signal. Called when New project is created
             self.widget_new_project.ui_search_content.clear_project_search_bar_signal.connect(
@@ -435,6 +448,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             )
             # add widgets to the layout
             self.main_widget.layout.addWidget(self.widget_new_model)
+            self.main_widget.layout.setCurrentWidget(self.widget_new_model)
 
             # connect clear_model_search_bar_signal. Called when New model is created
             self.widget_new_model.ui_search_content.clear_model_search_bar_signal.connect(
@@ -457,6 +471,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             )
             # add widgets to the layout
             self.main_widget.layout.addWidget(self.widget_account_search)
+            self.main_widget.layout.setCurrentWidget(self.widget_account_search)
 
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_account_search)
@@ -471,6 +486,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             )
             # add widgets to the layout
             self.main_widget.layout.addWidget(self.widget_model_search)
+            self.main_widget.layout.setCurrentWidget(self.widget_model_search)
 
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_model_search)
@@ -498,6 +514,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
 
             # add widgets to the layout
             self.main_widget.layout.addWidget(self.widget_selection_filter)
+            self.main_widget.layout.setCurrentWidget(self.widget_selection_filter)
 
             self.widget_selection_filter.add_model_card_signal.connect(
                 self._create_or_add_model_cards_widget
@@ -526,13 +543,18 @@ class SpeckleQGISv3Dialog(QDockWidget):
         model_card_widget.show_notification_line("Version created!", True, True, False)
 
     def resizeEvent(self, event):
-        QDockWidget.resizeEvent(self, event)
 
         # handle resize of child elements
         if self.header_widget:
             self.header_widget.resize(
                 self.frameSize().width(),
                 LABEL_HEIGHT,
+            )
+
+        if self.placeholder_widget:
+            self.placeholder_widget.resize(
+                self.frameSize().width(),
+                self.frameSize().height(),
             )
 
         if self.main_widget:
@@ -544,53 +566,55 @@ class SpeckleQGISv3Dialog(QDockWidget):
         if self.widget_no_document:
             self.widget_no_document.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
         if self.widget_no_model_cards:
             self.widget_no_model_cards.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
         if self.widget_project_search:
             self.widget_project_search.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
         if self.widget_model_search:
             self.widget_model_search.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
 
         if self.widget_model_cards:
             self.widget_model_cards.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
 
         if self.widget_selection_filter:
             self.widget_selection_filter.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
 
         if self.widget_new_project:
             self.widget_new_project.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
 
         if self.widget_new_model:
             self.widget_new_model.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
 
         if self.widget_account_search:
             self.widget_account_search.resize(
                 self.frameSize().width(),
-                self.frameSize().height(),
+                self.frameSize().height() - LABEL_HEIGHT,
             )
+
+        QDockWidget.resizeEvent(self, event)
 
     def closeEvent(self, event):
         self.close_plugin_signal.emit()

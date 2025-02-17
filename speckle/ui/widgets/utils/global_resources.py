@@ -1,7 +1,7 @@
 import os
 
 # widget utils
-LABEL_HEIGHT = 30
+LABEL_HEIGHT = 35
 WIDGET_SIDE_BUFFER = 40
 ZERO_MARGIN_PADDING = "padding:0px; margin:0px;"
 FULL_HEIGHT_WIDTH = "width:100%; height:100%"
