@@ -21,7 +21,7 @@ try:
         :type iface: QgsInterface
         """
 
-        # Set qgisInterface to enable logToUser notifications
+        # Set qgisInterface to enable log_to_user notifications
         logger.qgisInterface = iface
         iface.pluginToolBar().setVisible(True)
 

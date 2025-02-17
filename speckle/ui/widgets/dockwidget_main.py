@@ -14,7 +14,6 @@ from speckle.ui.widgets.widget_no_document import NoDocumentWidget
 from speckle.ui.widgets.widget_no_model_cards import NoModelCardsWidget
 from speckle.ui.widgets.widget_project_search import ProjectSearchWidget
 
-from plugin_utils.panel_logging import logToUser
 from speckle.ui.widgets.utils.global_resources import (
     ICON_LOGO,
     BACKGR_COLOR,
@@ -124,7 +123,7 @@ class SpeckleQGISv3Dialog(QtWidgets.QDockWidget):
             self.labelWidget.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
             self.labelWidget.clicked.connect(self._on_click_logo)
         except Exception as e:
-            logToUser(e)
+            print(e)
 
     def _add_start_widget(self, plugin):
 
