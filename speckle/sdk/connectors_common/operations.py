@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from speckle.host_apps.qgis.connectors.utils import QgisThreadContext
+from speckle.host_apps.qgis.connectors.utils import HOST_APP_FULL_VERSION
 from speckle.sdk.connectors_common.api import IClientFactory, IOperations
 from speckle.sdk.connectors_common.builders import (
     IRootObjectBuilder,
@@ -135,6 +135,7 @@ class SendOperation:
             metrics.SEND,
             account,
             {
+                "hostAppFullVersion": HOST_APP_FULL_VERSION,
                 "core_version": "3.0.099",
                 "ui": "dui3",
                 "workspace_id": get_project_workspace_id(client, send_info.project_id),
