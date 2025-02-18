@@ -37,7 +37,7 @@ try:
             .decode("utf-8")
             .split(".")[0]
         )
-        metrics.set_host_app("QGIS", f"QGIS{version}")
+        metrics.set_host_app("qgis", version)
         return SpeckleQGIS(iface)
 
     class EmptyClass:

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from speckle.host_apps.qgis.connectors.utils import QgisThreadContext
+from speckle.host_apps.qgis.connectors.utils import HOST_APP_FULL_VERSION
 from speckle.sdk.connectors_common.api import IClientFactory, IOperations
 from speckle.sdk.connectors_common.builders import (
     IRootObjectBuilder,
@@ -9,11 +9,13 @@ from speckle.sdk.connectors_common.builders import (
 )
 from speckle.sdk.connectors_common.cancellation import CancellationToken
 from speckle.sdk.connectors_common.credentials import IAccountManager
+from speckle.sdk.utils import get_project_workspace_id
 from speckle.ui.models import SendInfo
 from specklepy.core.api import operations
 from specklepy.core.api.client import SpeckleClient
 from specklepy.core.api.credentials import Account
 from specklepy.core.api.inputs.version_inputs import CreateVersionInput
+from specklepy.logging import metrics
 from specklepy.objects.base import Base
 from specklepy.transports.server.server import ServerTransport
 
@@ -122,10 +124,22 @@ class SendOperation:
             ct,
         )
         """
+        client = self.client_factory.create(account=account)
         transport = ServerTransport(
-            client=self.client_factory.create(account=account),
+            client=client,
             account=account,
             stream_id=send_info.project_id,
+        )
+
+        metrics.track(
+            metrics.SEND,
+            account,
+            {
+                "hostAppFullVersion": HOST_APP_FULL_VERSION,
+                "core_version": "3.0.099",
+                "ui": "dui3",
+                "workspace_id": get_project_workspace_id(client, send_info.project_id),
+            },
         )
         obj_id = operations.send(base=commit_object, transports=[transport])
         # store cache
