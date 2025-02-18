@@ -84,6 +84,7 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         }
         root_collection["units"] = self.converter_settings.speckle_units
         root_collection["crs"] = crs
+        root_collection["version"] = 3
 
         # TODO: wrap into activityFactory
         layers_ordered: List[LayerStorage] = self.layer_utils.get_layers_in_order(
