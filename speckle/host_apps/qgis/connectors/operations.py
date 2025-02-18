@@ -24,6 +24,8 @@ from specklepy.objects.models.collections.collection import Collection
 
 from qgis.core import QgsProject, QgsVectorLayer, QgsRasterLayer
 
+from speckle.host_apps.qgis.connectors.utils import UNSUPPORTED_PROVIDERS
+
 
 class QgisRootObjectBuilder(IRootObjectBuilder):
     root_to_speckle_converter: IRootToSpeckleConverter
@@ -104,7 +106,13 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
 
             status = "SUCCESS"
 
-            if isinstance(lyr, QgsVectorLayer):
+            # verify that the data provider is supported
+            data_provider_type = lyr.providerType()
+            if data_provider_type in UNSUPPORTED_PROVIDERS:
+                status = "ERROR"
+                print(f"Unsupported layer data provider: {data_provider_type}")
+
+            elif isinstance(lyr, QgsVectorLayer):
 
                 # TODO handle layers that failed to convert
                 # right now, the entire layer will fail if 1 feature fails

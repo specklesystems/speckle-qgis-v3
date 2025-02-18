@@ -6,7 +6,6 @@ from speckle.ui.widgets.utils.global_resources import (
     WIDGET_SIDE_BUFFER,
     BACKGR_COLOR_WHITE,
     BACKGR_COLOR_LIGHT_GREY2,
-    LABEL_HEIGHT,
 )
 
 
@@ -19,7 +18,7 @@ class NoDocumentWidget(QWidget):
         self.parent: "SpeckleQGISv3Dialog" = parent
 
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, {LABEL_HEIGHT}, 0, 0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setAlignment(Qt.AlignVCenter)
 
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)

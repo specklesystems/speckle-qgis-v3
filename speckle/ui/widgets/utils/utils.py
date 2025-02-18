@@ -1,7 +1,5 @@
 from textwrap import wrap
-from typing import Union
 import webbrowser
-import requests
 
 from speckle.ui.models import ModelCard
 
@@ -10,8 +8,6 @@ from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_TRANSPARENT,
     ZERO_MARGIN_PADDING,
 )
-
-SYMBOL = "_x_x_"
 
 
 def splitTextIntoLines(text: str = "", number: int = 40) -> str:
@@ -35,54 +31,6 @@ def splitTextIntoLines(text: str = "", number: int = 40) -> str:
         print(e)
         # print(text)
     return msg
-
-
-def constructCommitURL(
-    streamWrapper,
-    branch_id: Union[str, None] = None,
-    commit_id: Union[str, None] = None,
-) -> Union[str, None]:
-    import requests
-
-    try:
-        if isinstance(streamWrapper, tuple) or isinstance(streamWrapper, list):
-            streamWrapper = streamWrapper[0]
-        streamUrl = streamWrapper.stream_url.split("?")[0].split("&")[0].split("@")[0]
-        r = requests.get(streamUrl)
-
-        url = streamUrl
-        # check for frontend2
-        try:
-            header = r.headers["x-speckle-frontend-2"]  # will throw Exception in FE1
-            url = (
-                streamUrl.replace("streams", "projects")
-                + "/models/"
-                + branch_id
-                + "@"
-                + commit_id
-            )
-        except:
-            url = streamUrl.replace("projects", "streams") + "/commits/" + commit_id
-        return url
-    except:
-        return None
-
-
-def constructCommitURLfromServerCommit(serverURL: str, stream_id: str) -> str:
-    r = requests.get(serverURL)
-
-    # check for frontend2
-    # only check the url string
-    try:
-        header = r.headers["x-speckle-frontend-2"]
-        url = (
-            serverURL
-            + "/projects/"
-            + stream_id  # + "/models/" + branch_id + "@" + commit_id
-        )
-    except KeyError:
-        url = serverURL + "/streams/" + stream_id
-    return url
 
 
 def open_in_web(model_card: ModelCard):

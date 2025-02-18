@@ -18,7 +18,6 @@ from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT,
     WIDGET_SIDE_BUFFER,
     ZERO_MARGIN_PADDING,
-    LABEL_HEIGHT,
     BACKGR_COLOR_LIGHT_GREY,
     BACKGR_COLOR_LIGHT_GREY2,
 )
@@ -74,7 +73,7 @@ class ModelCardsWidget(QWidget):
 
         content = QWidget()
         content.layout = QVBoxLayout(self)
-        content.layout.setContentsMargins(0, LABEL_HEIGHT, 0, 0)
+        content.layout.setContentsMargins(0, 0, 0, 0)
         content.layout.setAlignment(Qt.AlignCenter)
         content.layout.addWidget(self.scroll_container)
         content.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
@@ -156,7 +155,7 @@ class ModelCardsWidget(QWidget):
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setStyleSheet(
             "QScrollArea {"
-            + f"{ZERO_MARGIN_PADDING}margin-bottom:{LABEL_HEIGHT};"  # space fot Publish btn
+            + f"{ZERO_MARGIN_PADDING}margin-bottom:45px;"  # space fot Publish btn
             + "}"
         )
         self.scroll_area.setAlignment(Qt.AlignHCenter)

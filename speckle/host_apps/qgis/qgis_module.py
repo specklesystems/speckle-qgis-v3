@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any, List
-from plugin_utils.panel_logging import logToUser
+from plugin_utils.panel_logging import display_and_log
 
 from speckle.host_apps.qgis.connectors.qgis_connector_module import (
     QgisConnectorModule,
@@ -16,25 +16,15 @@ from speckle.ui.widgets.dockwidget_main import SpeckleQGISv3Dialog
 
 import webbrowser
 
-from qgis.core import QgsApplication
-
-
-SPECKLE_COLOR = (59, 130, 246)
-SPECKLE_COLOR_LIGHT = (69, 140, 255)
-
 
 class SpeckleQGISv3Module:
     """Speckle Connector Plugin for QGIS"""
 
     connector_module: QgisConnectorModule
     converter_module: QgisConverterModule
-    speckle_version: str
-    theads_total: int
 
     def __init__(self, iface):
 
-        self.speckle_version = "3.0.0"
-        self.theads_total = 0
         self.instantiate_module_dependencies(iface)
 
     def create_dockwidget(self):
@@ -185,11 +175,14 @@ class SpeckleQGISv3Module:
             urllib3.__version__.startswith("1.24.")
             and requests.__version__.startswith("2.23.")
         ):
-            logToUser(
-                "Dependencies versioning error.\nClick here for details.",
+            display_and_log(
+                "Dependencies versioning error.",  # \nClick here for details.",
                 url="dependencies_error",
                 level=2,
-                plugin=self.dockwidget,
+                dockwidget=self.dockwidget,
+            )
+            raise ImportError(
+                f"Incompatible versions of dependencies: 'urllib3=={urllib3.__version__}' and 'requests=={requests.__version__}'"
             )
 
     def reloadUI(self):
