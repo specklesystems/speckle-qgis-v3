@@ -135,8 +135,8 @@ class SendOperation:
             metrics.SEND,
             account,
             {
-                "connector_version": "3.0.099",
-                "ui": "dui3_pyqt",
+                "core_version": "3.0.099",
+                "ui": "dui3",
                 "workspace_id": get_project_workspace_id(client, send_info.project_id),
             },
         )
