@@ -16,7 +16,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.11" # pb_tool depends on distutils which was deprecated in 3.10 and removed in 3.12
 
       - name: Setup Poetry Env
         run: |
