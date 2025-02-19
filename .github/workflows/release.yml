@@ -22,6 +22,7 @@ jobs:
         run: |
           pip install poetry
           poetry self add poetry-plugin-export
+          poetry install
 
       - name: Export requirements.txt
         run: |
