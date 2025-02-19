@@ -1,3 +1,3 @@
 $ErrorActionPreference = "Stop";
 
-dotnet run --project build/build.csproj -- $args
+dotnet run --project ci-build/build.csproj -- $args
