@@ -1,0 +1,83 @@
+name: build_powerbi
+on:
+  push:
+    branches: ["main", "dev", "release/*", "alan/*"] # Continuous delivery on every long-lived branch
+    tags: ["v3.*"] # Manual delivery on every 3.x tag
+
+jobs:
+  build-connector:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Setup Poetry Env
+        run: |
+          pip install poetry
+
+      - name: Export requirements.txt
+        run: |
+          poetry export --without-hashes --without-urls --output plugin_utils/requirements.txt
+
+      - name: Clean requirements.txt
+        run: |
+          python plugin_utils/patch_requirements.py
+
+      - name: Install dependencies
+        run: |
+          pip install pb_tool==3.1.0 pyqt5==5.15.9
+
+      - name: ZIP plugin
+        run: pb_tool zip
+
+      - name: ⬆️ Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip_build/speckle-qgis-v3.zip
+          path: output/*.*
+          compression-level: 0 # no compression
+
+      - id: set-version
+        name: Set version to output
+        run: | # This was copied from the old v2 CI, likely we'll want to use git-version in future
+          TAG=${{ github.ref_name }}
+          if [[ "${{ github.ref }}" != refs/tags/* ]]; then
+            TAG="3.0.99.${{ github.run_number }}"
+          fi
+          SEMVER=$(echo "$TAG" | sed -E 's/\/[a-zA-Z-]+//')
+          VERSION=$(echo "$SEMVER" | sed -E 's/[a-zA-Z]*\///')
+
+          echo "version=$VERSION" >> "$Env:GITHUB_OUTPUT"
+
+  deploy-installers:
+    runs-on: ubuntu-latest
+    needs: build-connector
+    env:
+      IS_TAG_BUILD: ${{ github.ref_type == 'tag' }}
+      IS_RELEASE_BRANCH: ${{ startsWith(github.ref_name, 'release/') || github.ref_name == 'main'}}
+    steps:
+      - name: 🔫 Trigger Build Installers
+        uses: ALEEF02/workflow-dispatch@v3.0.0
+        continue-on-error: true
+        with:
+          workflow: Build Installers
+          repo: specklesystems/connector-installers
+          token: ${{ secrets.CONNECTORS_GH_TOKEN }}
+          inputs: '{ "run_id": "${{ github.run_id }}", "version": "${{ needs.build-connector.outputs.version }}", "public_release": ${{ env.IS_TAG_BUILD }}, "store_artifacts": ${{ env.IS_RELEASE_BRANCH }} }'
+          ref: main
+          wait-for-completion: true
+          wait-for-completion-interval: 10s
+          wait-for-completion-timeout: 10m
+          display-workflow-run-url: true
+          display-workflow-run-url-interval: 10s
+
+      - uses: geekyeggo/delete-artifact@v5
+        with:
+          name: output-*

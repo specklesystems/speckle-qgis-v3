@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "speckle-qgis"
+name = "speckle-qgis-v3"
 version = "0.1.0"
-description = "poetry for speckle-qgis"
+description = "poetry for speckle-qgis-v3"
 authors = ["Your Name <you@example.com>"]
 license = "Apache License 2.0"
 readme = "README.md"
