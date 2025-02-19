@@ -21,6 +21,7 @@ jobs:
       - name: Setup Poetry Env
         run: |
           pip install poetry
+          poetry self add poetry-plugin-export
 
       - name: Export requirements.txt
         run: |
