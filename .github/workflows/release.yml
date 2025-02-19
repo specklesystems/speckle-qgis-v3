@@ -21,7 +21,7 @@ jobs:
           dotnet-version: 8.x.x
 
       - name: ⚒️ Run GitVersion
-        run: ./build.ps1 build-server-version
+        run: ./build.sh build-server-version
 
       - name: Install Python
         uses: actions/setup-python@v5
