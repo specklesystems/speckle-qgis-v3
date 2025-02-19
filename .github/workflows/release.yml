@@ -12,6 +12,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # fetch the whole repo history
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x.x
+
+      - name: ⚒️ Run GitVersion
+        run: ./build.ps1 build-server-version
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -39,25 +49,22 @@ jobs:
       - name: ZIP plugin
         run: pb_tool zip
 
+      - id: set-version
+        name: Set version to output
+        run: echo "version=${{ env.GitVersion_FullSemVer }}" >> "$Env:GITHUB_OUTPUT"
+
+      - id: set-info-version
+        name: Set file version to output
+        run: echo "file_version=${{ env.GitVersion_AssemblySemVer}}" >> "$Env:GITHUB_OUTPUT" # version will be retrieved from tag?
+
       - name: ⬆️ Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: zip_build/speckle-qgis-v3.zip
-          path: output/*.*
+          name: output-${{ env.GitVersion_FullSemVer }}
+          path: zip_build/speckle-qgis-v3.zip
+          if-no-files-found: error
+          retention-days: 1
           compression-level: 0 # no compression
-
-      - id: set-version
-        name: Set version to output
-        run:
-          | # This was copied from the old v2 CI, likely we'll want to use git-version in future
-          TAG=${{ github.ref_name }}
-          if [[ "${{ github.ref }}" != refs/tags/* ]]; then
-            TAG="3.0.99.${{ github.run_number }}"
-          fi
-          SEMVER=$(echo "$TAG" | sed -E 's/\/[a-zA-Z-]+//')
-          VERSION=$(echo "$SEMVER" | sed -E 's/[a-zA-Z]*\///')
-
-          echo "version=$VERSION" >> "$Env:GITHUB_OUTPUT"
 
   deploy-installers:
     runs-on: ubuntu-latest
