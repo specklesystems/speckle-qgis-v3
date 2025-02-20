@@ -51,11 +51,11 @@ jobs:
 
       - id: set-version
         name: Set version to output
-        run: echo "version=${{ env.GitVersion_FullSemVer }}" >> "$Env:GITHUB_OUTPUT"
+        run: echo "version=${{ env.GitVersion_FullSemVer }}" >> "$GITHUB_OUTPUT"
 
       - id: set-info-version
         name: Set file version to output
-        run: echo "file_version=${{ env.GitVersion_AssemblySemVer}}" >> "$Env:GITHUB_OUTPUT" # version will be retrieved from tag?
+        run: echo "file_version=${{ env.GitVersion_AssemblySemVer}}" >> "$GITHUB_OUTPUT" # version will be retrieved from tag?
 
       - name: ⬆️ Upload artifacts
         uses: actions/upload-artifact@v4
@@ -76,7 +76,7 @@ jobs:
       - name: 🔫 Trigger Build Installers
         uses: ALEEF02/workflow-dispatch@v3.0.0
         with:
-          workflow: Build Installers
+          workflow: Build QGIS
           repo: specklesystems/connector-installers
           token: ${{ secrets.CONNECTORS_GH_TOKEN }}
           inputs: '{ "run_id": "${{ github.run_id }}", "version": "${{ needs.build-connector.outputs.version }}", "public_release": ${{ env.IS_TAG_BUILD }}, "store_artifacts": ${{ env.IS_RELEASE_BRANCH }} }'
