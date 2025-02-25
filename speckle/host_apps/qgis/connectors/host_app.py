@@ -5,14 +5,37 @@ from speckle.ui.models import DocumentModelStore
 from specklepy.objects.models.collections.collection import Collection
 from specklepy.objects.proxies import ColorProxy
 
-from PyQt5.QtGui import QColor
 from qgis.core import QgsLayerTreeGroup, QgsVectorLayer, QgsRasterLayer, QgsFeature
+from PyQt5.QtCore import pyqtSignal, QObject, QTimer
 
 
-class QgisDocumentStore(DocumentModelStore):
-    def __init__(self):
+class MetaQObject(type(QObject), type(DocumentModelStore)):
+    # avoiding TypeError: metaclass conflict: the metaclass of a derived class
+    # must be a (non-strict) subclass of the metaclasses of all its bases
+    pass
+
+
+class QgisDocumentStore(DocumentModelStore, QObject, metaclass=MetaQObject):
+
+    document_changed_signal = pyqtSignal()
+
+    def __init__(self, iface):
+        QObject.__init__(self)
         self.models = []
         self.is_document_init = False
+
+        # connect to reading document from disk
+        iface.projectRead.connect(
+            lambda: QTimer.singleShot(0, self.on_document_changed)
+        )
+
+        # connect to creating new document
+        iface.newProjectCreated.connect(
+            lambda: QTimer.singleShot(0, self.on_document_changed)
+        )
+
+    def document_changed(self):
+        self.document_changed_signal.emit()
 
     def on_project_closing(self):
         return

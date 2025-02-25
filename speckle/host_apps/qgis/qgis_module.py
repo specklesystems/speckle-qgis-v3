@@ -31,9 +31,9 @@ class SpeckleQGISv3Module:
         self.dockwidget = SpeckleQGISv3Dialog(
             bridge=self, basic_binding=self.connector_module.basic_binding
         )
-        self.dockwidget.runSetup(self)
+        self.dockwidget.header_widget = self.dockwidget.create_header(self)
+        self.dockwidget.runSetup()
         self.connect_dockwidget_signals()
-        self.connect_self_signals()
 
     def instantiate_module_dependencies(self, iface):
 
@@ -59,16 +59,20 @@ class SpeckleQGISv3Module:
             self.dockwidget.add_send_notification
         )  # Send a UI notification after Send operation
 
-        # all dockwidget subscribtions to child widget signals are handled in Dockwidget class,
-        # because child widget are not persistent
+        # refresh widgets if document change signal received
+        self.connector_module.document_store.document_changed_signal.connect(
+            self.dockwidget.refresh_ui
+        )
 
-    def connect_self_signals(self):
-        # signal to update UI, needs t be transferred to the main thread
+        # signal to update UI, needs to be transferred to the main thread
         self.dockwidget.activity_start_signal.connect(
             self.dockwidget.add_activity_status
         )
+        # all dockwidget subscribtions to child widget signals are handled in Dockwidget class,
+        # because child widget are not persistent
 
     def connect_connector_module_signals(self):
+        # create conversion settings and RootObjectBuilder
         self.connector_module.send_binding.create_send_modules_signal.connect(
             self._create_send_modules
         )
