@@ -80,7 +80,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
         self.basic_binding = basic_binding
         self.bridge = bridge
 
-    def runSetup(self, plugin):
+    def runSetup(self):
         self.placeholder_widget = QWidget()
         self.placeholder_widget.layout = QVBoxLayout(self.placeholder_widget)
         self.placeholder_widget.layout.setContentsMargins(0, 0, 0, 0)
@@ -88,11 +88,10 @@ class SpeckleQGISv3Dialog(QDockWidget):
         self.placeholder_widget.setStyleSheet(f"{ZERO_MARGIN_PADDING}")
         self.layout().addWidget(self.placeholder_widget)
 
-        # create and add header widget
-        self.header_widget = self._create_header(plugin)
+        # add header widget
         self.placeholder_widget.layout.addWidget(self.header_widget)
 
-        # cerate and add main widget
+        # create and add main widget
         self.main_widget = QWidget()
         self.main_widget.layout = QStackedLayout(self.main_widget)
         self.main_widget.layout.setStackingMode(QStackedLayout.StackAll)
@@ -101,9 +100,13 @@ class SpeckleQGISv3Dialog(QDockWidget):
         self.placeholder_widget.layout.addWidget(self.main_widget)
 
         # add first widget to main
-        self._add_start_widget(plugin)
+        self._add_start_widget()
 
-    def _create_header(self, plugin):
+    def refresh_ui(self):
+        self._remove_all_widgets()
+        self._add_start_widget()
+
+    def create_header(self, plugin):
         try:
             header_widget = QWidget()
             header_widget.setStyleSheet(f"{BACKGR_COLOR}{ZERO_MARGIN_PADDING}")
@@ -180,7 +183,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
         except Exception as e:
             print(e)
 
-    def _add_start_widget(self, plugin):
+    def _add_start_widget(self):
 
         # document in QGIS is opened by default, we don't need as actually saved file to start working with data
         document_open = True
@@ -225,7 +228,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             self._remove_widget_new_model()
 
         if self.widget_selection_filter:
-            self.remove_widget_selection_filter()
+            self._remove_widget_selection_filter()
 
         if self.widget_model_cards:
             self._remove_widget_model_cards()
@@ -251,7 +254,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             self._remove_widget_new_model()
 
         elif self.widget_selection_filter == widget:
-            self.remove_widget_selection_filter()
+            self._remove_widget_selection_filter()
 
     def _remove_process_widgets(self):
         if self.widget_project_search:
@@ -261,7 +264,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             self._remove_widget_model_search()
 
         if self.widget_selection_filter:
-            self.remove_widget_selection_filter()
+            self._remove_widget_selection_filter()
 
         if self.widget_account_search:
             self._remove_widget_account_search()
@@ -292,7 +295,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
         self.widget_new_model.setParent(None)
         self.widget_new_model = None
 
-    def remove_widget_selection_filter(self):
+    def _remove_widget_selection_filter(self):
         self.widget_selection_filter.setParent(None)
         self.widget_selection_filter = None
 

@@ -50,7 +50,7 @@ class QgisConnectorModule(QObject):
         self.iface = iface
         self.bridge = bridge
         self.thread_context = QgisThreadContext()
-        self.document_store = QgisDocumentStore()
+        self.document_store = QgisDocumentStore(iface)
         self.basic_binding = QgisBasicConnectorBinding(self.document_store, bridge)
         self.send_binding = QgisSendBinding(
             bridge=bridge,

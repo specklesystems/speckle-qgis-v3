@@ -35,7 +35,7 @@ class QgisBasicConnectorBinding(IBasicConnectorBinding):
         self.parent = bridge
         self.commands = BasicConnectorBindingCommands(bridge)
 
-        self.store.document_changed = lambda: self.commands.notify_document_changed()
+        # self.store.document_changed = lambda: self.commands.notify_document_changed()
 
     def get_source_app_name(self) -> str:
         # TODO self.speckle_application.slug
@@ -126,13 +126,6 @@ class QgisSendBinding(ISendBinding, QObject, metaclass=MetaQObject):
         self.bridge = bridge
         self.commads = SendBindingUICommands(bridge)
         self.subscribe_to_qgis_events()
-
-        def new_func():
-            self.store.document_changed()
-            # TODO
-            # self.send_conversion_cache.clear_cache()
-
-        self.store.document_changed = new_func
 
     def subscribe_to_qgis_events(self):
         # TODO
