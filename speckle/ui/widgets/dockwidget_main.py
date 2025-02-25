@@ -104,7 +104,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
 
     def refresh_ui(self):
         self._remove_all_widgets()
-        # self._add_start_widget()
+        self._add_start_widget()
 
     def create_header(self, plugin):
         try:
