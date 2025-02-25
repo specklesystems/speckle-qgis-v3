@@ -205,7 +205,7 @@ class UiSearchUtils(QObject):
             model_content = [
                 partial(self.add_selection_filter_widget, project, model),
                 model.name,
-                f"updated {time_ago(model.updatedAt)}",
+                f"updated {time_ago(model.updated_at)}",
                 project,
             ]
             content_list.append(model_content)
