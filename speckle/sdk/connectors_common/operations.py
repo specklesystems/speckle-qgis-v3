@@ -153,11 +153,11 @@ class SendOperation:
 
         _ = api_client.version.create(
             CreateVersionInput(
-                objectId=obj_id,
-                modelId=send_info.model_id,
-                projectId=send_info.project_id,
+                object_id=obj_id,
+                model_id=send_info.model_id,
+                project_id=send_info.project_id,
                 message="Sent from QGIS v3",
-                sourceApplication=send_info.host_application,
+                source_application=send_info.host_application,
             )
         )
 

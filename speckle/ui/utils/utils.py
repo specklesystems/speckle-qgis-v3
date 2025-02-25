@@ -157,7 +157,7 @@ def create_new_model_query(
         # possible GraphQLException
         result: Project = speckle_client.model.create(
             input=CreateModelInput(
-                name=model_name, description=None, projectId=project_id
+                name=model_name, description=None, project_id=project_id
             )
         )
 
