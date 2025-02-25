@@ -1,51 +1,51 @@
-annotated-types==0.7.0
-anyio==4.6.2.post1
-appdirs==1.4.4
-attrs==23.2.0
-backoff==2.2.1
-certifi==2024.8.30
-charset-normalizer==3.4.0
-click-plugins==1.1.1
-click==8.1.7
-cligj==0.7.2
-colorama==0.4.6
-deprecated==1.2.14
-earcut==1.1.5
-exceptiongroup==1.2.2
-fiona==1.10.1
-geopandas==0.13.2
-geovoronoi==0.4.0
-gql==3.5.0
-graphql-core==3.2.5
-h11==0.14.0
-httpcore==1.0.6
-httpx==0.25.2
-idna==3.10
-importlib-metadata==8.5.0
-multidict==6.1.0
-numpy==1.26.4
-packaging==24.1
-pandas==2.2.3
-propcache==0.2.0
-pydantic-core==2.23.4
-pydantic==2.9.2
-pyproj==3.6.1
-pyshp==2.3.1
-python-dateutil==2.9.0.post0
-pytz==2024.2
-requests-toolbelt==1.0.0
-requests==2.31.0
-scipy==1.13.1
-shapely==2.0.6
-six==1.16.0
-sniffio==1.3.1
-specklepy==2.21.3
-stringcase==1.2.0
-typing-extensions==4.12.2
-tzdata==2024.2
-ujson==5.10.0
-urllib3==2.2.1
-websockets==11.0.3
-wrapt==1.16.0
-yarl==1.17.1
-zipp==3.20.2
+annotated-types==0.7.0 ; python_version >= "3.10" and python_version < "4.0"
+anyio==4.8.0 ; python_version >= "3.10" and python_version < "4.0"
+appdirs==1.4.4 ; python_version >= "3.10" and python_version < "4.0"
+attrs==25.1.0 ; python_version >= "3.10" and python_version < "4.0"
+backoff==2.2.1 ; python_version >= "3.10" and python_version < "4.0"
+certifi==2025.1.31 ; python_version >= "3.10" and python_version < "4.0"
+charset-normalizer==3.4.1 ; python_version >= "3.10" and python_version < "4.0"
+click-plugins==1.1.1 ; python_version >= "3.10" and python_version < "4.0"
+click==8.1.8 ; python_version >= "3.10" and python_version < "4.0"
+cligj==0.7.2 ; python_version >= "3.10" and python_version < "4"
+colorama==0.4.6 ; python_version >= "3.10" and python_version < "4.0" and platform_system == "Windows"
+deprecated==1.2.18 ; python_version >= "3.10" and python_version < "4.0"
+earcut==1.1.5 ; python_version >= "3.10" and python_version < "4.0"
+exceptiongroup==1.2.2 ; python_version >= "3.10" and python_version < "3.11"
+fiona==1.10.1 ; python_version >= "3.10" and python_version < "4.0"
+geopandas==0.13.2 ; python_version >= "3.10" and python_version < "4.0"
+geovoronoi==0.4.0 ; python_version >= "3.10" and python_version < "4.0"
+gql[requests,websockets]==3.5.0 ; python_version >= "3.10" and python_version < "4.0"
+graphql-core==3.2.6 ; python_version >= "3.10" and python_version < "4"
+h11==0.14.0 ; python_version >= "3.10" and python_version < "4.0"
+httpcore==1.0.7 ; python_version >= "3.10" and python_version < "4.0"
+httpx==0.28.1 ; python_version >= "3.10" and python_version < "4.0"
+idna==3.10 ; python_version >= "3.10" and python_version < "4.0"
+multidict==6.1.0 ; python_version >= "3.10" and python_version < "4.0"
+numpy==1.26.4 ; python_version >= "3.10" and python_version < "4.0"
+packaging==24.2 ; python_version >= "3.10" and python_version < "4.0"
+pandas==2.2.3 ; python_version >= "3.10" and python_version < "4.0"
+propcache==0.2.1 ; python_version >= "3.10" and python_version < "4.0"
+pydantic-core==2.27.2 ; python_version >= "3.10" and python_version < "4.0"
+pydantic-settings==2.7.1 ; python_version >= "3.10" and python_version < "4.0"
+pydantic==2.10.6 ; python_version >= "3.10" and python_version < "4.0"
+pyproj==3.7.1 ; python_version >= "3.10" and python_version < "4.0"
+pyshp==2.3.1 ; python_version >= "3.10" and python_version < "4.0"
+python-dateutil==2.9.0.post0 ; python_version >= "3.10" and python_version < "4.0"
+python-dotenv==1.0.1 ; python_version >= "3.10" and python_version < "4.0"
+pytz==2025.1 ; python_version >= "3.10" and python_version < "4.0"
+requests-toolbelt==1.0.0 ; python_version >= "3.10" and python_version < "4.0"
+requests==2.31.0 ; python_version >= "3.10" and python_version < "4.0"
+scipy==1.15.2 ; python_version >= "3.10" and python_version < "4.0"
+shapely==2.0.7 ; python_version >= "3.10" and python_version < "4.0"
+six==1.17.0 ; python_version >= "3.10" and python_version < "4.0"
+sniffio==1.3.1 ; python_version >= "3.10" and python_version < "4.0"
+specklepy==3.0.0a1 ; python_version >= "3.10" and python_version < "4.0"
+stringcase==1.2.0 ; python_version >= "3.10" and python_version < "4.0"
+typing-extensions==4.12.2 ; python_version >= "3.10" and python_version < "4.0"
+tzdata==2025.1 ; python_version >= "3.10" and python_version < "4.0"
+ujson==5.10.0 ; python_version >= "3.10" and python_version < "4.0"
+urllib3==2.2.1 ; python_version >= "3.10" and python_version < "4.0"
+websockets==11.0.3 ; python_version >= "3.10" and python_version < "4.0"
+wrapt==1.17.2 ; python_version >= "3.10" and python_version < "4.0"
+yarl==1.18.3 ; python_version >= "3.10" and python_version < "4.0"

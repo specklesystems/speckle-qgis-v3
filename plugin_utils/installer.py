@@ -186,6 +186,7 @@ def install_requirements(host_application: str) -> None:
             "-m",
             "pip",
             "install",
+            "--pre",
             "-t",
             str(path),
             "-r",
