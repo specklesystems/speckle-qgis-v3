@@ -97,6 +97,8 @@ class PropertiesExtractor:
             properties = {}
             for field in core_object.fields():
 
+                # rename reserved property name (here and in create_and_cache_layer_collection)
+                name: str = field.name() if field.name() != "id" else "ID"
                 value = core_object[field.name()]
 
                 # convert values unfamiliar to our Serializer to String or Null
@@ -105,7 +107,7 @@ class PropertiesExtractor:
                 elif type(value) is QtCore.QDate or QtCore.QDateTime or QtCore.QTime:
                     value = str(value)
 
-                properties[field.name()] = value
+                properties[name] = value
 
             return properties
 
