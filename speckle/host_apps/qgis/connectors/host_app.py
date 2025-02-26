@@ -118,7 +118,10 @@ class QgisLayerUnpacker:
         if isinstance(layer, QgsVectorLayer):
             layer_fields: Dict[str, Any] = {}
             for field in layer.fields():
-                layer_fields[field.name()] = field.type()
+
+                # rename reserved property name 'id' (here and in PropertiesExtractor)
+                field_name = field.name() if field.name() != "id" else "ID"
+                layer_fields[field_name] = field.type()
 
             collection["fields"] = layer_fields
             collection["wkbType"] = layer.wkbType().name

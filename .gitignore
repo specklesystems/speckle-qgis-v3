@@ -121,6 +121,33 @@ zip-build*
 *.shp
 *.shx 
 
+# C#
+**/bin/*
+**/obj/*
+_ReSharper.SharpCompress/
+bin/
+*.suo
+*.user
+TestArchives/Scratch/
+TestArchives/Scratch2/
+TestResults/
+*.nupkg
+packages/*/
+project.lock.json
+tests/TestArchives/Scratch
+.vs
+tools
+.vscode
+.idea/
+
+.DS_Store
+*.snupkg
+coverage.xml
+
+*.received.*
+*.log
+
+
 /typings/*
 *.csv
 */PyQt-UI*
