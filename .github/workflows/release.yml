@@ -41,6 +41,10 @@ jobs:
         run: |
           python plugin_utils/patch_requirements.py
 
+      - name: Update version in plugin metadata.txt
+        run: |
+          python plugin_utils/patch_version.py ${{ env.GitVersion_FullSemVer }}
+
       - name: Install dependencies
         run: |
           pip install pb_tool==3.1.0 pyqt5==5.15.9
