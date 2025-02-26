@@ -14,9 +14,8 @@ from qgis.core import (
     QgsRasterLayer,
     QgsGeometry,
     QgsCoordinateTransform,
-    QgsPoint,
 )
-from osgeo import gdal
+from PyQt5 import QtCore
 
 
 class DisplayValueExtractor:
@@ -93,7 +92,22 @@ class PropertiesExtractor:
     def get_properties(self, core_object: Any) -> Dict[str, Any]:
 
         if isinstance(core_object, QgsFeature):
-            return core_object.attributeMap()
+            # print(core_object.attributeMap()) # shortcut, but we need special treatment for certain data types, therefore using the loop below
+
+            properties = {}
+            for field in core_object.fields():
+
+                value = core_object[field.name()]
+
+                # convert values unfamiliar to our Serializer to String or Null
+                if type(value) is QtCore.QVariant:
+                    value = None
+                elif type(value) is QtCore.QDate or QtCore.QDateTime or QtCore.QTime:
+                    value = str(value)
+
+                properties[field.name()] = value
+
+            return properties
 
         elif isinstance(core_object, QgsRasterLayer):
             return {}  # TODO
