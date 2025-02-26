@@ -57,7 +57,8 @@ jobs:
           SEMVER=$(echo "$TAG" | sed -E 's/\/[a-zA-Z-]+//')
           VERSION=$(echo "$SEMVER" | sed -E 's/[a-zA-Z]*\///')
 
-          echo "version=$VERSION" >> "$Env:GITHUB_OUTPUT"
+          echo "semver=$SEMVER" >> "$Env:GITHUB_OUTPUT"
+          echo "file-version=$VERSION" >> "$Env:GITHUB_OUTPUT"
 
   deploy-installers:
     runs-on: ubuntu-latest
