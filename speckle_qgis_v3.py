@@ -2,6 +2,7 @@
 
 import os.path
 from typing import Optional
+from speckle.host_apps.qgis.connectors.utils import setup_metrics
 from speckle.host_apps.qgis.qgis_module import SpeckleQGISv3Module
 
 # Initialize Qt resources from file resources.py
@@ -30,6 +31,8 @@ class SpeckleQGIS(SpeckleQGISv3Module):
             application at run time.
         :type iface: QgsInterface
         """
+        setup_metrics()
+
         super(SpeckleQGIS, self).__init__(iface)
 
         # initialize plugin directory

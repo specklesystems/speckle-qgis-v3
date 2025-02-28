@@ -11,8 +11,6 @@ try:
     from plugin_utils.installer import ensure_dependencies, startDebugger
     from plugin_utils.panel_logging import logger
 
-    from qgis.core import Qgis
-
     # noinspection PyPep8Naming
     def classFactory(iface):  # pylint: disable=invalid-name
         """Load SpeckleQGIS class from file SpeckleQGIS.
@@ -30,26 +28,8 @@ try:
         ensure_dependencies("QGISv3")
 
         from speckle_qgis_v3 import SpeckleQGIS
-        from specklepy.logging import metrics
 
-        version = (
-            Qgis.QGIS_VERSION.encode("iso-8859-1", errors="ignore")
-            .decode("utf-8")
-            .split(".")[0]
-        )
-        metrics.set_host_app("qgis", version)
         return SpeckleQGIS(iface)
-
-    class EmptyClass:
-        # https://docs.qgis.org/3.28/en/docs/pyqgis_developer_cookbook/plugins/plugins.html#mainplugin-py
-        def __init__(self, iface):
-            pass
-
-        def initGui(self):
-            pass
-
-        def unload(self):
-            pass
 
 except ModuleNotFoundError:
     pass
