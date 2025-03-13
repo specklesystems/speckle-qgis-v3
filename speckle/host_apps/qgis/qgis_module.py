@@ -96,24 +96,29 @@ class SpeckleQGISv3Module:
         on_operation_progressed: "IProgress[CardProgress]",
         ct: "CancellationToken",
     ):
-
-        # first, update UI status
-        self.dockwidget.activity_start_signal.emit(
-            model_card_id, "Converting and sending.."
-        )
-
-        print("_execute_send_operation, send_operation.execute:")
-        # execute and return send operation results
-        send_operation_result: SendOperationResult = (
-            self.connector_module.send_operation.execute(
-                objects, send_info, on_operation_progressed, ct
+        # wrap into exception handler, which will cancel task and UI progress, instead of giving ipression that task still loads
+        try:
+            # first, update UI status
+            self.dockwidget.activity_start_signal.emit(
+                model_card_id, "Converting and sending.."
             )
-        )
-        self.connector_module.send_binding.commads.set_model_send_result(
-            model_card_id=model_card_id,
-            version_id=send_operation_result.root_obj_id,
-            send_conversion_results=send_operation_result.converted_references,
-        )
+
+            print("_execute_send_operation, send_operation.execute:")
+            # execute and return send operation results
+            send_operation_result: SendOperationResult = (
+                self.connector_module.send_operation.execute(
+                    objects, send_info, on_operation_progressed, ct
+                )
+            )
+            self.connector_module.send_binding.commads.set_model_send_result(
+                model_card_id=model_card_id,
+                version_id=send_operation_result.root_obj_id,
+                send_conversion_results=send_operation_result.converted_references,
+            )
+        except Exception as e:
+            # TODO: also show an error message
+            print(e)
+            self._cancel_operation(model_card_id)
 
     def _cancel_operation(self, model_card_id: str):
 
