@@ -88,7 +88,7 @@ jobs:
             "semver": "${{ needs.build-connector.outputs.semver }}",
             "file_version": "${{ needs.build-connector.outputs.file-version }}",
             "repo": "${{ github.repository }}",
-            "public_release": ${{ env.IS_PUBLIC_RELEASE }}
+            "is_public_release": ${{ env.IS_PUBLIC_RELEASE }}
             }'
           ref: jrm/experiment-similar-ci
           wait-for-completion: true
