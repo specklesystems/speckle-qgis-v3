@@ -175,10 +175,50 @@ class PolygonToSpeckleConverter:
             if len(list(set(all_z_values))) == 1:
                 return all_regions
             else:
+                return [self.merge_regions_meshes(all_regions)]
                 nested_mesh_list = [x.displayValue for x in all_regions]
                 return [item for sublist in nested_mesh_list for item in sublist]
 
         raise ValueError(f"Geometry of type '{type(target)}' cannot be converted")
+
+    def merge_regions_meshes(self, regions: List[Region]) -> Mesh:
+        """Merge all regions meshes into one mesh."""
+        vertices = []
+        faces = []
+
+        vertex_count = 0
+        for region in regions:
+            for display_mesh in region.displayValue:
+                vertices.extend(display_mesh.vertices)
+
+                # iterate over meshes, adjusting the indices of the vertices in .faces
+                local_vertex_count = 0
+                while local_vertex_count < len(display_mesh.faces):
+                    face_vertex_number = display_mesh.faces[local_vertex_count]
+                    faces.append(face_vertex_number)
+
+                    new_face_indices = [
+                        x + vertex_count
+                        for x in display_mesh.faces[
+                            local_vertex_count
+                            + 1 : local_vertex_count
+                            + 1
+                            + face_vertex_number
+                        ]
+                    ]
+                    faces.extend(new_face_indices)
+
+                    local_vertex_count += face_vertex_number + 1
+
+                # adjust vertex count of the mesh
+                vertex_count += int(len(display_mesh.vertices) / 3)
+
+            merged_mesh = Mesh(
+                vertices=vertices,
+                faces=faces,
+                units=self._conversion_settings.speckle_units,
+            )
+        return merged_mesh
 
 
 class RasterToSpeckleConverter:
