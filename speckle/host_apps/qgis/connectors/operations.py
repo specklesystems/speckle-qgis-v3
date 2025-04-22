@@ -25,6 +25,8 @@ from specklepy.objects.models.collections.collection import Collection
 from qgis.core import QgsProject, QgsVectorLayer, QgsRasterLayer
 
 from speckle.host_apps.qgis.connectors.utils import UNSUPPORTED_PROVIDERS
+from specklepy.objects.other import RenderMaterial
+from specklepy.objects.proxies import RenderMaterialProxy
 
 
 class QgisRootObjectBuilder(IRootObjectBuilder):
@@ -147,6 +149,17 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
         root_collection[ProxyKeys().COLOR] = list(
             self.color_unpacker.color_proxy_cache.values()
         )
+
+        # duplicate colors into render materials
+        root_collection[ProxyKeys().RENDER_MATERIAL] = [
+            RenderMaterialProxy(
+                objects=x.objects,
+                value=RenderMaterial(
+                    applicationId=x.applicationId, name=x.applicationId, diffuse=x.value
+                ),
+            )
+            for x in self.color_unpacker.color_proxy_cache.values()
+        ]
 
         return RootObjectBuilderResult(
             root_object=root_collection,
