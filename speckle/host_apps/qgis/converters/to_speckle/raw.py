@@ -4,6 +4,7 @@ from speckle.host_apps.qgis.connectors.extensions import get_speckle_app_id
 from speckle.host_apps.qgis.converters.settings import QgisConversionSettings
 
 from speckle.host_apps.qgis.converters.to_speckle.mesher import generate_region_mesh
+from specklepy.objects.base import Base
 from specklepy.objects.geometry import Mesh, Point, Polyline, Region
 
 from qgis.core import (
@@ -123,7 +124,7 @@ class PolygonToSpeckleConverter:
         self._conversion_settings = conversion_settings
         self._polyline_converter = polyline_converter
 
-    def convert(self, target: QgsAbstractGeometry) -> List[Region]:
+    def convert(self, target: QgsAbstractGeometry) -> List[Base]:
 
         wkb_type = target.wkbType()
 
@@ -142,9 +143,13 @@ class PolygonToSpeckleConverter:
             or wkb_type == QgsWkbTypes.CurvePolygonZM
         ):
             all_regions = []
+            all_z_values = []
             for part in target.parts():
 
                 boundary = self._polyline_converter.convert(part.exteriorRing())[0]
+                all_z_values.extend(
+                    [x for i, x in enumerate(boundary.value) if (i + 1) % 3 == 0]
+                )
                 inner_loops = []
 
                 for i in range(part.numInteriorRings()):
@@ -166,7 +171,12 @@ class PolygonToSpeckleConverter:
                     )
                 )
 
-            return all_regions
+            # return list of Meshes, if not horizontal Polygon
+            if len(list(set(all_z_values))) == 1:
+                return all_regions
+            else:
+                nested_mesh_list = [x.displayValue for x in all_regions]
+                return [item for sublist in nested_mesh_list for item in sublist]
 
         raise ValueError(f"Geometry of type '{type(target)}' cannot be converted")
 

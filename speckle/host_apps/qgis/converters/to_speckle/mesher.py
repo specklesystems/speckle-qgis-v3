@@ -35,7 +35,6 @@ def _flat_coords_to_tuples(polyline: Polyline):
 
     max_points = 1000
     coef = math.ceil(len(polyline.value) / (3 * max_points))
-    print(coef)
 
     # Get a list of coordinate tuples for polyline points
     points_count = int(len(polyline.value) / 3)
