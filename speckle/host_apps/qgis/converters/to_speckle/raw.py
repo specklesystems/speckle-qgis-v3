@@ -176,8 +176,6 @@ class PolygonToSpeckleConverter:
                 return all_regions
             else:
                 return [self.merge_regions_meshes(all_regions)]
-                nested_mesh_list = [x.displayValue for x in all_regions]
-                return [item for sublist in nested_mesh_list for item in sublist]
 
         raise ValueError(f"Geometry of type '{type(target)}' cannot be converted")
 
