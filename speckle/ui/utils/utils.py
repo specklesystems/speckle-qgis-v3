@@ -9,8 +9,10 @@ from specklepy.core.api.inputs.model_inputs import CreateModelInput
 from specklepy.core.api.inputs.project_inputs import (
     ProjectCreateInput,
     ProjectModelsFilter,
+    WorkspaceProjectCreateInput,
 )
 from specklepy.core.api.inputs.user_inputs import UserProjectsFilter
+from specklepy.core.api.inputs.project_inputs import WorksaceProjectsFilter
 from specklepy.core.api.models.current import (
     Model,
     Project,
@@ -49,19 +51,51 @@ def get_authenticate_client_for_account(account: Account) -> SpeckleClient:
 
 
 def get_projects_from_client(
-    speckle_client: SpeckleClient, cursor=None, filter_keyword: Optional[str] = None
+    speckle_client: SpeckleClient,
+    workspace_id: Optional[str],
+    cursor=None,
+    filter_keyword: Optional[str] = None,
 ) -> ResourceCollection[Project]:
 
     results = []
+
+    # create search filters for user query and workspace query
+    project_user_filter = UserProjectsFilter(search="", workspaceId=workspace_id)
+    project_workspace_filter = WorksaceProjectsFilter(
+        search="", with_project_role_only=False
+    )
+
     if speckle_client is not None:
-        # possible GraphQLException
-        results: ResourceCollection[Project] = speckle_client.active_user.get_projects(
-            limit=100 if filter_keyword else QUERY_BATCH_SIZE,
-            cursor=cursor,
-            filter=(
-                UserProjectsFilter(search=filter_keyword) if filter_keyword else None
-            ),
-        )
+
+        # for personal projects, use active_user query
+        if workspace_id is None:
+            if isinstance(filter_keyword, str):
+                project_user_filter.search = filter_keyword
+
+            # possible GraphQLException
+            results: ResourceCollection[Project] = (
+                speckle_client.active_user.get_projects(
+                    limit=100 if filter_keyword else QUERY_BATCH_SIZE,
+                    cursor=cursor,
+                    filter=project_user_filter,
+                )
+            )
+
+        # for workspace projects, use workspace query (active user.get_projects doesn't return projects created by others, even for admin role)
+        else:
+
+            if isinstance(filter_keyword, str):
+                project_workspace_filter.search = filter_keyword
+
+            # possible GraphQLException
+            results: ResourceCollection[Project] = (
+                speckle_client.workspace.get_projects(
+                    workspace_id=workspace_id,
+                    limit=100 if filter_keyword else QUERY_BATCH_SIZE,
+                    cursor=cursor,
+                    filter=project_workspace_filter,
+                )
+            )
 
         if not isinstance(results, ResourceCollection):
             # TODO: handle
@@ -70,6 +104,20 @@ def get_projects_from_client(
     else:
         # TODO add a warning
         pass
+
+    results.items = [
+        item
+        for item in results.items
+        if (
+            (
+                item.role is None
+                and speckle_client.project.get_permissions(
+                    item.id
+                ).can_create_model.authorized
+            )
+            or (isinstance(item.role, str) and not item.role.endswith("viewer"))
+        )  # "None" for "implicit" owner or viewer roles (if not explicitly invited)
+    ]
 
     return results
 
@@ -130,12 +178,25 @@ def create_new_project_query(
 
     result = None
     if speckle_client is not None:
-        # possible GraphQLException
-        result: Project = speckle_client.project.create(
-            input=ProjectCreateInput(
-                name=project_name, description=None, visibility=None
+
+        if workspace_id:
+            # possible GraphQLException
+            result: Project = speckle_client.project.create_in_workspace(
+                input=WorkspaceProjectCreateInput(
+                    name=project_name,
+                    description=None,
+                    visibility=None,
+                    workspaceId=workspace_id,
+                )
             )
-        )
+
+        else:
+            # possible GraphQLException
+            result: Project = speckle_client.project.create(
+                input=ProjectCreateInput(
+                    name=project_name, description=None, visibility=None
+                )
+            )
 
         if not isinstance(result, Project):
             # TODO: handle

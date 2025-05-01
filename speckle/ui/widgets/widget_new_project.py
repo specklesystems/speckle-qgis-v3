@@ -28,7 +28,6 @@ class NewProjectWidget(QWidget):
         None  # needs to be here, so it can be called on resize event
     )
     project_name_widget: QLineEdit = None
-    workspace_widget: QLineEdit = None
 
     def __init__(
         self,
@@ -131,22 +130,6 @@ class NewProjectWidget(QWidget):
         )
         boxLayout.addWidget(self.project_name_widget)
 
-        # add text 2
-        label2 = self._create_text_widget("Workspaces:")
-        label2.setEnabled(False)
-        boxLayout.addWidget(label2)
-
-        # add text input 2
-        self.workspace_widget = QLineEdit()
-        self.workspace_widget.setStyleSheet(
-            "QLineEdit { "
-            + f"{ZERO_MARGIN_PADDING}margin-left:{int(WIDGET_SIDE_BUFFER/6)};margin-right:{int(WIDGET_SIDE_BUFFER/6)};"
-            + "border: 1px solid lightgrey; height: 30px; border-radius: 5px; "
-            + "}"
-        )
-        self.workspace_widget.setEnabled(False)
-        boxLayout.addWidget(self.workspace_widget)
-
         button_create = self._create_create_button()
         boxLayout.addWidget(button_create)
 
@@ -154,20 +137,27 @@ class NewProjectWidget(QWidget):
 
     def _create_create_button(self) -> QPushButton:
 
-        button_publish = QPushButton("Create")
-        button_publish.clicked.connect(self._create_project_and_exit_widget)
-        button_publish.setStyleSheet(
+        button_create = QPushButton("Create")
+        button_create.clicked.connect(self._create_project_and_exit_widget)
+        button_create.setStyleSheet(
             "QPushButton {"
             + f"color:white;border-radius: 7px;margin:5px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
             + "} QPushButton:hover { "
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"
         )
-        return button_publish
+        return button_create
 
     def _create_project_and_exit_widget(self):
 
-        self.ui_search_content.create_new_project(self.project_name_widget.text(), None)
+        workspace_id = (
+            self.ui_search_content.current_workspace.id
+            if self.ui_search_content.current_workspace
+            else None
+        )
+        self.ui_search_content.create_new_project(
+            self.project_name_widget.text(), workspace_id
+        )
 
         # the next signal will trigger closing the widget and refreshing project list
         self.ui_search_content.change_account_and_projects_signal.emit()

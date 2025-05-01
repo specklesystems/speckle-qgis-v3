@@ -9,6 +9,7 @@ from specklepy.core.api.models.current import (
     ResourceCollection,
 )
 from specklepy.core.api.resources.current.project_resource import ProjectResource
+from specklepy.core.api.resources.current.workspace_resource import Workspace
 from speckle.ui.utils.utils import (
     create_new_project_query,
     create_new_model_query,
@@ -28,6 +29,7 @@ class UiSearchUtils(QObject):
     cursor_projects: Any = None
     cursor_models: Any = None
     speckle_client: SpeckleClient = None
+    current_workspace: Optional[Workspace] = None
     batch_size: int = None
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
     add_models_search_signal = pyqtSignal(Project)
@@ -89,7 +91,9 @@ class UiSearchUtils(QObject):
     def create_new_model(self, project_id: str, model_name: str):
         create_new_model_query(self.speckle_client, project_id, model_name)
 
-    def get_new_projects_content(self, clear_cursor=False):
+    def get_new_projects_content(
+        self, clear_cursor=False, workspace_id: Optional[str] = None
+    ):
 
         if clear_cursor:
             self.cursor_projects = None
@@ -97,7 +101,9 @@ class UiSearchUtils(QObject):
         content_list: List[List] = []
         projects_resource_collection: ResourceCollection[Project] = (
             get_projects_from_client(
-                speckle_client=self.speckle_client, cursor=self.cursor_projects
+                speckle_client=self.speckle_client,
+                workspace_id=workspace_id,
+                cursor=self.cursor_projects,
             )
         )
         self.cursor_projects = projects_resource_collection.cursor
@@ -109,13 +115,16 @@ class UiSearchUtils(QObject):
 
         return content_list
 
-    def get_new_projects_content_with_name_condition(self, name_filter: str):
+    def get_new_projects_content_with_name_condition(
+        self, name_filter: str, workspace_id: Optional[str] = None
+    ):
 
         self.cursor_projects = None
 
         projects_resource_collection: ResourceCollection[Project] = (
             get_projects_from_client(
                 speckle_client=self.speckle_client,
+                workspace_id=workspace_id,
                 cursor=self.cursor_projects,
                 filter_keyword=name_filter,
             )
@@ -137,11 +146,14 @@ class UiSearchUtils(QObject):
         content_list: List[List] = []
 
         for project in projects_batch:
+
+            role = "can edit" if project.role is None else project.role.split(":")[-1]
+
             # make sure to pass the actual project, not a reference to a variable
             project_content = [
                 partial(self._emit_function_add_models_signal, project),
                 project.name,
-                project.role.split(":")[-1],
+                role,
                 f"updated {time_ago(project.updated_at)}",
             ]
             content_list.append(project_content)
@@ -230,6 +242,10 @@ class UiSearchUtils(QObject):
                 send_filter=None,
             )
         )
+
+    def get_workspaces(self) -> List[Workspace]:
+        workspaces = self.speckle_client.active_user.get_workspaces().items
+        return workspaces
 
     def get_version_search_widget_content(self, project: ProjectResource) -> List[List]:
         """Add search cards for models (only valid for Receive workflow)."""

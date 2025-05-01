@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
@@ -18,6 +18,8 @@ from PyQt5.QtWidgets import (
     QWidget,
     QLineEdit,
     QPushButton,
+    QComboBox,
+    QSizePolicy,
 )
 
 
@@ -26,6 +28,8 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
     ui_search_content: UiSearchUtils = None
     account_switch_btn: QPushButton = None
     search_widget: QLineEdit = None
+    workspaces_dropdown: QComboBox = None
+    workspaces: List["Workspace"] = None
 
     def __init__(
         self,
@@ -39,6 +43,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
         # get content for project cards
         self.ui_search_content = UiSearchUtils()
+        self.workspaces = self.ui_search_content.get_workspaces()
 
         # customize load_more function
         self._load_more = lambda: self._add_projects(clear_cursor=False)
@@ -49,21 +54,31 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             label_text=label_text,
             cards_content_list=[],
         )
-        self._add_search_and_account_switch_line()
+        self._add_project_search_and_project_add_line()
+        self._add_workspace_search_and_account_switch_line()
         self._add_projects(clear_cursor=True)
 
     def _add_projects(self, clear_cursor=False, name_filter: Optional[str] = None):
 
+        # get selected workspace
+        workspace_id = None  # default to "Personal Projects"
+        index = self.workspaces_dropdown.currentIndex()
+        if index < len(self.workspaces):
+            workspace_id = self.workspaces[index].id
+            self.ui_search_content.current_workspace = self.workspaces[index]
+        else:
+            self.ui_search_content.current_workspace = None
+
         if name_filter is None:
             # just get the projects in batches
             new_project_cards: list = self.ui_search_content.get_new_projects_content(
-                clear_cursor=clear_cursor
+                clear_cursor=clear_cursor, workspace_id=workspace_id
             )
         else:
             # get the projects that match the name condition
             new_project_cards: list = (
                 self.ui_search_content.get_new_projects_content_with_name_condition(
-                    name_filter=name_filter
+                    name_filter=name_filter, workspace_id=workspace_id
                 )
             )
 
@@ -81,9 +96,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
     def clear_search_bar(self):
         self.search_widget.setText("")
 
-    def _add_search_and_account_switch_line(self):
+    def _add_project_search_and_project_add_line(self):
 
-        # create a line widget
+        # create an empty widget
         line = QWidget()
         line.setStyleSheet(
             "QWidget {"
@@ -104,11 +119,43 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         new_project_btn = self._create_new_project_btn()
         layout_line.addWidget(new_project_btn)
 
+        self.scroll_container.layout().insertWidget(1, line)
+
+    def _add_workspace_search_and_account_switch_line(self):
+
+        # create an empty widget
+        line = QWidget()
+        line.setStyleSheet(
+            "QWidget {"
+            + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
+            + f"margin-left:{int(WIDGET_SIDE_BUFFER/4)};margin-right:{int(WIDGET_SIDE_BUFFER/4)};text-align: left;"
+            + "}"
+        )
+        layout_line = QHBoxLayout(line)
+        layout_line.setAlignment(Qt.AlignLeft)
+        layout_line.setContentsMargins(10, 0, 0, 0)
+
+        # workspaces selection dropdown
+        self.workspaces_dropdown = self._create_workspace_dropdown()
+        layout_line.addWidget(self.workspaces_dropdown)
+
         # Account switch buttom
         self.account_switch_btn = self._create_account_switch_btn()
         layout_line.addWidget(self.account_switch_btn)
 
         self.scroll_container.layout().insertWidget(1, line)
+
+    def _create_workspace_dropdown(self):
+        workspaces_dropdown = QComboBox()
+        workspaces_dropdown.addItems([x.name for x in self.workspaces])
+        workspaces_dropdown.addItem("Personal Projects")
+        workspaces_dropdown.setStyleSheet(
+            """QComboBox { background-color: white; border: 1px solid lightgrey; border-radius: 5px; color: black; height: 30px; padding: 0px 0px 0px 10px; }"""
+        )
+        workspaces_dropdown.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        workspaces_dropdown.currentIndexChanged.connect(self.refresh_projects)
+        return workspaces_dropdown
 
     def _create_search_widget(self):
         text_box = QLineEdit()

@@ -1,8 +1,8 @@
 name: build_qgis
 on:
   push:
-    branches: ["main", "dev", "release/*", "alan/*"] # Continuous delivery on every long-lived branch
-    tags: ["v3.*"] # Manual delivery on every v3.x tag
+    branches: ["main", "installer-test/**"] # Continuous delivery on every long-lived branch
+    tags: ["v3.*.*"] # Manual delivery on every v3.x tag
 
 env:
   ZipName: "qgis.zip"
@@ -75,16 +75,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-connector
     env:
-      IS_TAG_BUILD: ${{ github.ref_type == 'tag' }}
-      IS_RELEASE_BRANCH: ${{ startsWith(github.ref_name, 'release/') || github.ref_name == 'main'}}
+      IS_PUBLIC_RELEASE: ${{ github.ref_type == 'tag' }}
     steps:
-      - name: 🔫 Trigger Build QGIS
-        uses: ALEEF02/workflow-dispatch@v3.0.0
+      - name: 🔫 Trigger Build Installer(s)
+        uses: the-actions-org/workflow-dispatch@v4.0.0
         with:
-          workflow: Build QGIS
+          workflow: Build Installers
           repo: specklesystems/connector-installers
           token: ${{ secrets.CONNECTORS_GH_TOKEN }}
-          inputs: '{ "run_id": "${{ github.run_id }}", "semver": "${{ needs.build-connector.outputs.semver }}", "file_version": "${{ needs.build-connector.outputs.file-version }}", "public_release": ${{ env.IS_TAG_BUILD }} }'
+          inputs: '{
+            "run_id": "${{ github.run_id }}",
+            "semver": "${{ needs.build-connector.outputs.semver }}",
+            "file_version": "${{ needs.build-connector.outputs.file-version }}",
+            "repo": "${{ github.repository }}",
+            "is_public_release": ${{ env.IS_PUBLIC_RELEASE }}
+            }'
           ref: main
           wait-for-completion: true
           wait-for-completion-interval: 10s
