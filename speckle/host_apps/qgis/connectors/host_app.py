@@ -6,7 +6,7 @@ from specklepy.objects.models.collections.collection import Collection
 from specklepy.objects.proxies import ColorProxy
 
 from qgis.core import QgsLayerTreeGroup, QgsVectorLayer, QgsRasterLayer, QgsFeature
-from PyQt5.QtCore import pyqtSignal, QObject, QTimer
+from PyQt5.QtCore import pyqtSignal, QObject, QTimer, QVariant
 
 
 class MetaQObject(type(QObject), type(DocumentModelStore)):
@@ -209,8 +209,11 @@ class QgisColorUnpacker:
     ) -> Any:
 
         feature_value_for_rendering = feature.attribute(self.stored_renderer_field)
-        category_index = renderer.categoryIndexForValue(feature_value_for_rendering)
-        value_symbol = renderer.categories()[category_index].symbol()
+        if not isinstance(feature_value_for_rendering, QVariant):  # for QVariant.NULL
+            category_index = renderer.categoryIndexForValue(feature_value_for_rendering)
+            value_symbol = renderer.categories()[category_index].symbol()
+        else:
+            value_symbol = renderer.sourceSymbol()
 
         if not value_symbol:
             value_symbol = renderer.sourceSymbol()
@@ -223,7 +226,11 @@ class QgisColorUnpacker:
     ) -> Any:
 
         feature_value_for_rendering = feature.attribute(self.stored_renderer_field)
-        value_symbol = renderer.symbolForValue(feature_value_for_rendering)
+        if not isinstance(feature_value_for_rendering, QVariant):  # for QVariant.NULL
+            value_symbol = renderer.symbolForValue(feature_value_for_rendering)
+        else:
+            value_symbol = renderer.sourceSymbol()
+
         if not value_symbol:
             value_symbol = renderer.sourceSymbol()
 
