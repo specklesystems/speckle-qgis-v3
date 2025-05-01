@@ -90,7 +90,9 @@ class UiSearchUtils(QObject):
     def create_new_model(self, project_id: str, model_name: str):
         create_new_model_query(self.speckle_client, project_id, model_name)
 
-    def get_new_projects_content(self, clear_cursor=False):
+    def get_new_projects_content(
+        self, clear_cursor=False, workspace_id: Optional[str] = None
+    ):
 
         if clear_cursor:
             self.cursor_projects = None
@@ -98,7 +100,9 @@ class UiSearchUtils(QObject):
         content_list: List[List] = []
         projects_resource_collection: ResourceCollection[Project] = (
             get_projects_from_client(
-                speckle_client=self.speckle_client, cursor=self.cursor_projects
+                speckle_client=self.speckle_client,
+                workspace_id=workspace_id,
+                cursor=self.cursor_projects,
             )
         )
         self.cursor_projects = projects_resource_collection.cursor
@@ -110,13 +114,16 @@ class UiSearchUtils(QObject):
 
         return content_list
 
-    def get_new_projects_content_with_name_condition(self, name_filter: str):
+    def get_new_projects_content_with_name_condition(
+        self, name_filter: str, workspace_id: Optional[str] = None
+    ):
 
         self.cursor_projects = None
 
         projects_resource_collection: ResourceCollection[Project] = (
             get_projects_from_client(
                 speckle_client=self.speckle_client,
+                workspace_id=workspace_id,
                 cursor=self.cursor_projects,
                 filter_keyword=name_filter,
             )

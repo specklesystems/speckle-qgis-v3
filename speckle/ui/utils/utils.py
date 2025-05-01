@@ -49,18 +49,26 @@ def get_authenticate_client_for_account(account: Account) -> SpeckleClient:
 
 
 def get_projects_from_client(
-    speckle_client: SpeckleClient, cursor=None, filter_keyword: Optional[str] = None
+    speckle_client: SpeckleClient,
+    workspace_id: Optional[str],
+    cursor=None,
+    filter_keyword: Optional[str] = None,
 ) -> ResourceCollection[Project]:
 
     results = []
+
+    # create search filter for keyword and workspace id
+    project_filter = UserProjectsFilter(search="", workspaceId=workspace_id)
+    if isinstance(filter_keyword, str):
+        project_filter.search = filter_keyword
+    print(project_filter)
+
     if speckle_client is not None:
         # possible GraphQLException
         results: ResourceCollection[Project] = speckle_client.active_user.get_projects(
             limit=100 if filter_keyword else QUERY_BATCH_SIZE,
             cursor=cursor,
-            filter=(
-                UserProjectsFilter(search=filter_keyword) if filter_keyword else None
-            ),
+            filter=project_filter,
         )
 
         if not isinstance(results, ResourceCollection):
