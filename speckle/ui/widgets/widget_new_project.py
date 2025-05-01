@@ -28,7 +28,6 @@ class NewProjectWidget(QWidget):
         None  # needs to be here, so it can be called on resize event
     )
     project_name_widget: QLineEdit = None
-    workspace_widget: QLineEdit = None
 
     def __init__(
         self,
@@ -138,20 +137,27 @@ class NewProjectWidget(QWidget):
 
     def _create_create_button(self) -> QPushButton:
 
-        button_publish = QPushButton("Create")
-        button_publish.clicked.connect(self._create_project_and_exit_widget)
-        button_publish.setStyleSheet(
+        button_create = QPushButton("Create")
+        button_create.clicked.connect(self._create_project_and_exit_widget)
+        button_create.setStyleSheet(
             "QPushButton {"
             + f"color:white;border-radius: 7px;margin:5px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
             + "} QPushButton:hover { "
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"
         )
-        return button_publish
+        return button_create
 
     def _create_project_and_exit_widget(self):
 
-        self.ui_search_content.create_new_project(self.project_name_widget.text(), None)
+        workspace_id = (
+            self.ui_search_content.current_workspace.id
+            if self.ui_search_content.current_workspace
+            else None
+        )
+        self.ui_search_content.create_new_project(
+            self.project_name_widget.text(), workspace_id
+        )
 
         # the next signal will trigger closing the widget and refreshing project list
         self.ui_search_content.change_account_and_projects_signal.emit()

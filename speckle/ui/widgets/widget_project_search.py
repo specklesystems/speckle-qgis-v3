@@ -65,6 +65,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         index = self.workspaces_dropdown.currentIndex()
         if index < len(self.workspaces):
             workspace_id = self.workspaces[index].id
+            self.ui_search_content.current_workspace = self.workspaces[index]
+        else:
+            self.ui_search_content.current_workspace = None
 
         if name_filter is None:
             # just get the projects in batches

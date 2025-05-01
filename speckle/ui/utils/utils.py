@@ -9,6 +9,7 @@ from specklepy.core.api.inputs.model_inputs import CreateModelInput
 from specklepy.core.api.inputs.project_inputs import (
     ProjectCreateInput,
     ProjectModelsFilter,
+    WorkspaceProjectCreateInput,
 )
 from specklepy.core.api.inputs.user_inputs import UserProjectsFilter
 from specklepy.core.api.inputs.project_inputs import WorksaceProjectsFilter
@@ -177,13 +178,26 @@ def create_new_project_query(
 
     result = None
     if speckle_client is not None:
-        # possible GraphQLException
-        result: Project = speckle_client.project.create(
-            input=ProjectCreateInput(
-                name=project_name, description=None, visibility=None
-            )
-        )
 
+        if workspace_id:
+            # possible GraphQLException
+            result: Project = speckle_client.project.create_in_workspace(
+                input=WorkspaceProjectCreateInput(
+                    name=project_name,
+                    description=None,
+                    visibility=None,
+                    workspaceId=workspace_id,
+                )
+            )
+
+        else:
+            # possible GraphQLException
+            result: Project = speckle_client.project.create(
+                input=ProjectCreateInput(
+                    name=project_name, description=None, visibility=None
+                )
+            )
+        print(result)
         if not isinstance(result, Project):
             # TODO: handle
             pass

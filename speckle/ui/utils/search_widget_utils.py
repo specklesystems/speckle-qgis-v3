@@ -29,6 +29,7 @@ class UiSearchUtils(QObject):
     cursor_projects: Any = None
     cursor_models: Any = None
     speckle_client: SpeckleClient = None
+    current_workspace: Optional[Workspace] = None
     batch_size: int = None
     add_selection_filter_signal = pyqtSignal(SenderModelCard)
     add_models_search_signal = pyqtSignal(Project)
