@@ -108,9 +108,14 @@ def get_projects_from_client(
         item
         for item in results.items
         if (
-            item.role is None
+            (
+                item.role is None
+                and speckle_client.project.get_permissions(
+                    item.id
+                ).can_create_model.authorized
+            )
             or (isinstance(item.role, str) and not item.role.endswith("viewer"))
-        )  # "None" for admin access writes (if not explicitly invited)
+        )  # "None" for "implicit" owner or viewer roles (if not explicitly invited)
     ]
 
     return results
