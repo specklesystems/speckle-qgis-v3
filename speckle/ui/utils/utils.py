@@ -197,7 +197,7 @@ def create_new_project_query(
                     name=project_name, description=None, visibility=None
                 )
             )
-        print(result)
+
         if not isinstance(result, Project):
             # TODO: handle
             pass
