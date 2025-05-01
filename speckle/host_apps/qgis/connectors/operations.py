@@ -19,7 +19,7 @@ from speckle.ui.models import SendInfo
 from specklepy.objects.base import Base
 
 # from specklepy.objects.data import QgisObject
-from specklepy.objects.geometry.mesh import Mesh
+from specklepy.objects.geometry import Mesh, Region
 from specklepy.objects.models.collections.collection import Collection
 
 from qgis.core import QgsProject, QgsVectorLayer, QgsRasterLayer
@@ -187,7 +187,37 @@ class QgisRootObjectBuilder(IRootObjectBuilder):
                 feature, get_speckle_app_id(feature, layer_app_id)
             )
 
+        self.confirm_features_type(converted_features)
+
         return converted_features
+
+    def confirm_features_type(self, converted_features: List["QgisObject"]) -> None:
+
+        # check if it's a Polygon layer and it has vertical data (needs to be converted to Meshes)
+        convert_regions_to_meshes = False
+        for feature in converted_features:
+            polygon_dataset = True
+            for display_region in feature.displayValue:
+                if display_region is not Region:
+                    polygon_dataset = False
+                    break
+                else:  # if polygon
+                    if display_region["3d"]:  # sufficient condition to convert all dataset features to meshes
+                        convert_regions_to_meshes = True
+                        break
+
+            if not polygon_dataset:
+                break
+
+        # modify list of features if needed
+        if convert_regions_to_meshes:
+            for feature in converted_features:
+                display_meshes = []
+
+                # replace displayValue of Region list to Mesh list
+                for display_region in feature.displayValue: # region
+                    display_meshes.extend(display_region.displayValue)
+                feature.displayValue = display_meshes
 
     def convert_raster_feature(
         self, raster_layer: QgsRasterLayer, layer_app_id: str
