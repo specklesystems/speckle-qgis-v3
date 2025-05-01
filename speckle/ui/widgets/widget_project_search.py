@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR,
     BACKGR_COLOR_LIGHT,
@@ -13,12 +13,7 @@ from speckle.ui.utils.search_widget_utils import UiSearchUtils
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QObject
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import (
-    QHBoxLayout,
-    QWidget,
-    QLineEdit,
-    QPushButton,
-)
+from PyQt5.QtWidgets import QHBoxLayout, QWidget, QLineEdit, QPushButton, QComboBox
 
 
 class ProjectSearchWidget(CardsListTemporaryWidget):
@@ -26,6 +21,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
     ui_search_content: UiSearchUtils = None
     account_switch_btn: QPushButton = None
     search_widget: QLineEdit = None
+    workspaces: List["Workspace"] = None
 
     def __init__(
         self,
@@ -39,6 +35,7 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
         # get content for project cards
         self.ui_search_content = UiSearchUtils()
+        self.workspaces = self.ui_search_content.get_workspaces()
 
         # customize load_more function
         self._load_more = lambda: self._add_projects(clear_cursor=False)
@@ -49,7 +46,8 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
             label_text=label_text,
             cards_content_list=[],
         )
-        self._add_search_and_account_switch_line()
+        self._add_project_search_and_project_add_line()
+        self._add_workspace_search_and_account_switch_line()
         self._add_projects(clear_cursor=True)
 
     def _add_projects(self, clear_cursor=False, name_filter: Optional[str] = None):
@@ -81,9 +79,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
     def clear_search_bar(self):
         self.search_widget.setText("")
 
-    def _add_search_and_account_switch_line(self):
+    def _add_project_search_and_project_add_line(self):
 
-        # create a line widget
+        # create an empty widget
         line = QWidget()
         line.setStyleSheet(
             "QWidget {"
@@ -103,6 +101,27 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         # New project buttom
         new_project_btn = self._create_new_project_btn()
         layout_line.addWidget(new_project_btn)
+
+        self.scroll_container.layout().insertWidget(1, line)
+
+    def _add_workspace_search_and_account_switch_line(self):
+
+        # create an empty widget
+        line = QWidget()
+        line.setStyleSheet(
+            "QWidget {"
+            + f"border-radius: 0px;color:white;{ZERO_MARGIN_PADDING}"
+            + f"margin-left:{int(WIDGET_SIDE_BUFFER/4)};margin-right:{int(WIDGET_SIDE_BUFFER/4)};text-align: left;"
+            + "}"
+        )
+        layout_line = QHBoxLayout(line)
+        layout_line.setAlignment(Qt.AlignLeft)
+        layout_line.setContentsMargins(10, 0, 0, 0)
+
+        # workspaces selection dropdown
+        workspaces_dropdown = QComboBox()
+        workspaces_dropdown.addItems([x.name for x in self.workspaces])
+        workspaces_dropdown.addItem("Personal Projects")
 
         # Account switch buttom
         self.account_switch_btn = self._create_account_switch_btn()

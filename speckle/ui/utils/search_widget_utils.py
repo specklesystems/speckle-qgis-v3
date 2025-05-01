@@ -9,6 +9,7 @@ from specklepy.core.api.models.current import (
     ResourceCollection,
 )
 from specklepy.core.api.resources.current.project_resource import ProjectResource
+from specklepy.core.api.resources.current.workspace_resource import Workspace
 from speckle.ui.utils.utils import (
     create_new_project_query,
     create_new_model_query,
@@ -230,6 +231,10 @@ class UiSearchUtils(QObject):
                 send_filter=None,
             )
         )
+
+    def get_workspaces(self) -> List[Workspace]:
+        workspaces = self.speckle_client.active_user.get_workspaces().items
+        return workspaces
 
     def get_version_search_widget_content(self, project: ProjectResource) -> List[List]:
         """Add search cards for models (only valid for Receive workflow)."""
