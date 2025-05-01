@@ -145,11 +145,14 @@ class UiSearchUtils(QObject):
         content_list: List[List] = []
 
         for project in projects_batch:
+
+            role = "" if project.role is None else project.role.split(":")[-1]
+
             # make sure to pass the actual project, not a reference to a variable
             project_content = [
                 partial(self._emit_function_add_models_signal, project),
                 project.name,
-                project.role.split(":")[-1],
+                role,
                 f"updated {time_ago(project.updated_at)}",
             ]
             content_list.append(project_content)
