@@ -13,7 +13,14 @@ from speckle.ui.utils.search_widget_utils import UiSearchUtils
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QObject
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QHBoxLayout, QWidget, QLineEdit, QPushButton, QComboBox
+from PyQt5.QtWidgets import (
+    QHBoxLayout,
+    QWidget,
+    QLineEdit,
+    QPushButton,
+    QComboBox,
+    QSizePolicy,
+)
 
 
 class ProjectSearchWidget(CardsListTemporaryWidget):
@@ -122,6 +129,11 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         workspaces_dropdown = QComboBox()
         workspaces_dropdown.addItems([x.name for x in self.workspaces])
         workspaces_dropdown.addItem("Personal Projects")
+        workspaces_dropdown.setStyleSheet(
+            """QComboBox { background-color: white; border: 1px solid lightgrey; border-radius: 5px; color: black; height: 30px; padding: 0px 0px 0px 10px; }"""
+        )
+        workspaces_dropdown.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        layout_line.addWidget(workspaces_dropdown)
 
         # Account switch buttom
         self.account_switch_btn = self._create_account_switch_btn()
