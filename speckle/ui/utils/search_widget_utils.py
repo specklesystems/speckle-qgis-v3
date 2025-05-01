@@ -146,7 +146,11 @@ class UiSearchUtils(QObject):
 
         for project in projects_batch:
 
-            role = "" if project.role is None else project.role.split(":")[-1]
+            role = (
+                "workspace admin access"
+                if project.role is None
+                else project.role.split(":")[-1]
+            )
 
             # make sure to pass the actual project, not a reference to a variable
             project_content = [
