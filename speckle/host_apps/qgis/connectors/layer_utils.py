@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, List, Optional
 
+from specklepy.objects.geometry import Region
 from speckle.ui.bindings import SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
 
@@ -234,3 +235,35 @@ class QgisLayerUtils:
             selected_object_ids=[layer.id or layer.name for layer in selected_layers],
             summary=f"{len(selected_layers)} layers ({", ".join(object_types)})",
         )
+
+
+    def confirm_features_type(self, converted_features: List["QgisObject"]) -> None:
+
+        # check if it's a Polygon layer and it has vertical data (needs to be converted to Meshes)
+        convert_regions_to_meshes = False
+        for feature in converted_features:
+            polygon_dataset = True
+            for display_region in feature.displayValue:
+                if not isinstance(display_region, Region):
+                    polygon_dataset = False
+                    break
+                else:  # if Region
+                    if getattr(
+                        display_region, "3d", None
+                    ):  # sufficient condition to convert all dataset features to meshes
+                        convert_regions_to_meshes = True
+                        break
+
+            if convert_regions_to_meshes or not polygon_dataset:
+                break
+
+        # modify list of features if needed
+        if convert_regions_to_meshes:
+            for i, feature in enumerate(converted_features):
+                display_meshes = []
+
+                # replace displayValue of Region list to Mesh list
+                for display_region in feature.displayValue:  # region
+                    display_meshes.extend(display_region.displayValue)
+
+                converted_features[i].displayValue = display_meshes

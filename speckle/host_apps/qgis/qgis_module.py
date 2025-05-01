@@ -103,7 +103,7 @@ class SpeckleQGISv3Module:
                 model_card_id, "Converting and sending.."
             )
 
-            print("_execute_send_operation, send_operation.execute:")
+            print("_execute_send_operation -> send_operation.execute:")
             # execute and return send operation results
             send_operation_result: SendOperationResult = (
                 self.connector_module.send_operation.execute(
