@@ -131,22 +131,6 @@ class NewProjectWidget(QWidget):
         )
         boxLayout.addWidget(self.project_name_widget)
 
-        # add text 2
-        label2 = self._create_text_widget("Workspaces:")
-        label2.setEnabled(False)
-        boxLayout.addWidget(label2)
-
-        # add text input 2
-        self.workspace_widget = QLineEdit()
-        self.workspace_widget.setStyleSheet(
-            "QLineEdit { "
-            + f"{ZERO_MARGIN_PADDING}margin-left:{int(WIDGET_SIDE_BUFFER/6)};margin-right:{int(WIDGET_SIDE_BUFFER/6)};"
-            + "border: 1px solid lightgrey; height: 30px; border-radius: 5px; "
-            + "}"
-        )
-        self.workspace_widget.setEnabled(False)
-        boxLayout.addWidget(self.workspace_widget)
-
         button_create = self._create_create_button()
         boxLayout.addWidget(button_create)
 
