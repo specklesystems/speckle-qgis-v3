@@ -19,7 +19,6 @@ class CardsListTemporaryWidget(QWidget):
     background: BackgroundWidget = None
     scroll_area: QtWidgets.QScrollArea = None
     cards_list_widget: QWidget = None  # needed here to resize child elements
-    cards_list_layout: QVBoxLayout = None  # layout to add any widgets below the cards
     load_more_btn: QPushButton = None
 
     scroll_container: QWidget = None  # overall container, added after the label
@@ -30,9 +29,11 @@ class CardsListTemporaryWidget(QWidget):
         parent=None,
         label_text: str = "Label",
         cards_content_list: List[List],
+        init_load_more_btn: bool = True,
     ):
         super(CardsListTemporaryWidget, self).__init__(parent)
         self.parent: "SpeckleQGISv3Dialog" = parent
+        self.init_load_more_btn = init_load_more_btn
 
         # align with the parent widget size
         self.resize(
@@ -83,7 +84,7 @@ class CardsListTemporaryWidget(QWidget):
 
         return scroll_container
 
-    def _create_container(self):
+    def _create_container(self) -> QWidget:
 
         scroll_container = QWidget()
         scroll_container.setAttribute(QtCore.Qt.WA_StyledBackground, True)
@@ -158,16 +159,17 @@ class CardsListTemporaryWidget(QWidget):
 
         cards_list_widget = QWidget()
         cards_list_widget.setStyleSheet("QWidget {" + f"{ZERO_MARGIN_PADDING}" + "}")
-        self.cards_list_layout = QVBoxLayout(cards_list_widget)
+        _ = QVBoxLayout(cards_list_widget)
 
         # in case the input argument was missing or None, don't create any cards
         if isinstance(cards_content_list, list):
             for content in cards_content_list:
                 project_card = CardInListWidget(content)
-                self.cards_list_layout.addWidget(project_card)
+                cards_list_widget.layout().addWidget(project_card)
 
-        self._create_load_more_btn()
-        self.cards_list_layout.addWidget(self.load_more_btn)
+        if self.init_load_more_btn:
+            self._create_load_more_btn()
+            cards_list_widget.layout().addWidget(self.load_more_btn)
 
         return cards_list_widget
 
@@ -178,8 +180,8 @@ class CardsListTemporaryWidget(QWidget):
         self.cards_list_widget.setParent(None)
 
         existing_content = []
-        for i in range(self.cards_list_layout.count()):
-            widget = self.cards_list_layout.itemAt(i).widget()
+        for i in range(self.cards_list_widget.layout().count()):
+            widget = self.cards_list_widget.layout().itemAt(i).widget()
             if isinstance(widget, CardInListWidget):
                 existing_content.append(widget.card_content)
 
@@ -195,9 +197,8 @@ class CardsListTemporaryWidget(QWidget):
             vbar.setValue(vbar.maximum())
 
         # style LoadMore buttom
-        if len(new_cards_content_list) < batch_size:
+        if self.load_more_btn and len(new_cards_content_list) < batch_size:
             self._style_load_btn(active=False, text="No more items found")
-            return
 
     def _remove_all_cards(self):
         all_count = self.cards_list_widget.layout().count()

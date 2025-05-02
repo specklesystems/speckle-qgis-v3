@@ -25,15 +25,17 @@ class AccountSearchWidget(CardsListTemporaryWidget):
         self.parent = parent
         self.ui_search_content = ui_search_content
 
-        # customize load_more function
-        self._load_more = lambda: self._refresh_accounts(clear_cursor=False)
-
         # initialize the inherited widget, passing the card content
         super(AccountSearchWidget, self).__init__(
-            parent=parent, label_text=label_text, cards_content_list=[]
+            parent=parent,
+            label_text=label_text,
+            cards_content_list=[],
+            init_load_more_btn=False,
         )
+        self.refresh_accounts()
 
-        self.refresh_accounts_widget()
+        button_create = self._create_add_button()
+        self.scroll_container.layout().addWidget(button_create)
 
     def _create_add_button(self) -> QPushButton:
 
@@ -50,7 +52,7 @@ class AccountSearchWidget(CardsListTemporaryWidget):
         )
         return button_create
 
-    def _refresh_accounts(self, clear_cursor=False):
+    def refresh_accounts(self, clear_cursor=False):
 
         all_accounts = self.ui_search_content.get_accounts_content()
 
@@ -60,11 +62,3 @@ class AccountSearchWidget(CardsListTemporaryWidget):
 
         # adjust size of new widget:
         self.resizeEvent()
-
-    def refresh_accounts_widget(self):
-
-        self._refresh_accounts(clear_cursor=True)
-        button_create = self._create_add_button()
-        self.cards_list_layout.addWidget(button_create)
-
-        self.scroll_area.setWidget(self.cards_list_widget)

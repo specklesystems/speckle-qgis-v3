@@ -428,7 +428,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
             self._remove_widget_account_add()
 
         # refresh accounts in the AccountSearch widget
-        self.widget_account_search.refresh_accounts_widget()
+        self.widget_account_search.refresh_accounts()
 
     def _update_project_list(self):
 
