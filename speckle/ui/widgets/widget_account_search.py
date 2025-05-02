@@ -56,6 +56,7 @@ class AccountSearchWidget(CardsListTemporaryWidget):
 
         all_accounts = self.ui_search_content.get_accounts_content()
 
+        self._remove_all_cards()
         self._add_more_cards(
             all_accounts, clear_cursor, self.ui_search_content.batch_size
         )
