@@ -5,6 +5,7 @@ from speckle.sdk.connectors_common.operations import SendOperationResult
 from speckle.ui.bindings import IBasicConnectorBinding, SelectionInfo
 from speckle.ui.models import ModelCard, SenderModelCard
 from speckle.ui.widgets.widget_account_search import AccountSearchWidget
+from speckle.ui.widgets.widget_add_account import AddAccountWidget
 from speckle.ui.widgets.widget_model_card import ModelCardWidget
 from speckle.ui.widgets.widget_model_cards_list import ModelCardsWidget
 from speckle.ui.widgets.widget_model_search import ModelSearchWidget
@@ -55,6 +56,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
     widget_project_search: ProjectSearchWidget = None
     widget_model_search: ModelSearchWidget = None
     widget_account_search: AccountSearchWidget = None
+    widget_account_add: AddAccountWidget = None
     widget_new_project: NewProjectWidget = None
     widget_new_model: NewModelWidget = None
     widget_model_cards: ModelCardsWidget = None
@@ -221,6 +223,9 @@ class SpeckleQGISv3Dialog(QDockWidget):
         if self.widget_account_search:
             self._remove_widget_account_search()
 
+        if self.widget_account_add:
+            self._remove_widget_account_add()
+
         if self.widget_new_project:
             self._remove_widget_new_project()
 
@@ -269,6 +274,9 @@ class SpeckleQGISv3Dialog(QDockWidget):
         if self.widget_account_search:
             self._remove_widget_account_search()
 
+        if self.widget_account_add:
+            self._remove_widget_account_add()
+
         if self.widget_new_project:
             self._remove_widget_new_project()
 
@@ -286,6 +294,10 @@ class SpeckleQGISv3Dialog(QDockWidget):
     def _remove_widget_account_search(self):
         self.widget_account_search.setParent(None)
         self.widget_account_search = None
+
+    def _remove_widget_account_add(self):
+        self.widget_account_add.setParent(None)
+        self.widget_account_add = None
 
     def _remove_widget_new_project(self):
         self.widget_new_project.setParent(None)
@@ -405,6 +417,16 @@ class SpeckleQGISv3Dialog(QDockWidget):
                 self._update_project_list
             )
 
+    def _update_account_list(self):
+
+        # close AddAccount widget
+        # can be called from AddAccount widget
+        if self.widget_account_add:
+            self._remove_widget_account_add()
+
+        # refresh accounts in the AccountSearch widget
+        self.widget_account_search.refresh_accounts_widget()
+
     def _update_project_list(self):
 
         # can be called from CreateAccount or NewProject widgets
@@ -476,6 +498,29 @@ class SpeckleQGISv3Dialog(QDockWidget):
 
             # subscribe to close-on-background-click event
             self._subscribe_to_close_on_background_click(self.widget_account_search)
+
+            # subscribe to select_account_signal signal
+            self.widget_account_search.ui_search_content.open_add_new_account_widget_signal.connect(
+                self._open_add_account_widget
+            )
+
+            # subscribe to add_new_account_signal signal
+            self.widget_account_search.ui_search_content.add_new_account_signal.connect(
+                self._update_account_list
+            )
+
+    def _open_add_account_widget(self):
+        if not self.widget_account_add:
+            self.widget_account_add = AddAccountWidget(
+                parent=self,
+                ui_search_content=self.widget_project_search.ui_search_content,
+            )
+            # add widgets to the layout
+            self.main_widget.layout.addWidget(self.widget_account_add)
+            self.main_widget.layout.setCurrentWidget(self.widget_account_add)
+
+            # subscribe to close-on-background-click event
+            self._subscribe_to_close_on_background_click(self.widget_account_add)
 
     def _open_select_models_widget(self, project):
 
