@@ -252,6 +252,9 @@ class SpeckleQGISv3Dialog(QDockWidget):
         elif self.widget_account_search == widget:
             self._remove_widget_account_search()
 
+        elif self.widget_account_add == widget:
+            self._remove_widget_account_add()
+
         elif self.widget_new_project == widget:
             self._remove_widget_new_project()
 
