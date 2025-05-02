@@ -140,7 +140,6 @@ class AddAccountWidget(QWidget):
     def _create_add_button(self) -> QPushButton:
 
         button_create = QPushButton("Create")
-        button_create.clicked.connect(self._add_account_and_exit_widget)
         button_create.setStyleSheet(
             "QPushButton {"
             + f"color:white;border-radius: 7px;margin:5px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
@@ -148,9 +147,36 @@ class AddAccountWidget(QWidget):
             + f"{BACKGR_COLOR_LIGHT};"
             + " }"
         )
+        button_create.clicked.connect(self._add_account)
+        button_create.clicked.connect(lambda: self._create_ready_button(button_create))
+
         return button_create
 
-    def _add_account_and_exit_widget(self):
+    def _create_ready_button(self, button):
+
+        try:
+            button.clicked.disconnect(self._add_account)
+            button.clicked.disconnect(self._create_ready_button)
+        except:
+            pass  # ignore if methods already disconnected
+
+        button.setText("READY!")
+        button.clicked.connect(self._exit_widget)
+
+        button.setStyleSheet(
+            "QPushButton {"
+            + f"color:white;border-radius: 7px;margin:5px;padding: 5px;height: 20px;text-align: center;{BACKGR_COLOR}"
+            + "} QPushButton:hover { "
+            + f"{BACKGR_COLOR_LIGHT};"
+            + " }"
+        )
+
+    def _exit_widget(self):
+
+        # the next signal will trigger closing the widget and refreshing project list
+        self.ui_search_content.add_new_account_signal.emit()
+
+    def _add_account(self):
 
         # create a new account, authenticate and write to DB
         server_url: str = self.server_url_widget.text()
@@ -159,9 +185,6 @@ class AddAccountWidget(QWidget):
         api_url = "http://localhost:29364"
         url = f"{api_url}/auth/add-account?serverUrl={server_url}"
         webbrowser.open(url)
-
-        # the next signal will trigger closing the widget and refreshing project list
-        self.ui_search_content.add_new_account_signal.emit()
 
     def resizeEvent(self, event=None):
         QWidget.resizeEvent(self, event)

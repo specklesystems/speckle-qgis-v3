@@ -60,7 +60,6 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
     def _add_projects(self, clear_cursor=False, name_filter: Optional[str] = None):
 
-        # get selected workspace
         workspace_id = None  # default to "Personal Projects"
         index = self.workspaces_dropdown.currentIndex()
         if index < len(self.workspaces):
@@ -136,7 +135,10 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         layout_line.setContentsMargins(10, 0, 0, 0)
 
         # workspaces selection dropdown
-        self.workspaces_dropdown = self._create_workspace_dropdown()
+        self.workspaces_dropdown = QComboBox()
+        self.workspaces_dropdown.currentIndexChanged.connect(self.refresh_projects)
+        self._fill_workspace_dropdown()
+
         layout_line.addWidget(self.workspaces_dropdown)
 
         # Account switch buttom
@@ -145,17 +147,16 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
         self.scroll_container.layout().insertWidget(1, line)
 
-    def _create_workspace_dropdown(self):
-        workspaces_dropdown = QComboBox()
-        workspaces_dropdown.addItems([x.name for x in self.workspaces])
-        workspaces_dropdown.addItem("Personal Projects")
-        workspaces_dropdown.setStyleSheet(
+    def _fill_workspace_dropdown(self):
+
+        self.workspaces_dropdown.clear()
+        self.workspaces_dropdown.addItems([x.name for x in self.workspaces])
+        self.workspaces_dropdown.addItem("Personal Projects")
+
+        self.workspaces_dropdown.setStyleSheet(
             """QComboBox { background-color: white; border: 1px solid lightgrey; border-radius: 5px; color: black; height: 30px; padding: 0px 0px 0px 10px; }"""
         )
-        workspaces_dropdown.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        workspaces_dropdown.currentIndexChanged.connect(self.refresh_projects)
-        return workspaces_dropdown
+        self.workspaces_dropdown.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     def _create_search_widget(self):
         text_box = QLineEdit()

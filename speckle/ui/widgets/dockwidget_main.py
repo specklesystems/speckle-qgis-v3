@@ -438,6 +438,13 @@ class SpeckleQGISv3Dialog(QDockWidget):
         if self.widget_new_project:
             self._remove_widget_new_project()
 
+        # get list of workspaces
+        self.widget_project_search.workspaces = (
+            self.widget_project_search.ui_search_content.get_workspaces()
+        )
+        self.widget_project_search._fill_workspace_dropdown()
+
+        # refresh projects for the selected workspace
         self.widget_project_search.refresh_projects()
 
     def _update_model_list(self):
