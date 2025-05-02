@@ -65,19 +65,19 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         if index < len(self.workspaces):
             workspace_id = self.workspaces[index].id
             self.ui_search_content.current_workspace = self.workspaces[index]
-        else:
+        else:  # personal projects
             self.ui_search_content.current_workspace = None
 
         if name_filter is None:
             # just get the projects in batches
             new_project_cards: list = self.ui_search_content.get_new_projects_content(
-                clear_cursor=clear_cursor, workspace_id=workspace_id
+                clear_cursor=clear_cursor
             )
         else:
             # get the projects that match the name condition
             new_project_cards: list = (
                 self.ui_search_content.get_new_projects_content_with_name_condition(
-                    name_filter=name_filter, workspace_id=workspace_id
+                    name_filter=name_filter
                 )
             )
 
