@@ -8,7 +8,7 @@ from speckle.ui.widgets.utils.global_resources import (
     BACKGR_COLOR_LIGHT,
 )
 
-from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QPushButton, QSizePolicy
 
 
 class AccountSearchWidget(CardsListTemporaryWidget):
@@ -55,6 +55,10 @@ class AccountSearchWidget(CardsListTemporaryWidget):
     def refresh_accounts(self, clear_cursor=False):
 
         all_accounts = self.ui_search_content.get_accounts_content()
+        if len(all_accounts) == 0:
+            self.scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        else:
+            self.scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self._remove_all_cards()
         self._add_more_cards(

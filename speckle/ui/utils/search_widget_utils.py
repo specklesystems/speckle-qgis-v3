@@ -75,12 +75,12 @@ class UiSearchUtils(QObject):
 
     def get_account_initials(self):
         if self.speckle_client is None:
-            return "X"
+            return "?"
         name = self.speckle_client.account.userInfo.name
         if isinstance(name, str) and len(name) > 0:
             return name[0]
 
-        return "X"
+        return "?"
 
     def create_new_project(self, name: str, workspace_id: Optional[str] = None):
         create_new_project_query(self.speckle_client, name, workspace_id)

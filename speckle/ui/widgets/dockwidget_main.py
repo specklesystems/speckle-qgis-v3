@@ -393,6 +393,10 @@ class SpeckleQGISv3Dialog(QDockWidget):
             self.main_widget.layout.addWidget(self.widget_project_search)
             self.main_widget.layout.setCurrentWidget(self.widget_project_search)
 
+            # if no accounts are present, open Select Account widget
+            if self.widget_project_search.ui_search_content.speckle_client is None:
+                self._open_select_accounts_widget()
+
             self.widget_project_search.ui_search_content.add_selection_filter_signal.connect(
                 self._create_selection_filter_widget
             )
