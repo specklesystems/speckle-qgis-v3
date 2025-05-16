@@ -60,6 +60,9 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
 
     def _add_projects(self, clear_cursor=False, name_filter: Optional[str] = None):
 
+        if self.ui_search_content.speckle_client is None:
+            return
+
         workspace_id = None  # default to "Personal Projects"
         index = self.workspaces_dropdown.currentIndex()
         if index < len(self.workspaces):
@@ -89,6 +92,11 @@ class ProjectSearchWidget(CardsListTemporaryWidget):
         self.resizeEvent()
 
     def refresh_projects(self, name_filter: Optional[str] = None):
+        if self.account_switch_btn:
+            self.account_switch_btn.setText(
+                self.ui_search_content.get_account_initials()
+            )
+
         self._remove_all_cards()
         self._add_projects(clear_cursor=True, name_filter=name_filter)
 
