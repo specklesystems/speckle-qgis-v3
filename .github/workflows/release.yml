@@ -1,0 +1,102 @@
+name: build_qgis
+on:
+  push:
+    branches: ["main", "installer-test/**"] # Continuous delivery on every long-lived branch
+    tags: ["v3.*.*"] # Manual delivery on every v3.x tag
+
+env:
+  ZipName: "qgis.zip"
+
+jobs:
+  build-connector:
+    runs-on: ubuntu-latest
+    outputs:
+      semver: ${{ steps.set-version.outputs.semver }}
+      file-version: ${{ steps.set-info-version.outputs.file-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # fetch the whole repo history
+
+      - name: ⚒️ Run GitVersion
+        run: ./build.sh build-server-version
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11" # pb_tool depends on distutils which was deprecated in 3.10 and removed in 3.12
+
+      - name: Setup Poetry Env
+        run: |
+          pip install poetry
+          poetry self add poetry-plugin-export
+          poetry install
+
+      - name: Export requirements.txt
+        run: |
+          poetry export --without-hashes --without-urls --output plugin_utils/requirements.txt
+
+      - name: Clean requirements.txt
+        run: |
+          python plugin_utils/patch_requirements.py
+
+      - name: Update version in plugin metadata.txt
+        run: |
+          python plugin_utils/patch_version.py ${{ env.GitVersion_FullSemVer }}
+
+      - name: Install dependencies
+        run: |
+          pip install pb_tool==3.1.0 pyqt5==5.15.9
+
+      - name: ZIP plugin
+        run: |
+          pb_tool zip
+          mv "zip_build/speckle-qgis-v3.zip" ${{env.ZipName}}
+
+      - id: set-version
+        name: Set version to output
+        run: echo "semver=${{ env.GitVersion_FullSemVer }}" >> "$GITHUB_OUTPUT"
+
+      - id: set-info-version
+        name: Set file version to output
+        run: echo "file-version=${{ env.GitVersion_AssemblySemVer}}" >> "$GITHUB_OUTPUT" # version will be retrieved from tag?
+
+      - name: ⬆️ Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-${{ env.GitVersion_FullSemVer }}
+          path: ${{env.ZipName}}
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0 # no compression
+
+  deploy-installers:
+    runs-on: ubuntu-latest
+    needs: build-connector
+    env:
+      IS_PUBLIC_RELEASE: ${{ github.ref_type == 'tag' }}
+    steps:
+      - name: 🔫 Trigger Build Installer(s)
+        uses: the-actions-org/workflow-dispatch@v4.0.0
+        with:
+          workflow: Build Installers
+          repo: specklesystems/connector-installers
+          token: ${{ secrets.CONNECTORS_GH_TOKEN }}
+          inputs: '{
+            "run_id": "${{ github.run_id }}",
+            "semver": "${{ needs.build-connector.outputs.semver }}",
+            "file_version": "${{ needs.build-connector.outputs.file-version }}",
+            "repo": "${{ github.repository }}",
+            "is_public_release": ${{ env.IS_PUBLIC_RELEASE }}
+            }'
+          ref: main
+          wait-for-completion: true
+          wait-for-completion-interval: 10s
+          wait-for-completion-timeout: 10m
+          display-workflow-run-url: true
+          display-workflow-run-url-interval: 10s
+
+      - uses: geekyeggo/delete-artifact@v5
+        with:
+          name: output-*
