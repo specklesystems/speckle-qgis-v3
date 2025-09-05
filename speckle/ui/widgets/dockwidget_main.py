@@ -105,6 +105,7 @@ class SpeckleQGISv3Dialog(QDockWidget):
         self._add_start_widget()
 
     def refresh_ui(self):
+        self.bridge.instantiate_module_dependencies()  # should be the first command, before restarting widgets
         self._remove_all_widgets()
         self._add_start_widget()
 

@@ -22,10 +22,13 @@ class SpeckleQGISv3Module:
 
     connector_module: QgisConnectorModule
     converter_module: QgisConverterModule
+    dockwidget: SpeckleQGISv3Dialog
+    iface: Any
 
     def __init__(self, iface):
 
-        self.instantiate_module_dependencies(iface)
+        self.iface = iface
+        self.instantiate_module_dependencies()
 
     def create_dockwidget(self):
         self.dockwidget = SpeckleQGISv3Dialog(
@@ -35,10 +38,10 @@ class SpeckleQGISv3Module:
         self.dockwidget.runSetup()
         self.connect_dockwidget_signals()
 
-    def instantiate_module_dependencies(self, iface):
+    def instantiate_module_dependencies(self):
 
         self.converter_module = QgisConverterModule()
-        self.connector_module = QgisConnectorModule(bridge=self, iface=iface)
+        self.connector_module = QgisConnectorModule(bridge=self, iface=self.iface)
 
         self.connect_connector_module_signals()
         self.connect_converter_module_signals()
